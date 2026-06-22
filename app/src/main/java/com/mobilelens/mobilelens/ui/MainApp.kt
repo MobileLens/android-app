@@ -1,22 +1,27 @@
 package com.mobilelens.mobilelens.ui
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.mobilelens.mobilelens.data.PhoneCatalogue
+import com.mobilelens.mobilelens.data.displayName
+import com.mobilelens.mobilelens.data.filterByQuery
 import com.mobilelens.mobilelens.navigation.Screen
-import com.mobilelens.mobilelens.navigation.TOP_LEVEL_ROUTES
 import com.mobilelens.mobilelens.ui.components.BottomNavigationBar
+import com.mobilelens.mobilelens.ui.components.SearchAppBar
 import com.mobilelens.mobilelens.ui.screens.CatalogueScreen
 import com.mobilelens.mobilelens.ui.screens.FavoritesScreen
 import com.mobilelens.mobilelens.ui.screens.HomeScreen
@@ -25,20 +30,39 @@ import com.mobilelens.mobilelens.ui.screens.HomeScreen
 @Composable
 fun MainApp() {
     val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
+    val textFieldState = rememberTextFieldState()
+    val query = textFieldState.text.toString()
+    val filteredPhones = remember(query) { PhoneCatalogue.filterByQuery(query) }
+    var selectedPhoneId by rememberSaveable { mutableStateOf<Int?>(null) }
 
-    val currentTitle = TOP_LEVEL_ROUTES.find { route ->
-        currentDestination?.hierarchy?.any { it.hasRoute(route.route::class) } == true
-    }?.name ?: "MobileLens"
+    fun navigateToCatalogue() {
+        navController.navigate(Screen.Catalogue) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
 
     Scaffold(
         bottomBar = {
             BottomNavigationBar(navController)
         },
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(currentTitle) }
+            SearchAppBar(
+                textFieldState = textFieldState,
+                searchResults = filteredPhones,
+                onSearch = {
+                    selectedPhoneId = null
+                    navigateToCatalogue()
+                },
+                onResultSelected = { phone ->
+                    textFieldState.setTextAndPlaceCursorAtEnd(phone.displayName)
+                    selectedPhoneId = phone.id
+                    navigateToCatalogue()
+                },
+                onClear = { selectedPhoneId = null },
             )
         }
     ) { innerPadding ->
@@ -54,7 +78,10 @@ fun MainApp() {
                 FavoritesScreen()
             }
             composable<Screen.Catalogue> {
-                CatalogueScreen()
+                CatalogueScreen(
+                    phones = filteredPhones,
+                    selectedPhoneId = selectedPhoneId,
+                )
             }
         }
     }

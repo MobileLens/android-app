@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">MobileLens</string>
+    <string name="search_phones">Search phones</string>
+    <string name="search_phones_hint">Search by phone model…</string>
+    <string name="search_back">Close search</string>
+    <string name="clear_search">Clear search</string>
+    <string name="no_phones_found">No phones found</string>
+    <string name="phone_camera_summary">%1$d cameras • %2$s mm eq</string>
 </resources>
