@@ -47,16 +47,23 @@ data class Lens(
             Facing.OTHER -> "Other"
         }
 
-    val focalLengthLabel: String
+    val focalLength35mmLabel: String
         get() = focalLength35mm.joinToString(separator = ", ") {
             String.format(Locale.US, "%.0f", it)
-        } + " mm eq"
+        } + " mm"
+
+    val focalLengthLabel: String
+        get() = focalLength.joinToString(separator = ", ") {
+            String.format(Locale.US, "%.2f", it)
+        } + " mm"
 
     val apertureLabel: String
         get() = aperture.joinToString(separator = "/") {
             String.format(Locale.US, "f/%.1f", it)
         }
 
-    val activeResolutionLabel: String
-        get() = String.format(Locale.US, "%.1f", activeResolution)
+    val aperture35mmLabel: String
+        get() = aperture35mm.joinToString(separator = "/") {
+            String.format(Locale.US, "f/%.1f", it)
+        }
 }
