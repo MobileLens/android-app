@@ -35,7 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
-import com.mobilelens.mobilelens.data.Phone
+import com.mobilelens.mobilelens.model.Phone
 import com.mobilelens.mobilelens.data.displayName
 import com.mobilelens.mobilelens.data.focalLengthSummary
 import kotlinx.coroutines.launch

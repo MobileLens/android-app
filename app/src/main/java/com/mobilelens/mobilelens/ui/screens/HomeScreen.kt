@@ -20,7 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.mobilelens.mobilelens.data.Lens
+import com.mobilelens.mobilelens.model.Lens
 import com.mobilelens.mobilelens.viewmodel.CameraUiState
 import com.mobilelens.mobilelens.viewmodel.CameraViewModel
 

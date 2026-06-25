@@ -1,5 +1,6 @@
-package com.mobilelens.mobilelens.data
+package com.mobilelens.mobilelens.model
 
+import java.net.URL
 import java.util.Date
 
 data class Phone(
@@ -8,4 +9,5 @@ data class Phone(
     val model: String,
     val releaseDate: Date?,
     val lenses: List<Lens>,
+    val imageURL: URL,
 )

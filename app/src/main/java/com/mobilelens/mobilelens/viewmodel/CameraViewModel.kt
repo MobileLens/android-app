@@ -3,7 +3,7 @@ package com.mobilelens.mobilelens.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.data.CameraHardwareRepository
-import com.mobilelens.mobilelens.data.Lens
+import com.mobilelens.mobilelens.model.Lens
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

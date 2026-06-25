@@ -1,4 +1,4 @@
-package com.mobilelens.mobilelens.data
+package com.mobilelens.mobilelens.model
 
 import java.util.Locale
 

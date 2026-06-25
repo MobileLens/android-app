@@ -8,6 +8,10 @@ import android.media.MediaRecorder
 import android.util.Log
 import android.util.Size
 import android.util.SizeF
+import com.mobilelens.mobilelens.model.Facing
+import com.mobilelens.mobilelens.model.Lens
+import com.mobilelens.mobilelens.model.Stabilization
+import com.mobilelens.mobilelens.model.VideoResolution
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -172,7 +176,8 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
 
                 return lenses
             } else {
-                // No ids found, skipping for now (brute-forcing ids might be necessary for some brands) <- TODO
+                // No ids found
+                // TODO: brute force through all ids
                 Log.i(TAG, "No physical IDs found for cameraID = $cameraId. Skipping...")
             }
         }
