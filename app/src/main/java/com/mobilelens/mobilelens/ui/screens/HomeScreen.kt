@@ -2,12 +2,8 @@ package com.mobilelens.mobilelens.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
@@ -23,10 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.model.Lens
-import com.mobilelens.mobilelens.model.Stabilization
-import com.mobilelens.mobilelens.ui.components.SpecCard
 import com.mobilelens.mobilelens.viewmodel.CameraUiState
 import com.mobilelens.mobilelens.viewmodel.CameraViewModel
+import com.mobilelens.mobilelens.ui.components.LensSpecs
 
 @Composable
 fun HomeScreen(
@@ -107,110 +102,5 @@ private fun CameraLensTabs(
         if (lenses.isNotEmpty()) {
             LensSpecs(lenses[selectedTabIndex])
         }
-    }
-}
-
-@Composable
-private fun LensSpecs(lens: Lens) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Focal lengths row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            SpecCard(
-                title = "Focal length",
-                value = lens.focalLengthLabel,
-                modifier = Modifier.weight(1f)
-            )
-            SpecCard(
-                title = "Focal length (35mm)",
-                value = lens.focalLength35mmLabel,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // Apertures row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            SpecCard(
-                title = "Aperture",
-                value = lens.apertureLabel,
-                modifier = Modifier.weight(1f)
-            )
-            SpecCard(
-                title = "Aperture (35mm)",
-                value = lens.aperture35mmLabel,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // Resolution row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            SpecCard(
-                title = "Resolution",
-                value = "%.1f MP".format(lens.resolution),
-                modifier = Modifier.weight(1f)
-            )
-            SpecCard(
-                title = "Active resolution",
-                value = "%.1f MP".format(lens.activeResolution),
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // Crop factor + sensor type row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            SpecCard(
-                title = "Crop factor",
-                value = "%.2fx".format(lens.cropFactor),
-                modifier = Modifier.weight(1f)
-            )
-            SpecCard(
-                title = "Sensor type",
-                value = "1/%.2f\"".format(lens.sensorTypeDenominator),
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // AF zones + OIS
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            SpecCard(
-                title = "OIS",
-                value = when(lens.ois) {
-                    Stabilization.OIS -> "Yes"
-                    Stabilization.SENSORSHIFT -> "Sensor-shift"
-                    Stabilization.NONE -> "No"
-                },
-                modifier = Modifier.weight(1f)
-            )
-            SpecCard(
-                title = "AF Zones",
-                value = lens.afZones.toString(),
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // TODO: add pixel pitch + video resolutions
-
-
-        // TODO: Gallery here
     }
 }
