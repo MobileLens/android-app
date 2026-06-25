@@ -23,16 +23,14 @@ data class VideoResolution(
 }
 
 data class Lens(
-    val id: String,
-    val brand: String,
-    val model: String,
-    val focalLength: List<Double>,
-    val aperture: List<Double>,
-    val cropFactor: Double,
+    val focalLength: List<Float>,
+    val aperture: List<Float>,
+    val cropFactor: Float,
+    val sensorTypeDenominator: Float,
     val facing: Facing,
-    val pixelPitchUm: Double,
-    val resolution: Double,
-    val activeResolution: Double,
+    val pixelPitchUm: Float,
+    val resolution: Float,
+    val activeResolution: Float,
     val afZones: Int,
     val ois: Stabilization,
     val videoResolutions: List<VideoResolution>

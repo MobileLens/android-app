@@ -8,7 +8,6 @@ import android.media.MediaRecorder
 import android.util.Log
 import android.util.Size
 import android.util.SizeF
-import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -22,6 +21,7 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
             val cameraSpecs = cameraManager.getCameraCharacteristics(cameraId)
             val physicalCameraIds = cameraSpecs.physicalCameraIds
 
+            val lenses = mutableListOf<Lens>()
 
             if (physicalCameraIds.isNotEmpty()) {
                 // Processing the data
@@ -80,7 +80,7 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
                         val resolution = activeResolution
 
                         // Video resolutions
-                        var resolutionList = mutableListOf<String>()
+                        val resolutionList = mutableListOf<VideoResolution>()
 
                         val map = lens.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
                             ?: return emptyList()
@@ -96,7 +96,13 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
                                 val maxFps = (1_000_000_000L / minFrameDurationNs).toInt()
                                 val roundedFps = roundToStandardFps(maxFps)
 
-                                resolutionList.add("${size.width}x${size.height}@$roundedFps")
+                                resolutionList.add(
+                                    VideoResolution(
+                                        width = size.width,
+                                        height = size.height,
+                                        fps = roundedFps
+                                    )
+                                )
                             } else {
                                 // TODO: implement fallback
                             }
@@ -104,8 +110,7 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
 
                         // Sort resolutions (highest first)
                         resolutionList.sortByDescending {
-                            val width = it.split("x").firstOrNull()?.toIntOrNull() ?: 0
-                            width
+                            it.width * it.height
                         }
 
                         // Image stabilization
@@ -143,11 +148,29 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
                         val sensorTypeDenominator = 16f / diag
 
                         // TODO: create a new lens
+                        val lensObject = Lens(
+                            focalLength = focalLengths,
+                            aperture = apertures,
+                            cropFactor = cropFactor,
+                            facing = facing,
+                            pixelPitchUm = pixelPitch,
+                            sensorTypeDenominator = sensorTypeDenominator,
+                            resolution = resolution,
+                            activeResolution = activeResolution,
+                            afZones = 1,
+                            ois = imageStabilization,
+                            videoResolutions = resolutionList
+                        )
+
+                        Log.i(TAG, "Adding camera with ID = $physicalCameraId to list")
+                        lenses.add(lensObject)
 
                     } catch (e: Exception) {
                         Log.e(TAG, "Error during processing physical camera $physicalCameraId: ${e.message}")
                     }
                 }
+
+                return lenses
             } else {
                 // No ids found, skipping for now (brute-forcing ids might be necessary for some brands) <- TODO
                 Log.i(TAG, "No physical IDs found for cameraID = $cameraId. Skipping...")
