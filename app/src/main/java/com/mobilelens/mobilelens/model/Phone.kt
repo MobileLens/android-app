@@ -9,5 +9,5 @@ data class Phone(
     val model: String,
     val releaseDate: Date?,
     val lenses: List<Lens>,
-    val imageURL: URL,
+    val imageURL: URL?,
 )

@@ -5,7 +5,6 @@ import com.mobilelens.mobilelens.model.Lens
 import com.mobilelens.mobilelens.model.Phone
 import com.mobilelens.mobilelens.model.Stabilization
 import java.math.BigDecimal
-import java.net.URL
 import java.util.Calendar
 import java.util.GregorianCalendar
 
@@ -15,7 +14,7 @@ val PhoneCatalogue = listOf(
         brand = "Apple",
         model = "iPhone 16 Pro",
         releaseDate = dateOf(2024, Calendar.SEPTEMBER, 20),
-        imageURL = URL(""),
+        imageURL = null,
         lenses = listOf(
             Lens(
                 focalLength = listOf(6.8f),
@@ -50,7 +49,7 @@ val PhoneCatalogue = listOf(
         brand = "Google",
         model = "Pixel 9 Pro",
         releaseDate = dateOf(2024, Calendar.SEPTEMBER, 4),
-        imageURL = URL(""),
+        imageURL = null,
         lenses = listOf(
             Lens(
                 focalLength = listOf(6.9f),
@@ -85,7 +84,7 @@ val PhoneCatalogue = listOf(
         brand = "Samsung",
         model = "Galaxy S25 Ultra",
         releaseDate = dateOf(2025, Calendar.FEBRUARY, 7),
-        imageURL = URL(""),
+        imageURL = null,
         lenses = listOf(
             Lens(
                 focalLength = listOf(6.3f),
