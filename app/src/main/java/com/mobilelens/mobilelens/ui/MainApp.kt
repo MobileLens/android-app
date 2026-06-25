@@ -25,10 +25,11 @@ import com.mobilelens.mobilelens.ui.components.SearchAppBar
 import com.mobilelens.mobilelens.ui.screens.CatalogueScreen
 import com.mobilelens.mobilelens.ui.screens.FavoritesScreen
 import com.mobilelens.mobilelens.ui.screens.HomeScreen
+import com.mobilelens.mobilelens.viewmodel.CameraViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainApp() {
+fun MainApp(cameraViewModel: CameraViewModel) {
     val navController = rememberNavController()
     val textFieldState = rememberTextFieldState()
     val query = textFieldState.text.toString()
@@ -72,7 +73,7 @@ fun MainApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable<Screen.Home> {
-                HomeScreen()
+                HomeScreen(cameraViewModel = cameraViewModel)
             }
             composable<Screen.Favorites> {
                 FavoritesScreen()
