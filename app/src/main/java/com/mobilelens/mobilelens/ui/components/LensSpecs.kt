@@ -113,6 +113,9 @@ fun LensSpecs(lens: Lens) {
             )
         }
 
+        VideoResolutionsCard(lens.videoResolutions)
+
         // TODO: add pixel pitch + video resolutions
+        // TODO: add gallery below
     }
 }
