@@ -81,8 +81,8 @@ fun LensSpecs(lens: Lens) {
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SpecCard(
-                title = "Crop factor",
-                value = "%.2fx".format(lens.cropFactor),
+                title = "Pixel pitch",
+                value = "%.2f μm".format(lens.pixelPitchUm),
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
@@ -107,6 +107,11 @@ fun LensSpecs(lens: Lens) {
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
+                title = "Crop factor",
+                value = "%.2fx".format(lens.cropFactor),
+                modifier = Modifier.weight(1f)
+            )
+            SpecCard(
                 title = "AF Zones",
                 value = lens.afZones.toString(),
                 modifier = Modifier.weight(1f)
@@ -115,7 +120,6 @@ fun LensSpecs(lens: Lens) {
 
         VideoResolutionsCard(lens.videoResolutions)
 
-        // TODO: add pixel pitch + video resolutions
         // TODO: add gallery below
     }
 }
