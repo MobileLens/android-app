@@ -1,5 +1,6 @@
 package com.mobilelens.mobilelens.data
 
+import com.mobilelens.mobilelens.model.DeviceInfo
 import com.mobilelens.mobilelens.model.Facing
 import com.mobilelens.mobilelens.model.Lens
 import com.mobilelens.mobilelens.model.Phone
@@ -11,10 +12,12 @@ import java.util.GregorianCalendar
 val PhoneCatalogue = listOf(
     Phone(
         id = 1,
-        brand = "Apple",
-        model = "iPhone 16 Pro",
-        releaseDate = dateOf(2024, Calendar.SEPTEMBER, 20),
-        imageURL = null,
+        deviceInfo = DeviceInfo(
+            brand = "Apple",
+            model = "iPhone 16 Pro",
+            releaseDate = dateOf(2024, Calendar.SEPTEMBER, 20),
+            imageURL = null,
+        ),
         lenses = listOf(
             Lens(
                 focalLength = listOf(6.8f),
@@ -46,10 +49,12 @@ val PhoneCatalogue = listOf(
     ),
     Phone(
         id = 2,
-        brand = "Google",
-        model = "Pixel 9 Pro",
-        releaseDate = dateOf(2024, Calendar.SEPTEMBER, 4),
-        imageURL = null,
+        deviceInfo = DeviceInfo(
+            brand = "Google",
+            model = "Pixel 9 Pro",
+            releaseDate = dateOf(2024, Calendar.SEPTEMBER, 4),
+            imageURL = null,
+        ),
         lenses = listOf(
             Lens(
                 focalLength = listOf(6.9f),
@@ -81,10 +86,12 @@ val PhoneCatalogue = listOf(
     ),
     Phone(
         id = 3,
-        brand = "Samsung",
-        model = "Galaxy S25 Ultra",
-        releaseDate = dateOf(2025, Calendar.FEBRUARY, 7),
-        imageURL = null,
+        deviceInfo = DeviceInfo(
+            brand = "Samsung",
+            model = "Galaxy S25 Ultra",
+            releaseDate = dateOf(2025, Calendar.FEBRUARY, 7),
+            imageURL = null,
+        ),
         lenses = listOf(
             Lens(
                 focalLength = listOf(6.3f),
@@ -117,7 +124,7 @@ val PhoneCatalogue = listOf(
 )
 
 val Phone.displayName: String
-    get() = "$brand $model"
+    get() = "${deviceInfo.brand} ${deviceInfo.model}"
 
 val Phone.focalLengthSummary: String
     get() = lenses
@@ -134,7 +141,7 @@ fun List<Phone>.filterByQuery(query: String): List<Phone> {
     if (tokens.isEmpty()) return this
 
     return filter { phone ->
-        val searchableText = "${phone.brand} ${phone.model}".lowercase()
+        val searchableText = "${phone.deviceInfo.brand} ${phone.deviceInfo.model}".lowercase()
         tokens.all(searchableText::contains)
     }
 }

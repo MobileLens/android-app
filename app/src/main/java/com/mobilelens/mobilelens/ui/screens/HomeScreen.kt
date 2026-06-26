@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
@@ -18,10 +20,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.model.DeviceInfo
 import com.mobilelens.mobilelens.model.Lens
 import com.mobilelens.mobilelens.viewmodel.CameraUiState
 import com.mobilelens.mobilelens.viewmodel.CameraViewModel
 import com.mobilelens.mobilelens.ui.components.LensSpecs
+import com.mobilelens.mobilelens.ui.components.DeviceInfoSection
 
 @Composable
 fun HomeScreen(
@@ -33,7 +37,7 @@ fun HomeScreen(
     when (val state = uiState) {
         CameraUiState.Checking -> CameraChecking(modifier)
         is CameraUiState.Fallback -> CameraFallback(state.message, modifier)
-        is CameraUiState.Success -> CameraLensTabs(state.lenses, modifier)
+        is CameraUiState.Success -> CameraLensTabs(state.lenses, state.deviceInfo, modifier)
     }
 }
 
@@ -84,11 +88,19 @@ private fun CameraFallback(
 @Composable
 private fun CameraLensTabs(
     lenses: List<Lens>,
+    deviceInfo: DeviceInfo,
     modifier: Modifier = Modifier,
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val scrollState = rememberScrollState()
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    ) {
+        DeviceInfoSection(deviceInfo)
+
         PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
             lenses.forEachIndexed { index, _ ->
                 Tab(

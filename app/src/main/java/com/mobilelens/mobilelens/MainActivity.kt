@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.mobilelens.mobilelens.data.BuildInfoRepository
 import com.mobilelens.mobilelens.data.CameraHardwareRepository
 import com.mobilelens.mobilelens.ui.MainApp
 import com.mobilelens.mobilelens.ui.theme.MobileLensTheme
@@ -19,7 +20,10 @@ class MainActivity : ComponentActivity() {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val cameraManager = getSystemService(CameraManager::class.java)
-                return CameraViewModel(CameraHardwareRepository(cameraManager)) as T
+                return CameraViewModel(
+                    CameraHardwareRepository(cameraManager),
+                    BuildInfoRepository()
+                ) as T
             }
         }
     }

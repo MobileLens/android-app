@@ -36,6 +36,7 @@ fun VideoResolutionsCard(
            fontSize = 16.sp,
            fontWeight = FontWeight.Normal
         )
+
         Text(
             text = resolutions.joinToString(", "),
             color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -43,5 +44,7 @@ fun VideoResolutionsCard(
             fontWeight = FontWeight.Normal,
             fontFamily = FontFamily.Monospace
         )
+
+        // TODO: Gallery here
     }
 }
