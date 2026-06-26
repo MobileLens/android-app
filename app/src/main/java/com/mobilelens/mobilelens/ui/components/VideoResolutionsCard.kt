@@ -36,20 +36,12 @@ fun VideoResolutionsCard(
            fontSize = 16.sp,
            fontWeight = FontWeight.Normal
         )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(0.dp)
-        ) {
-            resolutions.forEach { videoResolution ->
-                Text(
-                    text = "${videoResolution.width}x${videoResolution.height}@${videoResolution.fps}",
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = FontFamily.Monospace,
-                )
-            }
-        }
-
+        Text(
+            text = resolutions.joinToString(", "),
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Normal,
+            fontFamily = FontFamily.Monospace
+        )
     }
 }
