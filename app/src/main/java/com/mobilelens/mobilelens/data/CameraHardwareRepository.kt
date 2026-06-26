@@ -84,7 +84,7 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
                         val resolution = activeResolution
 
                         // Video resolutions
-                        val resolutionList = mutableListOf<VideoResolution>()
+                        val resolutionMap = mutableMapOf<Pair<Int, Int>, VideoResolution>()
 
                         val map = lens.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
                             ?: return emptyList()
@@ -100,20 +100,28 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
                                 val maxFps = (1_000_000_000L / minFrameDurationNs).toInt()
                                 val roundedFps = roundToStandardFps(maxFps)
 
-                                resolutionList.add(
-                                    VideoResolution(
-                                        width = size.width,
-                                        height = size.height,
-                                        fps = roundedFps
-                                    )
-                                )
+                                val aspectRatio = size.width.toFloat() / size.height.toFloat()
+                                val is16By9 = kotlin.math.abs(aspectRatio - (16f / 9f)) < 0.01f
+
+                                // Filter small, non-16:9 and duplicate video resolutions (keeping max FPS for each)
+                                if (is16By9 && size.width > 1200 && size.height > 700) {
+                                    val key = size.width to size.height
+                                    val existing = resolutionMap[key]
+                                    if (existing == null || roundedFps > existing.fps) {
+                                        resolutionMap[key] = VideoResolution(
+                                            width = size.width,
+                                            height = size.height,
+                                            fps = roundedFps
+                                        )
+                                    }
+                                }
                             } else {
                                 // TODO: implement fallback
                             }
                         }
 
                         // Sort resolutions (highest first)
-                        resolutionList.sortByDescending {
+                        val resolutionList = resolutionMap.values.sortedByDescending {
                             it.width * it.height
                         }
 
