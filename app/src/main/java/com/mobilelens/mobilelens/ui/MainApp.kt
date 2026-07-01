@@ -15,16 +15,22 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.toRoute
 import com.mobilelens.mobilelens.data.PhoneCatalogue
 import com.mobilelens.mobilelens.data.displayName
 import com.mobilelens.mobilelens.data.filterByQuery
 import com.mobilelens.mobilelens.navigation.Screen
+import com.mobilelens.mobilelens.navigation.TOP_LEVEL_ROUTES
 import com.mobilelens.mobilelens.ui.components.BottomNavigationBar
 import com.mobilelens.mobilelens.ui.components.SearchAppBar
 import com.mobilelens.mobilelens.ui.screens.CatalogueScreen
 import com.mobilelens.mobilelens.ui.screens.FavoritesScreen
 import com.mobilelens.mobilelens.ui.screens.HomeScreen
+import com.mobilelens.mobilelens.ui.screens.PhoneScreen
 import com.mobilelens.mobilelens.viewmodel.CameraViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +41,12 @@ fun MainApp(cameraViewModel: CameraViewModel) {
     val query = textFieldState.text.toString()
     val filteredPhones = remember(query) { PhoneCatalogue.filterByQuery(query) }
     var selectedPhoneId by rememberSaveable { mutableStateOf<Int?>(null) }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+    val isTopLevelRoute = TOP_LEVEL_ROUTES.any { topLevelRoute ->
+        currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true
+    }
 
     fun navigateToCatalogue() {
         navController.navigate(Screen.Catalogue) {
@@ -54,6 +66,8 @@ fun MainApp(cameraViewModel: CameraViewModel) {
             SearchAppBar(
                 textFieldState = textFieldState,
                 searchResults = filteredPhones,
+                showBackButton = !isTopLevelRoute && navController.previousBackStackEntry != null,
+                onBackClick = { navController.popBackStack() },
                 onSearch = {
                     selectedPhoneId = null
                     navigateToCatalogue()
@@ -61,7 +75,7 @@ fun MainApp(cameraViewModel: CameraViewModel) {
                 onResultSelected = { phone ->
                     textFieldState.setTextAndPlaceCursorAtEnd(phone.displayName)
                     selectedPhoneId = phone.id
-                    navigateToCatalogue()
+                    navController.navigate(Screen.PhoneDetails(phone.id))
                 },
                 onClear = { selectedPhoneId = null },
             )
@@ -82,7 +96,19 @@ fun MainApp(cameraViewModel: CameraViewModel) {
                 CatalogueScreen(
                     phones = filteredPhones,
                     selectedPhoneId = selectedPhoneId,
+                    onPhoneClick = { phone ->
+                        navController.navigate(Screen.PhoneDetails(phone.id))
+                    }
                 )
+            }
+            composable<Screen.PhoneDetails> { backStackEntry ->
+                val route = backStackEntry.toRoute<Screen.PhoneDetails>()
+                val phone = remember(route.phoneId) {
+                    PhoneCatalogue.firstOrNull { it.id == route.phoneId }
+                }
+                if (phone != null) {
+                    PhoneScreen(phone = phone)
+                }
             }
         }
     }

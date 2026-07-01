@@ -50,6 +50,8 @@ fun SearchAppBar(
     onSearch: (String) -> Unit,
     onResultSelected: (Phone) -> Unit,
     onClear: () -> Unit,
+    showBackButton: Boolean = false,
+    onBackClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val searchBarState = rememberSearchBarState()
@@ -71,6 +73,13 @@ fun SearchAppBar(
             leadingIcon = {
                 if (searchBarState.currentValue == SearchBarValue.Expanded) {
                     IconButton(onClick = collapseSearch) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.search_back),
+                        )
+                    }
+                } else if (showBackButton) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.search_back),

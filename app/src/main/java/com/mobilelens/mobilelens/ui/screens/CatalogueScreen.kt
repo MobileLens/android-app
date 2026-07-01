@@ -1,5 +1,6 @@
 package com.mobilelens.mobilelens.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,6 +28,7 @@ import com.mobilelens.mobilelens.data.focalLengthSummary
 fun CatalogueScreen(
     phones: List<Phone>,
     selectedPhoneId: Int?,
+    onPhoneClick: (Phone) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
@@ -52,15 +54,6 @@ fun CatalogueScreen(
             val isSelected = phone.id == selectedPhoneId
             ListItem(
                 headlineContent = { Text(phone.displayName) },
-                supportingContent = {
-                    Text(
-                        stringResource(
-                            R.string.phone_camera_summary,
-                            phone.lenses.size,
-                            phone.focalLengthSummary,
-                        ),
-                    )
-                },
                 leadingContent = {
                     Icon(Icons.Default.PhoneAndroid, contentDescription = null)
                 },
@@ -73,6 +66,7 @@ fun CatalogueScreen(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable { onPhoneClick(phone) }
                     .padding(horizontal = 8.dp, vertical = 4.dp),
             )
         }

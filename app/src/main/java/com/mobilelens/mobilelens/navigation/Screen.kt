@@ -12,7 +12,9 @@ sealed interface Screen {
     @Serializable object Home : Screen
     @Serializable object Favorites : Screen
     @Serializable object Catalogue : Screen
+    @Serializable data class PhoneDetails(val phoneId: Int) : Screen
 }
+
 
 data class TopLevelRoute<T : Any>(
     val name: String,
