@@ -1,18 +1,10 @@
 package com.mobilelens.mobilelens.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.model.Phone
-import com.mobilelens.mobilelens.data.displayName
+import com.mobilelens.mobilelens.ui.components.PhoneListItem
 
 @Composable
 fun CatalogueScreen(
@@ -50,24 +42,12 @@ fun CatalogueScreen(
         modifier = modifier.fillMaxSize(),
     ) {
         itemsIndexed(phones, key = { _, phone -> phone.id }) { _, phone ->
-            val isSelected = phone.id == selectedPhoneId
-            ListItem(
-                headlineContent = { Text(phone.displayName) },
-                leadingContent = {
-                    Icon(Icons.Default.PhoneAndroid, contentDescription = null)
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = if (isSelected) {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    },
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onPhoneClick(phone) }
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            PhoneListItem(
+                phone = phone,
+                onClick = { onPhoneClick(phone) },
+                isSelected = phone.id == selectedPhoneId,
             )
         }
     }
 }
+
