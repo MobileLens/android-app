@@ -21,6 +21,8 @@ fun DeviceLensDetail(
     lenses: List<Lens>,
     deviceInfo: DeviceInfo,
     modifier: Modifier = Modifier,
+    isFavorited: Boolean = false,
+    onFavoriteClick: (() -> Unit)? = null,
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
@@ -30,7 +32,11 @@ fun DeviceLensDetail(
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
-        DeviceInfoSection(deviceInfo)
+        DeviceInfoSection(
+            deviceInfo = deviceInfo,
+            isFavorited = isFavorited,
+            onFavoriteClick = onFavoriteClick
+        )
 
         PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
             lenses.forEachIndexed { index, _ ->

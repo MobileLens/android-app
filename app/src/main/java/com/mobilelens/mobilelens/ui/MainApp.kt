@@ -42,6 +42,8 @@ fun MainApp(cameraViewModel: CameraViewModel) {
     val query = textFieldState.text.toString()
     val filteredPhones = remember(query) { PhoneCatalogue.filterByQuery(query) }
     var selectedPhoneId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var favoritePhoneIds by rememberSaveable { mutableStateOf(emptyList<Int>()) }
+
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -92,7 +94,15 @@ fun MainApp(cameraViewModel: CameraViewModel) {
                 HomeScreen(cameraViewModel = cameraViewModel)
             }
             composable<Screen.Favorites> {
-                FavoritesScreen()
+                val favoritePhones = remember(favoritePhoneIds) {
+                    PhoneCatalogue.filter { favoritePhoneIds.contains(it.id) }
+                }
+                FavoritesScreen(
+                    favoritePhones = favoritePhones,
+                    onPhoneClick = { phone ->
+                        navController.navigate(Screen.PhoneDetails(phone.id))
+                    }
+                )
             }
             composable<Screen.Catalogue> {
                 CatalogueScreen(
@@ -109,7 +119,18 @@ fun MainApp(cameraViewModel: CameraViewModel) {
                     PhoneCatalogue.firstOrNull { it.id == route.phoneId }
                 }
                 if (phone != null) {
-                    PhoneScreen(phone = phone)
+                    val isFavorited = favoritePhoneIds.contains(phone.id)
+                    PhoneScreen(
+                        phone = phone,
+                        isFavorited = isFavorited,
+                        onFavoriteClick = {
+                            favoritePhoneIds = if (isFavorited) {
+                                favoritePhoneIds - phone.id
+                            } else {
+                                favoritePhoneIds + phone.id
+                            }
+                        }
+                    )
                 }
             }
         }
