@@ -31,13 +31,13 @@ fun SpecCard(
         Text(
             text = title,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
-            fontSize = 14.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Normal
         )
         Text(
             text = value,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
-            fontSize = 24.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Normal,
             fontFamily = FontFamily.Monospace,
             letterSpacing = (-0.5).sp

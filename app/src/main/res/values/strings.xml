@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">MobileLens</string>
     <string name="search_phones">Search phones</string>
-    <string name="search_phones_hint">Search by phone model…</string>
+    <string name="search_phones_hint">Search</string>
     <string name="search_back">Close search</string>
     <string name="clear_search">Clear search</string>
     <string name="no_phones_found">No phones found</string>

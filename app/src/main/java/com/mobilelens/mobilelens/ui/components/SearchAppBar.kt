@@ -113,7 +113,13 @@ fun SearchAppBar(
                     }
                 }
             } else {
-                null
+                {
+                    if (searchBarState.currentValue == SearchBarValue.Expanded) {
+                        Box(modifier = Modifier.size(48.dp))
+                    } else {
+                        Box(modifier = Modifier.size(24.dp))
+                    }
+                }
             },
         )
     }
