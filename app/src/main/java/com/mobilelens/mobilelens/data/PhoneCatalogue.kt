@@ -1,7 +1,6 @@
 package com.mobilelens.mobilelens.data
 
-import java.math.BigDecimal
-import java.net.URL
+// import java.net.URL
 import java.util.Calendar
 import java.util.GregorianCalendar
 import com.mobilelens.mobilelens.model.DeviceInfo
@@ -18,7 +17,7 @@ val PhoneCatalogue = listOf(
             brand = "Apple",
             model = "iPhone 17 Pro",
             releaseDate = dateOf(2025, Calendar.SEPTEMBER, 19),
-            imageURL = URL("https://www.apple.com/v/iphone-17-pro/g/images/overview/welcome/hero_endframe__gb7f6nb06rau_medium.jpg"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -68,7 +67,7 @@ val PhoneCatalogue = listOf(
             brand = "Google",
             model = "Pixel 10 Pro XL",
             releaseDate = dateOf(2025, Calendar.AUGUST, 28),
-            imageURL = URL("https://blog.google/products/pixel/images/pixel-10-pro-xl.jpg"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -118,7 +117,7 @@ val PhoneCatalogue = listOf(
             brand = "Samsung",
             model = "Galaxy S22",
             releaseDate = dateOf(2022, Calendar.FEBRUARY, 25),
-            imageURL = URL("https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s22-1.jpg"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -168,7 +167,7 @@ val PhoneCatalogue = listOf(
             brand = "Samsung",
             model = "Galaxy S26",
             releaseDate = dateOf(2026, Calendar.JANUARY, 23),
-            imageURL = URL("https://images.samsung.com/is/image/samsung/p6pim/global/galaxy-s26/gallery/global-galaxy-s26-sm-s926-sm-s926bzkaxsp-thumb-536630447"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -218,7 +217,7 @@ val PhoneCatalogue = listOf(
             brand = "Apple",
             model = "iPhone 17e",
             releaseDate = dateOf(2026, Calendar.MARCH, 6),
-            imageURL = URL("https://www.apple.com/v/iphone-17e/b/images/overview/hero_endframe__b1x8d7x5w3u6_medium.jpg"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -242,7 +241,7 @@ val PhoneCatalogue = listOf(
             brand = "Huawei",
             model = "Pura 80 Ultra",
             releaseDate = dateOf(2026, Calendar.JUNE, 11),
-            imageURL = URL("https://consumer.huawei.com/dam/content/dam/huawei-cbg-site/common/mkt/pdp/phones/pura80-ultra/img/kv/kv.webp"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -292,7 +291,7 @@ val PhoneCatalogue = listOf(
             brand = "OnePlus",
             model = "OnePlus 15",
             releaseDate = dateOf(2025, Calendar.OCTOBER, 27),
-            imageURL = URL("https://www.oneplus.com/content/dam/oneplus/2025/product-station/15/assets/images-kv-phone-s-pad-1-92-c48981.png"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -342,7 +341,7 @@ val PhoneCatalogue = listOf(
             brand = "Xiaomi",
             model = "Xiaomi 17 Ultra",
             releaseDate = dateOf(2026, Calendar.JANUARY, 15),
-            imageURL = URL("https://i02.appmifile.com/mi-com-product/fly-birds/xiaomi-17-ultra/pc/overview_hero.jpg"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -392,7 +391,7 @@ val PhoneCatalogue = listOf(
             brand = "Samsung",
             model = "Galaxy S22",
             releaseDate = dateOf(2022, Calendar.FEBRUARY, 25),
-            imageURL = URL("https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s22-1.jpg"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -442,7 +441,7 @@ val PhoneCatalogue = listOf(
             brand = "Apple",
             model = "iPhone 16 Pro",
             releaseDate = dateOf(2024, Calendar.SEPTEMBER, 20),
-            imageURL = URL("https://www.apple.com/newsroom/images/2024/09/apple-debuts-iphone-16-pro-and-iphone-16-pro-max/article/Apple-iPhone-16-Pro-hero-240909_inline.jpg.large.jpg"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -492,7 +491,7 @@ val PhoneCatalogue = listOf(
             brand = "Apple",
             model = "iPhone 17 Pro Max",
             releaseDate = dateOf(2025, Calendar.SEPTEMBER, 19),
-            imageURL = URL("https://www.apple.com/v/iphone-17-pro/g/images/overview/welcome/hero_endframe__gb7f6nb06rau_medium.jpg"),
+            imageURL = null
         ),
         lenses = listOf(
             Lens(
@@ -540,16 +539,6 @@ val PhoneCatalogue = listOf(
 
 val Phone.displayName: String
     get() = "${deviceInfo.brand} ${deviceInfo.model}"
-
-val Phone.focalLengthSummary: String
-    get() = lenses
-        .flatMap(Lens::focalLength35mm)
-        .distinct()
-        .sorted()
-        .joinToString(", ") { it.toCompactString() }
-
-fun Float.toCompactString(): String =
-    BigDecimal.valueOf(toDouble()).stripTrailingZeros().toPlainString()
 
 fun List<Phone>.filterByQuery(query: String): List<Phone> {
     val tokens = query.trim().lowercase().split(Regex("\\s+")).filter(String::isNotEmpty)

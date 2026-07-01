@@ -12,7 +12,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.model.Phone
-import com.mobilelens.mobilelens.data.focalLengthSummary
 
 @Composable
 fun SearchResultsList(
@@ -32,11 +31,6 @@ fun SearchResultsList(
             PhoneListItem(
                 phone = phone,
                 onClick = { onResultSelected(phone) },
-                supportingText = stringResource(
-                    R.string.phone_camera_summary,
-                    phone.lenses.size,
-                    phone.focalLengthSummary,
-                ),
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
         }
