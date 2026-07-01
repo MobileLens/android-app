@@ -19,17 +19,42 @@ const val TAG = "CameraHardwareRepository"
 
 class CameraHardwareRepository(private val cameraManager: CameraManager) {
     fun getAllCamerasSpecs() : List<Lens> {
+        val lenses = mutableListOf<Lens>()
+
         cameraManager.cameraIdList.forEach { cameraId ->
             Log.i(TAG, "Processing cameraID = $cameraId")
 
             val cameraSpecs = cameraManager.getCameraCharacteristics(cameraId)
             val physicalCameraIds = cameraSpecs.physicalCameraIds
 
-            val lenses = mutableListOf<Lens>()
+            val camerasToProcess = if (physicalCameraIds.isNotEmpty()) {
+                Log.i(TAG, "Found ${physicalCameraIds.size} physical cameras for logical camera $cameraId")
+                physicalCameraIds
+            } else {
+                Log.i(TAG, "No physical cameras found, attempting fallback detection for logical camera $cameraId")
 
-            if (physicalCameraIds.isNotEmpty()) {
+                val fallbackCameras = mutableListOf(cameraId)
+
+                for (i in 0..99) {
+                    val numericCameraId = i.toString()
+
+                    if (!cameraManager.cameraIdList.contains(numericCameraId)) {
+                        try {
+                            cameraManager.getCameraCharacteristics(numericCameraId)
+                            Log.i(TAG, "Discovered camera: $numericCameraId")
+                            fallbackCameras.add(numericCameraId)
+                        } catch (e: Exception) {
+                            continue
+                        }
+                    }
+                }
+
+                fallbackCameras
+            }
+
+            if (camerasToProcess.isNotEmpty()) {
                 // Processing the data
-                physicalCameraIds.forEach { physicalCameraId ->
+                camerasToProcess.forEach { physicalCameraId ->
                     Log.i(TAG, "Processing physical camera $physicalCameraId")
 
                     try {
@@ -78,7 +103,7 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
 
                         // Active resolution in MP
                         var activeResolution: Float = (activeArrayWidth * activeArrayHeight) / 1000000f
-                        activeResolution = "%.1f".format(activeResolution).toFloat() // Fantastic rounding
+                        activeResolution = String.format(java.util.Locale.US, "%.1f", activeResolution).toFloat() // Fantastic rounding
 
                         // TODO: implement ultra high resolution camera detection (48MP+)
                         val resolution = activeResolution
@@ -87,11 +112,11 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
                         val resolutionMap = mutableMapOf<Pair<Int, Int>, VideoResolution>()
 
                         val map = lens.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-                            ?: return emptyList()
+                            ?: return@forEach
 
                         val videoSizes: Array<Size> = map.getOutputSizes(MediaRecorder::class.java)
                             ?: map.getOutputSizes(SurfaceTexture::class.java)
-                            ?: return emptyList()
+                            ?: return@forEach
 
                         for (size in videoSizes) {
                             val minFrameDurationNs = map.getOutputMinFrameDuration(MediaRecorder::class.java, size)
@@ -159,7 +184,6 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
                         // Calculating and storing only the denominator
                         val sensorTypeDenominator = 16f / diag
 
-                        // TODO: create a new lens
                         val lensObject = Lens(
                             focalLength = focalLengths,
                             aperture = apertures,
@@ -174,23 +198,37 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
                             videoResolutions = resolutionList
                         )
 
-                        Log.i(TAG, "Adding camera with ID = $physicalCameraId to list")
-                        lenses.add(lensObject)
+                        // Skip cameras that are duplicates of ones already collected
+                        if (!isDuplicateLens(lenses, lensObject)) {
+                            Log.i(TAG, "Adding camera with ID = $physicalCameraId to list")
+                            lenses.add(lensObject)
+                        } else {
+                            Log.i(TAG, "Skipping duplicate camera with ID = $physicalCameraId")
+                        }
 
                     } catch (e: Exception) {
                         Log.e(TAG, "Error during processing physical camera $physicalCameraId: ${e.message}")
                     }
                 }
-
-                return lenses
             } else {
-                // No ids found
-                // TODO: brute force through all ids
                 Log.i(TAG, "No physical IDs found for cameraID = $cameraId. Skipping...")
             }
         }
 
-        return emptyList() // Temporary
+        return lenses
+    }
+
+    private fun isDuplicateLens(lenses: List<Lens>, newLens: Lens): Boolean {
+        return lenses.any { existingLens ->
+            existingLens.facing == newLens.facing &&
+            (existingLens.resolution - newLens.resolution).toInt() == 0 &&
+            (existingLens.activeResolution - newLens.activeResolution).toInt() == 0 &&
+            existingLens.focalLength.size == newLens.focalLength.size &&
+            existingLens.focalLength.zip(newLens.focalLength).all { (a, b) -> (a - b).toInt() == 0 } &&
+            existingLens.aperture.size == newLens.aperture.size &&
+            existingLens.aperture.zip(newLens.aperture).all { (a, b) -> (a - b).toInt() == 0 } &&
+            existingLens.ois == newLens.ois
+        }
     }
 
     private fun roundToStandardFps(fps: Int): Int {
