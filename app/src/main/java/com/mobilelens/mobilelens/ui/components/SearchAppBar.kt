@@ -45,6 +45,7 @@ private val DockedSearchBreakpoint = 600.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchAppBar(
+    modifier: Modifier = Modifier,
     textFieldState: TextFieldState,
     searchResults: List<Phone>,
     onSearch: (String) -> Unit,
@@ -52,7 +53,6 @@ fun SearchAppBar(
     onClear: () -> Unit,
     showBackButton: Boolean = false,
     onBackClick: () -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     val searchBarState = rememberSearchBarState()
     val coroutineScope = rememberCoroutineScope()
