@@ -68,7 +68,7 @@ data class Lens(
         get() = String.format(Locale.US, "%.2f μm", pixelPitchUm)
 
     val cropFactorLabel: String
-        get() = String.format(Locale.US, ".2fx", cropFactor)
+        get() = String.format(Locale.US, "%.2fx", cropFactor)
 
     private fun List<Float>.format(
         pattern: String,
