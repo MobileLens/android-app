@@ -17,7 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.ui.components.PhoneListItem
 
@@ -64,3 +66,15 @@ fun FavoritesScreen(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun FavoritesScreenPreview() {
+    MaterialTheme {
+        FavoritesScreen(
+            favoritePhones = PhoneCatalogue.take(2),
+            onPhoneClick = {}
+        )
+    }
+}
+

@@ -13,6 +13,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 import com.mobilelens.mobilelens.phones.model.Lens
 
@@ -51,5 +53,18 @@ fun DeviceLensDetail(
         if (lenses.isNotEmpty()) {
             LensSpecs(lenses[selectedTabIndex])
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DeviceLensDetailPreview() {
+    com.mobilelens.mobilelens.core.ui.theme.MobileLensTheme {
+        DeviceLensDetail(
+            lenses = PhoneCatalogue[0].lenses,
+            deviceInfo = PhoneCatalogue[0].deviceInfo,
+            isFavorite = true,
+            onFavoriteClick = {}
+        )
     }
 }

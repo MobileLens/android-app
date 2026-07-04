@@ -11,7 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.Phone
 
 @Composable
@@ -42,4 +44,15 @@ fun PhoneListItem(
             .clickable(onClick = onClick)
             .padding(horizontal = 8.dp, vertical = 4.dp),
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PhoneListItemPreview() {
+    MaterialTheme {
+        PhoneListItem(
+            phone = PhoneCatalogue[0],
+            onClick = {}
+        )
+    }
 }

@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -41,6 +42,16 @@ fun SpecCard(
             fontWeight = FontWeight.Normal,
             fontFamily = FontFamily.Monospace,
             letterSpacing = (-0.5).sp
+        )
+    }
+}
+@Preview(showBackground = true)
+@Composable
+private fun SpecCardPreview() {
+    MaterialTheme {
+        SpecCard(
+            title = "Aperture",
+            value = "f/1.8"
         )
     }
 }

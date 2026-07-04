@@ -13,8 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.VideoResolution
 
 @Composable
@@ -46,5 +48,14 @@ fun VideoResolutionsCard(
         )
 
         // TODO: Gallery here
+    }
+}
+@Preview(showBackground = true)
+@Composable
+private fun VideoResolutionsCardPreview() {
+    MaterialTheme {
+        VideoResolutionsCard(
+            resolutions = PhoneCatalogue[0].lenses.first().videoResolutions
+        )
     }
 }

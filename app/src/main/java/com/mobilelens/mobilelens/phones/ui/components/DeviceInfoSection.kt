@@ -19,7 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 
 @Composable
@@ -80,5 +82,16 @@ fun DeviceInfoSection(
                 }
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+private fun DeviceInfoSectionPreview() {
+    MaterialTheme {
+        DeviceInfoSection(
+            deviceInfo = PhoneCatalogue[0].deviceInfo,
+            isFavorite = true,
+            onFavoriteClick = {}
+        )
     }
 }

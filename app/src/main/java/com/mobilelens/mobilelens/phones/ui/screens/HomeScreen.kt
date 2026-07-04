@@ -35,7 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.viewmodel.CameraUiState
 import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
 import com.mobilelens.mobilelens.phones.ui.components.DeviceLensDetail
@@ -46,6 +48,17 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     val uiState by cameraViewModel.uiState.collectAsState()
+    HomeScreenContent(
+        uiState = uiState,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun HomeScreenContent(
+    uiState: CameraUiState,
+    modifier: Modifier = Modifier,
+) {
     var fabExpanded by remember { mutableStateOf(false) }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -149,3 +162,17 @@ private fun CameraFallback(
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenPreview() {
+    MaterialTheme {
+        HomeScreenContent(
+            uiState = CameraUiState.Success(
+                lenses = PhoneCatalogue[0].lenses,
+                deviceInfo = PhoneCatalogue[0].deviceInfo
+            )
+        )
+    }
+}
+

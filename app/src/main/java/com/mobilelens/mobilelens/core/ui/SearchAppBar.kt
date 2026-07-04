@@ -35,10 +35,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.phones.model.Phone
@@ -209,3 +211,18 @@ fun SearchAppBar(
     }
 }
 
+
+@Preview(showBackground = true)
+@Composable
+private fun SearchAppBarPreview() {
+    com.mobilelens.mobilelens.core.ui.theme.MobileLensTheme {
+        SearchAppBar(
+            textFieldState = rememberTextFieldState(),
+            searchResults = emptyList(),
+            onSearch = {},
+            onResultSelected = {},
+            onClear = {},
+            showBackButton = true
+        )
+    }
+}
