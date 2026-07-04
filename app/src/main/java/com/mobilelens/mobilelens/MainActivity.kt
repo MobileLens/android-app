@@ -8,11 +8,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.mobilelens.mobilelens.data.BuildInfoRepository
-import com.mobilelens.mobilelens.data.CameraHardwareRepository
-import com.mobilelens.mobilelens.ui.MainApp
-import com.mobilelens.mobilelens.ui.theme.MobileLensTheme
-import com.mobilelens.mobilelens.viewmodel.CameraViewModel
+import com.mobilelens.mobilelens.core.data.BuildInfoRepository
+import com.mobilelens.mobilelens.phones.data.CameraHardwareRepository
+import com.mobilelens.mobilelens.MainApp
+import com.mobilelens.mobilelens.core.ui.theme.MobileLensTheme
+import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
 
 class MainActivity : ComponentActivity() {
     private val cameraViewModel: CameraViewModel by viewModels {
