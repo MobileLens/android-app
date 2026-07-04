@@ -145,7 +145,7 @@ fun ReviewCard(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewReviewCard() {
     MaterialTheme {
