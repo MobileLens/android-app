@@ -1,14 +1,14 @@
 package com.mobilelens.mobilelens.phones.data
 
-// import java.net.URL
+import com.mobilelens.mobilelens.phones.model.LensType
 import java.util.Calendar
-import java.util.GregorianCalendar
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 import com.mobilelens.mobilelens.phones.model.Facing
 import com.mobilelens.mobilelens.phones.model.Lens
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.model.Stabilization
 import com.mobilelens.mobilelens.phones.model.VideoResolution
+import java.util.Locale
 
 val PhoneCatalogue = listOf(
     Phone(
@@ -30,9 +30,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 1,
-                ois = Stabilization.SENSORSHIFT,
+                stabilization = Stabilization.SENSORSHIFT,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 120), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.WIDE,
+                        ),
             Lens(
                 focalLength = listOf(2.4f),
                 aperture = listOf(2.2f),
@@ -43,9 +44,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.NONE,
+                stabilization = Stabilization.NONE,
                 videoResolutions = emptyList(),
-            ),
+                            type = LensType.ULTRAWIDE,
+                        ),
             Lens(
                 focalLength = listOf(10.0f),
                 aperture = listOf(2.8f),
@@ -56,9 +58,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.SENSORSHIFT,
+                stabilization = Stabilization.SENSORSHIFT,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 120), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.WIDE,
+                        ),
         ),
     ),
     Phone(
@@ -80,9 +83,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.WIDE,
+                        ),
             Lens(
                 focalLength = listOf(13.0f),
                 aperture = listOf(1.7f),
@@ -93,9 +97,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
             Lens(
                 focalLength = listOf(110.0f),
                 aperture = listOf(2.8f),
@@ -106,9 +111,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
         ),
     ),
     Phone(
@@ -130,9 +136,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.WIDE,
+                        ),
             Lens(
                 focalLength = listOf(13.0f),
                 aperture = listOf(2.2f),
@@ -143,9 +150,10 @@ val PhoneCatalogue = listOf(
                 resolution = 12.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
             Lens(
                 focalLength = listOf(26.0f),
                 aperture = listOf(2.4f),
@@ -156,9 +164,10 @@ val PhoneCatalogue = listOf(
                 resolution = 10.0f,
                 activeResolution = 10.0f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
         ),
     ),
     Phone(
@@ -180,9 +189,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.WIDE,
+                        ),
             Lens(
                 focalLength = listOf(23.0f),
                 aperture = listOf(2.2f),
@@ -193,9 +203,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
             Lens(
                 focalLength = listOf(70.0f),
                 aperture = listOf(3.0f),
@@ -206,9 +217,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 30)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
         ),
     ),
     Phone(
@@ -230,9 +242,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.SENSORSHIFT,
+                stabilization = Stabilization.SENSORSHIFT,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.ULTRAWIDE,
+                        ),
         ),
     ),
     Phone(
@@ -254,9 +267,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
             Lens(
                 focalLength = listOf(89.0f),
                 aperture = listOf(2.4f),
@@ -267,9 +281,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
             Lens(
                 focalLength = listOf(250.0f),
                 aperture = listOf(3.6f),
@@ -280,9 +295,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
         ),
     ),
     Phone(
@@ -304,9 +320,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 120), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
             Lens(
                 focalLength = listOf(12.2f),
                 aperture = listOf(2.2f),
@@ -317,9 +334,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.NONE,
+                stabilization = Stabilization.NONE,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 120)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
             Lens(
                 focalLength = listOf(85.0f),
                 aperture = listOf(2.8f),
@@ -330,9 +348,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 120), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
         ),
     ),
     Phone(
@@ -354,9 +373,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 120), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
             Lens(
                 focalLength = listOf(14.0f),
                 aperture = listOf(2.2f),
@@ -367,9 +387,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.NONE,
+                stabilization = Stabilization.NONE,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
             Lens(
                 focalLength = listOf(75.0f, 100.0f),
                 aperture = listOf(2.4f, 2.96f),
@@ -380,9 +401,10 @@ val PhoneCatalogue = listOf(
                 resolution = 200.0f,
                 activeResolution = 50.0f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 120), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
         ),
     ),
     Phone(
@@ -404,9 +426,10 @@ val PhoneCatalogue = listOf(
                 resolution = 50.0f,
                 activeResolution = 12.5f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.WIDE,
+                        ),
             Lens(
                 focalLength = listOf(13.0f),
                 aperture = listOf(2.2f),
@@ -417,9 +440,10 @@ val PhoneCatalogue = listOf(
                 resolution = 12.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
             Lens(
                 focalLength = listOf(26.0f),
                 aperture = listOf(2.4f),
@@ -430,9 +454,10 @@ val PhoneCatalogue = listOf(
                 resolution = 10.0f,
                 activeResolution = 10.0f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
         ),
     ),
     Phone(
@@ -454,9 +479,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 1,
-                ois = Stabilization.SENSORSHIFT,
+                stabilization = Stabilization.SENSORSHIFT,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.ULTRAWIDE,
+                        ),
             Lens(
                 focalLength = listOf(2.2f),
                 aperture = listOf(2.2f),
@@ -467,9 +493,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.NONE,
+                stabilization = Stabilization.NONE,
                 videoResolutions = emptyList(),
-            ),
+                            type = LensType.ULTRAWIDE,
+                        ),
             Lens(
                 focalLength = listOf(12.0f),
                 aperture = listOf(2.8f),
@@ -480,9 +507,10 @@ val PhoneCatalogue = listOf(
                 resolution = 12.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.OIS,
+                stabilization = Stabilization.OIS,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 60)),
-            ),
+                            type = LensType.TELEPHOTO,
+                        ),
         ),
     ),
     Phone(
@@ -504,9 +532,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 1,
-                ois = Stabilization.SENSORSHIFT,
+                stabilization = Stabilization.SENSORSHIFT,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 120), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.WIDE,
+                        ),
             Lens(
                 focalLength = listOf(2.4f),
                 aperture = listOf(2.2f),
@@ -517,9 +546,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.NONE,
+                stabilization = Stabilization.NONE,
                 videoResolutions = emptyList(),
-            ),
+                            type = LensType.ULTRAWIDE,
+                        ),
             Lens(
                 focalLength = listOf(10.0f),
                 aperture = listOf(2.8f),
@@ -530,9 +560,10 @@ val PhoneCatalogue = listOf(
                 resolution = 48.0f,
                 activeResolution = 12.0f,
                 afZones = 100,
-                ois = Stabilization.SENSORSHIFT,
+                stabilization = Stabilization.SENSORSHIFT,
                 videoResolutions = listOf(VideoResolution(3840, 2160, 120), VideoResolution(1920, 1080, 240)),
-            ),
+                            type = LensType.WIDE,
+                        ),
         ),
     ),
 )
@@ -551,4 +582,4 @@ fun List<Phone>.filterByQuery(query: String): List<Phone> {
 }
 
 private fun dateOf(year: Int, month: Int, day: Int) =
-    GregorianCalendar(year, month, day).time
+    String.format(Locale.US, "%04d-%02d-%02d", year, month + 1, day)

@@ -24,7 +24,7 @@ fun DeviceImageOrPlaceholder(
     // Load image via Coil or show fallback placeholder icon
     if (deviceInfo.imageURL != null) {
         AsyncImage(
-            model = deviceInfo.imageURL.toString(),
+            model = deviceInfo.imageURL,
             contentDescription = "${deviceInfo.brand} ${deviceInfo.model}",
             modifier = Modifier
                 .size(80.dp)

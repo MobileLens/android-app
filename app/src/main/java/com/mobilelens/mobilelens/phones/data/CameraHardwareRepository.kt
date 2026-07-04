@@ -184,6 +184,18 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
                         // Calculating and storing only the denominator
                         val sensorTypeDenominator = 16f / diag
 
+                        // Lens Type
+                        val type = if (focalLengths.isNotEmpty()) {
+                            val focalLength35mm = focalLengths.first() * cropFactor
+                            when {
+                                focalLength35mm < 21f -> com.mobilelens.mobilelens.phones.model.LensType.ULTRAWIDE
+                                focalLength35mm > 36f -> com.mobilelens.mobilelens.phones.model.LensType.TELEPHOTO
+                                else -> com.mobilelens.mobilelens.phones.model.LensType.WIDE
+                            }
+                        } else {
+                            com.mobilelens.mobilelens.phones.model.LensType.WIDE
+                        }
+
                         val lensObject = Lens(
                             focalLength = focalLengths,
                             aperture = apertures,
@@ -194,8 +206,9 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
                             resolution = resolution,
                             activeResolution = activeResolution,
                             afZones = 1,
-                            ois = imageStabilization,
-                            videoResolutions = resolutionList
+                            stabilization = imageStabilization,
+                            videoResolutions = resolutionList,
+                            type = type
                         )
 
                         // Skip cameras that are duplicates of ones already collected
@@ -227,7 +240,7 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
             existingLens.focalLength.zip(newLens.focalLength).all { (a, b) -> (a - b).toInt() == 0 } &&
             existingLens.aperture.size == newLens.aperture.size &&
             existingLens.aperture.zip(newLens.aperture).all { (a, b) -> (a - b).toInt() == 0 } &&
-            existingLens.ois == newLens.ois
+            existingLens.stabilization == newLens.stabilization
         }
     }
 

@@ -21,12 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
-import java.text.DateFormat
 
 @Composable
 fun DeviceInfoSection(
     deviceInfo: DeviceInfo,
-    isFavorited: Boolean = false,
+    isFavorite: Boolean = false,
     onFavoriteClick: (() -> Unit)? = null,
 ) {
     Column(
@@ -64,7 +63,7 @@ fun DeviceInfoSection(
                 if (deviceInfo.releaseDate != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Released: ${DateFormat.getDateInstance(DateFormat.MEDIUM).format(deviceInfo.releaseDate)}",
+                        text = "Released: ${deviceInfo.releaseDate}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -74,9 +73,9 @@ fun DeviceInfoSection(
             if (onFavoriteClick != null) {
                 IconButton(onClick = onFavoriteClick) {
                     Icon(
-                        imageVector = if (isFavorited) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = if (isFavorited) "Remove from favorites" else "Add to favorites",
-                        tint = if (isFavorited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                        tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
                 }
             }

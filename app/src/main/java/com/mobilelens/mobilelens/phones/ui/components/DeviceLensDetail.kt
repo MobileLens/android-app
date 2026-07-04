@@ -21,7 +21,7 @@ fun DeviceLensDetail(
     lenses: List<Lens>,
     deviceInfo: DeviceInfo,
     modifier: Modifier = Modifier,
-    isFavorited: Boolean = false,
+    isFavorite: Boolean = false,
     onFavoriteClick: (() -> Unit)? = null,
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
@@ -34,7 +34,7 @@ fun DeviceLensDetail(
     ) {
         DeviceInfoSection(
             deviceInfo = deviceInfo,
-            isFavorited = isFavorited,
+            isFavorite = isFavorite,
             onFavoriteClick = onFavoriteClick
         )
 
@@ -43,7 +43,7 @@ fun DeviceLensDetail(
                 Tab(
                     selected = selectedTabIndex == index,
                     onClick = { selectedTabIndex = index },
-                    text = { Text("Camera ${index + 1}") }
+                    text = { Text("${lenses[index].facing.displayName} ${lenses[index].type.displayName.lowercase()}") }
                 )
             }
         }

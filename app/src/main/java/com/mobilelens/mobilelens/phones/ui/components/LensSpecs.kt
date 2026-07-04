@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.phones.model.Lens
-import com.mobilelens.mobilelens.phones.model.Stabilization
 
 
 @Composable
@@ -64,12 +63,12 @@ fun LensSpecs(
         ) {
             SpecCard(
                 title = "Resolution",
-                value = "%.1f MP".format(lens.resolution),
+                value = lens.resolutionLabel,
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
                 title = "Active resolution",
-                value = "%.1f MP".format(lens.activeResolution),
+                value = lens.activeResolutionLabel,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -81,12 +80,12 @@ fun LensSpecs(
         ) {
             SpecCard(
                 title = "Pixel pitch",
-                value = "%.2f μm".format(lens.pixelPitchUm),
+                value = lens.pixelPitchLabel,
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
                 title = "Sensor type",
-                value = "1/%.2f\"".format(lens.sensorTypeDenominator),
+                value = lens.sensorSizeLabel,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -98,16 +97,12 @@ fun LensSpecs(
         ) {
             SpecCard(
                 title = "OIS",
-                value = when(lens.ois) {
-                    Stabilization.OIS -> "Yes"
-                    Stabilization.SENSORSHIFT -> "Sensor-shift"
-                    Stabilization.NONE -> "No"
-                },
+                value = lens.stabilization.displayName,
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
                 title = "Crop factor",
-                value = "%.2fx".format(lens.cropFactor),
+                value = lens.cropFactorLabel,
                 modifier = Modifier.weight(1f)
             )
             SpecCard(

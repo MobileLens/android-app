@@ -47,7 +47,7 @@ fun PhoneScreen(
         DeviceLensDetail(
             lenses = phone.lenses,
             deviceInfo = phone.deviceInfo,
-            isFavorited = isFavorited,
+            isFavorite = isFavorited,
             onFavoriteClick = onFavoriteClick,
         )
 
