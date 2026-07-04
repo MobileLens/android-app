@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.mobilelens.mobilelens.core.data.BuildInfoRepository
 import com.mobilelens.mobilelens.phones.data.CameraHardwareRepository
-import com.mobilelens.mobilelens.MainApp
 import com.mobilelens.mobilelens.core.ui.theme.MobileLensTheme
 import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
 
