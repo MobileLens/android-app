@@ -61,4 +61,6 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.compose.richtext.commonmark)
     implementation(libs.compose.richtext.ui)
+    implementation(libs.retrofit)
+    implementation(libs.converter.kotlinx.serialization)
 }
