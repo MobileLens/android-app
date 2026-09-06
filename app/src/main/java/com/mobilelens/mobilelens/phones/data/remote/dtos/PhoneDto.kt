@@ -1,5 +1,6 @@
-package com.mobilelens.mobilelens.phones.data.remote
+package com.mobilelens.mobilelens.phones.data.remote.dtos
 
+import com.mobilelens.mobilelens.phones.data.remote.LensDto
 import kotlinx.serialization.Serializable
 
 @Serializable

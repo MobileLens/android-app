@@ -1,5 +1,7 @@
 package com.mobilelens.mobilelens.phones.data.remote
 
+import com.mobilelens.mobilelens.phones.data.remote.dtos.PhoneDto
+import com.mobilelens.mobilelens.phones.data.remote.dtos.PhonesResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
