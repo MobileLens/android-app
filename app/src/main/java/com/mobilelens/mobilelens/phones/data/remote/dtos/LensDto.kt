@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class LensDto(
     val id: String,
     val smartphoneId: String,
-    val status: String,
+    val status: String = "approved",
     val type: String,
     val facing: String,
     val focalLengthMm: Double,
@@ -15,8 +15,12 @@ data class LensDto(
     val pixelPitchUm: Double,
     val resolutionMp: Double,
     val activeResolutionMp: Double,
-    val afZones: Int,
-    val ois: String,
+    val afZones: Int = 0,
+    val ois: String = "none",
+    val submitterId: String? = null,
+    val reviewedBy: String? = null,
+    val submittedAt: String? = null,
+    val reviewedAt: String? = null,
     val videoModes: List<VideoModeDto> = emptyList()
 )
 
