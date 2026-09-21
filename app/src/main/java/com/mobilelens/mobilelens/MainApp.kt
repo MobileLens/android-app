@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -33,6 +32,20 @@ import com.mobilelens.mobilelens.phones.ui.screens.FavoritesScreen
 import com.mobilelens.mobilelens.phones.ui.screens.HomeScreen
 import com.mobilelens.mobilelens.phones.ui.screens.PhoneScreen
 import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mobilelens.mobilelens.reviews.ui.screens.ReviewScreen
+import com.mobilelens.mobilelens.reviews.ui.screens.ReviewThreadScreen
+import com.mobilelens.mobilelens.reviews.viewmodel.ReviewViewModel
+import com.mobilelens.mobilelens.reviews.viewmodel.ReviewThreadUiState
+import com.mobilelens.mobilelens.reviews.viewmodel.ReviewDetailsUiState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.Text
+import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +104,68 @@ fun MainApp(cameraViewModel: CameraViewModel) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable<Screen.Home> {
-                HomeScreen(cameraViewModel = cameraViewModel)
+                HomeScreen(
+                    cameraViewModel = cameraViewModel,
+                    onNavigateToReviews = {
+                        // Assuming phoneId 1 for HomeScreen for now
+                        navController.navigate(Screen.ReviewThread(phoneId = 1))
+                    }
+                )
+            }
+            composable<Screen.ReviewThread> { backStackEntry ->
+                val route = backStackEntry.toRoute<Screen.ReviewThread>()
+                val reviewViewModel: ReviewViewModel = viewModel()
+                val threadState by reviewViewModel.thread.collectAsState()
+
+                LaunchedEffect(route.phoneId) {
+                    reviewViewModel.loadReviewsForPhone(route.phoneId)
+                }
+
+                when (val state = threadState) {
+                    is ReviewThreadUiState.Loading -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                    is ReviewThreadUiState.Success -> {
+                        ReviewThreadScreen(
+                            thread = state.thread,
+                            onReviewClick = { review ->
+                                navController.navigate(Screen.ReviewDetails(reviewId = review.id))
+                            }
+                        )
+                    }
+                    is ReviewThreadUiState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(text = "Error: ${state.message}", modifier = Modifier.padding(16.dp))
+                        }
+                    }
+                }
+            }
+            composable<Screen.ReviewDetails> { backStackEntry ->
+                val route = backStackEntry.toRoute<Screen.ReviewDetails>()
+                val reviewViewModel: ReviewViewModel = viewModel()
+                val selectedReviewState by reviewViewModel.selectedReview.collectAsState()
+
+                LaunchedEffect(route.reviewId) {
+                    reviewViewModel.loadReview(route.reviewId)
+                }
+
+                when (val state = selectedReviewState) {
+                    is ReviewDetailsUiState.Loading -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                    is ReviewDetailsUiState.Success -> {
+                        ReviewScreen(review = state.review)
+                    }
+                    is ReviewDetailsUiState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(text = "Error: ${state.message}", modifier = Modifier.padding(16.dp))
+                        }
+                    }
+                }
             }
             composable<Screen.Favorites> {
                 val favoritePhones = remember(favoritePhoneIds) {

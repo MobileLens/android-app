@@ -46,11 +46,13 @@ import com.mobilelens.mobilelens.phones.ui.components.DeviceLensDetail
 fun HomeScreen(
     cameraViewModel: CameraViewModel,
     modifier: Modifier = Modifier,
+    onNavigateToReviews: () -> Unit = {},
 ) {
     val uiState by cameraViewModel.uiState.collectAsState()
     HomeScreenContent(
         uiState = uiState,
-        modifier = modifier
+        modifier = modifier,
+        onNavigateToReviews = onNavigateToReviews
     )
 }
 
@@ -58,6 +60,7 @@ fun HomeScreen(
 fun HomeScreenContent(
     uiState: CameraUiState,
     modifier: Modifier = Modifier,
+    onNavigateToReviews: () -> Unit = {},
 ) {
     var fabExpanded by remember { mutableStateOf(false) }
 
@@ -94,7 +97,12 @@ fun HomeScreenContent(
                             slideOutVertically(tween(durationMillis = 100)) { it / 2 },
                 ) {
                     ExtendedFloatingActionButton(
-                        onClick = { fabExpanded = false },
+                        onClick = {
+                            fabExpanded = false
+                            if (index == 1) { // Reviews
+                                onNavigateToReviews()
+                            }
+                        },
                         icon = { Icon(icon, contentDescription = null) },
                         text = { Text(label) },
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
