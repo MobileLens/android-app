@@ -3,6 +3,7 @@ package com.mobilelens.mobilelens.phones.data
 import com.mobilelens.mobilelens.core.data.remote.ApiClient
 import com.mobilelens.mobilelens.phones.data.remote.PhoneApi
 import com.mobilelens.mobilelens.phones.data.remote.dtos.PhoneDto
+import com.mobilelens.mobilelens.phones.data.remote.BrandApi
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 import com.mobilelens.mobilelens.phones.model.Facing
 import com.mobilelens.mobilelens.phones.model.Lens
@@ -13,9 +14,14 @@ import com.mobilelens.mobilelens.phones.model.VideoResolution
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.concurrent.ConcurrentHashMap
 
 class PhoneCatalogueRepository {
     private val phoneApi = ApiClient.createService<PhoneApi>()
+    private val brandApi = ApiClient.createService<BrandApi>()
+    
+    // Simple cache for brand names so we don't have to query the api repeatedly
+    private val brandCache = ConcurrentHashMap<String, String>()
 
     private val _phones = MutableStateFlow<List<Phone>>(emptyList())
     val phones: StateFlow<List<Phone>> = _phones.asStateFlow()
@@ -34,7 +40,18 @@ class PhoneCatalogueRepository {
         return mapToPhone(fullPhoneDto)
     }
 
-    private fun mapToPhone(dto: PhoneDto): Phone {
+    private suspend fun getBrandName(brandId: String): String {
+        return brandCache.getOrPut(brandId) {
+            try {
+                brandApi.getBrand(brandId).name
+            } catch (_: Exception) {
+                // fallback to ID if brand fetch fails
+                brandId
+            }
+        }
+    }
+
+    private suspend fun mapToPhone(dto: PhoneDto): Phone {
         val lenses = dto.cameras.map { lensDto ->
             Lens(
                 focalLength = listOf(lensDto.focalLengthMm.toFloat()),
@@ -71,7 +88,7 @@ class PhoneCatalogueRepository {
         return Phone(
             id = dto.id,
             deviceInfo = DeviceInfo(
-                brand = dto.brandId,
+                brand = getBrandName(dto.brandId),
                 model = dto.modelName,
                 releaseDate = dto.releaseDate,
                 imageURL = dto.imageUrl
