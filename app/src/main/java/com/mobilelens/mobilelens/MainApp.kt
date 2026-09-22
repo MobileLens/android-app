@@ -8,7 +8,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -20,9 +19,8 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.toRoute
-import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.data.displayName
-import com.mobilelens.mobilelens.phones.data.filterByQuery
+import com.mobilelens.mobilelens.phones.viewmodel.CatalogueViewModel
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.navigation.TOP_LEVEL_ROUTES
 import com.mobilelens.mobilelens.core.ui.BottomNavigationBar
@@ -46,16 +44,31 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.phones.viewmodel.CatalogueUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainApp(cameraViewModel: CameraViewModel) {
+fun MainApp(
+    cameraViewModel: CameraViewModel,
+    catalogueViewModel: CatalogueViewModel = viewModel()
+) {
     val navController = rememberNavController()
     val textFieldState = rememberTextFieldState()
     val query = textFieldState.text.toString()
-    val filteredPhones = remember(query) { PhoneCatalogue.filterByQuery(query) }
-    var selectedPhoneId by rememberSaveable { mutableStateOf<Int?>(null) }
-    var favoritePhoneIds by rememberSaveable { mutableStateOf(emptyList<Int>()) }
+    
+    val catalogueState by catalogueViewModel.catalogueState.collectAsState()
+    val favoritePhones by catalogueViewModel.favoritePhones.collectAsState()
+    
+    var selectedPhoneId by rememberSaveable { mutableStateOf<String?>(null) }
+    var favoritePhoneIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
+
+    LaunchedEffect(query) {
+        catalogueViewModel.searchPhones(query)
+    }
+
+    LaunchedEffect(favoritePhoneIds) {
+        catalogueViewModel.loadFavorites(favoritePhoneIds)
+    }
 
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -80,9 +93,14 @@ fun MainApp(cameraViewModel: CameraViewModel) {
             BottomNavigationBar(navController)
         },
         topBar = {
+            val displayResults = if (catalogueState is CatalogueUiState.Success) {
+                (catalogueState as CatalogueUiState.Success).phones
+            } else {
+                emptyList()
+            }
             SearchAppBar(
                 textFieldState = textFieldState,
-                searchResults = filteredPhones,
+                searchResults = displayResults,
                 showBackButton = !isTopLevelRoute && navController.previousBackStackEntry != null,
                 onBackClick = { navController.popBackStack() },
                 onSearch = {
@@ -108,7 +126,7 @@ fun MainApp(cameraViewModel: CameraViewModel) {
                     cameraViewModel = cameraViewModel,
                     onNavigateToReviews = {
                         // Assuming phoneId 1 for HomeScreen for now
-                        navController.navigate(Screen.ReviewThread(phoneId = 1))
+                        navController.navigate(Screen.ReviewThread(phoneId = "1"))
                     }
                 )
             }
@@ -168,9 +186,6 @@ fun MainApp(cameraViewModel: CameraViewModel) {
                 }
             }
             composable<Screen.Favorites> {
-                val favoritePhones = remember(favoritePhoneIds) {
-                    PhoneCatalogue.filter { favoritePhoneIds.contains(it.id) }
-                }
                 FavoritesScreen(
                     favoritePhones = favoritePhones,
                     onPhoneClick = { phone ->
@@ -179,20 +194,43 @@ fun MainApp(cameraViewModel: CameraViewModel) {
                 )
             }
             composable<Screen.Catalogue> {
-                CatalogueScreen(
-                    phones = filteredPhones,
-                    selectedPhoneId = selectedPhoneId,
-                    onPhoneClick = { phone ->
-                        navController.navigate(Screen.PhoneDetails(phone.id))
+                val displayResults = if (catalogueState is CatalogueUiState.Success) {
+                    (catalogueState as CatalogueUiState.Success).phones
+                } else {
+                    emptyList()
+                }
+                
+                if (catalogueState is CatalogueUiState.Loading) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
-                )
+                } else if (catalogueState is CatalogueUiState.Error) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Error: ${(catalogueState as CatalogueUiState.Error).message}",
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                } else {
+                    CatalogueScreen(
+                        phones = displayResults,
+                        selectedPhoneId = selectedPhoneId,
+                        onPhoneClick = { phone ->
+                            navController.navigate(Screen.PhoneDetails(phone.id))
+                        }
+                    )
+                }
             }
             composable<Screen.PhoneDetails> { backStackEntry ->
                 val route = backStackEntry.toRoute<Screen.PhoneDetails>()
-                val phone = remember(route.phoneId) {
-                    PhoneCatalogue.firstOrNull { it.id == route.phoneId }
+                val selectedPhone by catalogueViewModel.selectedPhone.collectAsState()
+
+                LaunchedEffect(route.phoneId) {
+                    catalogueViewModel.loadPhoneDetails(route.phoneId)
                 }
-                if (phone != null) {
+
+                if (selectedPhone != null && selectedPhone?.id == route.phoneId) {
+                    val phone = selectedPhone!!
                     val isFavorited = favoritePhoneIds.contains(phone.id)
                     PhoneScreen(
                         phone = phone,
@@ -203,6 +241,9 @@ fun MainApp(cameraViewModel: CameraViewModel) {
                             } else {
                                 favoritePhoneIds + phone.id
                             }
+                        },
+                        onNavigateToReviews = {
+                            navController.navigate(Screen.ReviewThread(phoneId = phone.id))
                         }
                     )
                 }

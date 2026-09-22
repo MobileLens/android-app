@@ -3,7 +3,7 @@ package com.mobilelens.mobilelens.reviews.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.core.data.remote.ApiClient
-import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
+import com.mobilelens.mobilelens.phones.data.PhoneCatalogueRepository
 import com.mobilelens.mobilelens.reviews.data.remote.ReviewApi
 import com.mobilelens.mobilelens.reviews.model.Review
 import com.mobilelens.mobilelens.reviews.model.ReviewThread
@@ -26,6 +26,7 @@ sealed interface ReviewDetailsUiState {
 
 class ReviewViewModel : ViewModel() {
     private val reviewApi: ReviewApi = ApiClient.createService()
+    private val phoneCatalogueRepository = PhoneCatalogueRepository()
 
     private val _thread = MutableStateFlow<ReviewThreadUiState>(ReviewThreadUiState.Loading)
     val thread: StateFlow<ReviewThreadUiState> = _thread.asStateFlow()
@@ -33,21 +34,17 @@ class ReviewViewModel : ViewModel() {
     private val _selectedReview = MutableStateFlow<ReviewDetailsUiState>(ReviewDetailsUiState.Loading)
     val selectedReview: StateFlow<ReviewDetailsUiState> = _selectedReview.asStateFlow()
 
-    fun loadReviewsForPhone(phoneId: Int) {
+    fun loadReviewsForPhone(phoneId: String) {
         viewModelScope.launch {
             _thread.value = ReviewThreadUiState.Loading
             try {
-                // Find phone in catalogue
-                val phone = PhoneCatalogue.firstOrNull { it.id == phoneId }
-                if (phone == null) {
-                    _thread.value = ReviewThreadUiState.Error("Phone not found.")
-                    return@launch
-                }
-                
-                val dtos = reviewApi.getReviews(phoneId.toString())
+                // Find phone via api/repository
+                val phone = phoneCatalogueRepository.getPhoneById(phoneId)
+
+                val dtos = reviewApi.getReviews(phoneId)
                 val reviews = dtos.map { dto ->
                     Review(
-                        id = dto.id.hashCode(),
+                        id = dto.id,
                         title = dto.title,
                         author = dto.authorId,
                         content = dto.contentMarkdown,
@@ -65,7 +62,7 @@ class ReviewViewModel : ViewModel() {
         }
     }
     
-    fun loadReview(reviewId: Int) {
+    fun loadReview(reviewId: String) {
         viewModelScope.launch {
             _selectedReview.value = ReviewDetailsUiState.Loading
             try {
@@ -78,10 +75,10 @@ class ReviewViewModel : ViewModel() {
                     }
                 }
                 
-                val dto = reviewApi.getReview(reviewId.toString())
+                val dto = reviewApi.getReview(reviewId)
                 _selectedReview.value = ReviewDetailsUiState.Success(
                     Review(
-                        id = dto.id.hashCode(),
+                        id = dto.id,
                         title = dto.title,
                         author = dto.authorId,
                         content = dto.contentMarkdown,

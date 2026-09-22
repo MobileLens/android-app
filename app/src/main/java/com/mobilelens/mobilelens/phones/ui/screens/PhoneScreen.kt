@@ -41,7 +41,8 @@ fun PhoneScreen(
     phone: Phone,
     isFavorited: Boolean,
     onFavoriteClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToReviews: () -> Unit = {}
 ) {
     var fabExpanded by remember { mutableStateOf(false) }
 
@@ -74,7 +75,12 @@ fun PhoneScreen(
                             slideOutVertically(tween(durationMillis = 100)) { it / 2 },
                 ) {
                     ExtendedFloatingActionButton(
-                        onClick = { fabExpanded = false },
+                        onClick = { 
+                            fabExpanded = false 
+                            if (index == 0) { // Reviews
+                                onNavigateToReviews()
+                            }
+                        },
                         icon = { Icon(icon, contentDescription = null) },
                         text = { Text(label) },
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
