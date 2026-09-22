@@ -21,7 +21,7 @@ import com.mobilelens.mobilelens.phones.ui.components.PhoneListItem
 @Composable
 fun CatalogueScreen(
     phones: List<Phone>,
-    selectedPhoneId: Int?,
+    selectedPhoneId: String?,
     onPhoneClick: (Phone) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -61,7 +61,7 @@ private fun CatalogueScreenPreview() {
     MaterialTheme {
         CatalogueScreen(
             phones = PhoneCatalogue,
-            selectedPhoneId = 1,
+            selectedPhoneId = "1",
             onPhoneClick = {}
         )
     }

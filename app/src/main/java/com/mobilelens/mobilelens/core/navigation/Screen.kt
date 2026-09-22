@@ -12,9 +12,9 @@ sealed interface Screen {
     @Serializable object Home : Screen
     @Serializable object Favorites : Screen
     @Serializable object Catalogue : Screen
-    @Serializable data class ReviewThread(val phoneId: Int) : Screen
-    @Serializable data class ReviewDetails(val reviewId: Int) : Screen
-    @Serializable data class PhoneDetails(val phoneId: Int) : Screen
+    @Serializable data class ReviewThread(val phoneId: String) : Screen
+    @Serializable data class ReviewDetails(val reviewId: String) : Screen
+    @Serializable data class PhoneDetails(val phoneId: String) : Screen
 }
 
 

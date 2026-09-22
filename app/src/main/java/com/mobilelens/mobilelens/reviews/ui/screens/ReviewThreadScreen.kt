@@ -61,11 +61,11 @@ private fun ReviewThreadScreenPreview() {
     MaterialTheme {
         ReviewThreadScreen(
             ReviewThread(
-                id = 0,
+                id = "0",
                 phone = PhoneCatalogue[0],
                 reviews = listOf(
                     Review(
-                        id = 1,
+                        id = "1",
                         title = "Review 1",
                         author = "John Phone",
                         commentCount = 5,
@@ -76,7 +76,7 @@ private fun ReviewThreadScreenPreview() {
                         assets = null
                     ),
                     Review(
-                        id = 1,
+                        id = "2",
                         title = "Review 2",
                         author = "John Phone",
                         commentCount = 1,

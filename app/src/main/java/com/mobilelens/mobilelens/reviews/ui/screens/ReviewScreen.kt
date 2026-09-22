@@ -57,7 +57,7 @@ fun PreviewReviewScreen() {
     MaterialTheme {
         ReviewScreen(
             review = Review(
-                id = 0,
+                id = "0",
                 title = "Review title",
                 author = "Author",
                 content = """

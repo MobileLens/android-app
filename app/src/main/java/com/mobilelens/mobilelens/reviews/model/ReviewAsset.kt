@@ -6,7 +6,7 @@ enum class ReviewAssetType {
 }
 
 data class ReviewAsset(
-    val id: Int,
+    val id: String,
     val type: ReviewAssetType,
     val storageUrl: String,
 )
