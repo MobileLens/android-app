@@ -15,6 +15,9 @@ sealed interface Screen {
     @Serializable data class ReviewThread(val phoneId: String) : Screen
     @Serializable data class ReviewDetails(val reviewId: String) : Screen
     @Serializable data class PhoneDetails(val phoneId: String) : Screen
+    @Serializable object Login : Screen
+    @Serializable object Register : Screen
+    @Serializable object UserSettings : Screen
 }
 
 

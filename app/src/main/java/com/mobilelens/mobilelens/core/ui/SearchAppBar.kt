@@ -60,6 +60,8 @@ fun SearchAppBar(
     onClear: () -> Unit,
     showBackButton: Boolean = false,
     onBackClick: () -> Unit = {},
+    onAccountClick: () -> Unit = {},
+    accountInitial: String = "U",
 ) {
     val searchBarState = rememberSearchBarState()
     val coroutineScope = rememberCoroutineScope()
@@ -171,7 +173,7 @@ fun SearchAppBar(
 
             if (isCollapsed) {
                 IconButton(
-                    onClick = { /* Future menu */ }
+                    onClick = onAccountClick
                 ) {
                     Box(
                         modifier = Modifier
@@ -181,7 +183,7 @@ fun SearchAppBar(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "U", // User placeholder
+                            text = accountInitial,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
