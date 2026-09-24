@@ -14,6 +14,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.navigation.TOP_LEVEL_ROUTES
 
 @Composable
@@ -23,17 +24,24 @@ fun BottomNavigationBar(navController: NavHostController) {
 
     NavigationBar {
         TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
+            val isSelected = currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true
+
             NavigationBarItem(
                 icon = { Icon(topLevelRoute.icon, contentDescription = topLevelRoute.name) },
                 label = { Text(topLevelRoute.name) },
-                selected = currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true,
+                selected = isSelected,
                 onClick = {
-                    navController.navigate(topLevelRoute.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                    val startDestinationId = navController.graph.findStartDestination().id
+                    if (topLevelRoute.route == Screen.Home) {
+                        navController.popBackStack(startDestinationId, inclusive = false)
+                    } else {
+                        navController.navigate(topLevelRoute.route) {
+                            popUpTo(startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 }
             )
