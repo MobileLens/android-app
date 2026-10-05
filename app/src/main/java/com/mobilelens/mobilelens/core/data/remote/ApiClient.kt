@@ -1,20 +1,22 @@
 package com.mobilelens.mobilelens.core.data.remote
 
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.mobilelens.mobilelens.BuildConfig
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 object ApiClient {
-    private const val BASE_URL = "http://10.0.2.2:3000/"
+    val BASE_URL: String = BuildConfig.BASE_URL
 
     var authToken: String? = null
 
     private val json = Json { ignoreUnknownKeys = true }
 
     private val okHttpClient: OkHttpClient by lazy {
-        OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val requestBuilder = chain.request().newBuilder()
                 val currentToken = authToken
@@ -23,7 +25,15 @@ object ApiClient {
                 }
                 chain.proceed(requestBuilder.build())
             }
-            .build()
+
+        if (BuildConfig.DEBUG) {
+            val loggingInterceptor = HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            }
+            builder.addInterceptor(loggingInterceptor)
+        }
+
+        builder.build()
     }
 
     val retrofit: Retrofit by lazy {
