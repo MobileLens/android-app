@@ -36,7 +36,6 @@ import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.navigation.TOP_LEVEL_ROUTES
 import com.mobilelens.mobilelens.core.ui.BottomNavigationBar
 import com.mobilelens.mobilelens.core.ui.SearchAppBar
-import com.mobilelens.mobilelens.phones.data.displayName
 import com.mobilelens.mobilelens.phones.ui.screens.CatalogueScreen
 import com.mobilelens.mobilelens.phones.ui.screens.FavoritesScreen
 import com.mobilelens.mobilelens.phones.ui.screens.HomeScreen
@@ -125,7 +124,9 @@ fun MainApp(
                         navigateToCatalogue()
                     },
                     onResultSelected = { phone ->
-                        textFieldState.setTextAndPlaceCursorAtEnd(phone.displayName)
+                        // The backend searches only `modelName`, so the brand must not be in the
+                        // query, otherwise the follow-up search matches nothing.
+                        textFieldState.setTextAndPlaceCursorAtEnd(phone.deviceInfo.model)
                         selectedPhoneId = phone.id
                         navController.navigate(Screen.PhoneDetails(phone.id))
                     },
