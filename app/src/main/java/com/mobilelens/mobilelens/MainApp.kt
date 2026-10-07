@@ -145,9 +145,6 @@ fun MainApp(
             composable<Screen.Home> {
                 HomeScreen(
                     cameraViewModel = cameraViewModel,
-                    onNavigateToReviews = {
-                        navController.navigate(Screen.ReviewThread(phoneId = "1"))
-                    }
                 )
             }
             composable<Screen.Login> {

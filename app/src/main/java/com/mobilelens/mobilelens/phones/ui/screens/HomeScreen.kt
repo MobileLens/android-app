@@ -16,7 +16,6 @@ import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.RateReview
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -46,13 +45,11 @@ import com.mobilelens.mobilelens.phones.ui.components.DeviceLensDetail
 fun HomeScreen(
     cameraViewModel: CameraViewModel,
     modifier: Modifier = Modifier,
-    onNavigateToReviews: () -> Unit = {},
 ) {
     val uiState by cameraViewModel.uiState.collectAsState()
     HomeScreenContent(
         uiState = uiState,
         modifier = modifier,
-        onNavigateToReviews = onNavigateToReviews
     )
 }
 
@@ -60,7 +57,6 @@ fun HomeScreen(
 fun HomeScreenContent(
     uiState: CameraUiState,
     modifier: Modifier = Modifier,
-    onNavigateToReviews: () -> Unit = {},
 ) {
     var fabExpanded by remember { mutableStateOf(false) }
 
@@ -84,9 +80,8 @@ fun HomeScreenContent(
             // Menu items
             val items = listOf(
                 Triple(Icons.Filled.RateReview, "Write a review", 0),
-                Triple(Icons.Filled.Star, "Reviews", 1),
-                Triple(Icons.Filled.Upload, "Upload", 2),
-                Triple(Icons.AutoMirrored.Filled.CompareArrows, "Compare", 3),
+                Triple(Icons.Filled.Upload, "Upload", 1),
+                Triple(Icons.AutoMirrored.Filled.CompareArrows, "Compare", 2),
             )
             items.forEach { (icon, label, index) ->
                 AnimatedVisibility(
@@ -99,9 +94,6 @@ fun HomeScreenContent(
                     ExtendedFloatingActionButton(
                         onClick = {
                             fabExpanded = false
-                            if (index == 1) { // Reviews
-                                onNavigateToReviews()
-                            }
                         },
                         icon = { Icon(icon, contentDescription = null) },
                         text = { Text(label) },
