@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Debug only: allows plain HTTP to the local backend (BASE_URL), whether that's
+    127.0.0.1 via adb reverse, 10.0.2.2 from the emulator, or a LAN IP from a real device.
+    Release builds use src/main/res/xml/network_security_config.xml (HTTPS only).
+-->
+<network-security-config xmlns:tools="http://schemas.android.com/tools">
+    <base-config cleartextTrafficPermitted="true" tools:ignore="InsecureBaseConfiguration" />
+</network-security-config>
