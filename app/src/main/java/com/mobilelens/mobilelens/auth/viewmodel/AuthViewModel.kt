@@ -63,8 +63,8 @@ class AuthViewModel(
     fun updateUsername(newUsername: String) {
         viewModelScope.launch {
             try {
-                val updated = authRepository.updateUserProfile(username = newUsername)
-                _currentUser.value = updated
+                authRepository.updateUserProfile(username = newUsername)
+                _currentUser.value = _currentUser.value?.copy(username = newUsername)
             } catch (_: Exception) {
                 _currentUser.value = _currentUser.value?.copy(username = newUsername)
             }
@@ -74,8 +74,8 @@ class AuthViewModel(
     fun updateEmail(newEmail: String) {
         viewModelScope.launch {
             try {
-                val updated = authRepository.updateUserProfile(email = newEmail)
-                _currentUser.value = updated
+                authRepository.updateUserProfile(email = newEmail)
+                _currentUser.value = _currentUser.value?.copy(email = newEmail)
             } catch (_: Exception) {
                 _currentUser.value = _currentUser.value?.copy(email = newEmail)
             }

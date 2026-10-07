@@ -5,8 +5,8 @@ import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangePasswordRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.LoginRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.RegisterRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.SessionResponse
+import com.mobilelens.mobilelens.auth.data.remote.dtos.StatusResponse
 import com.mobilelens.mobilelens.auth.data.remote.dtos.UpdateUserRequest
-import com.mobilelens.mobilelens.auth.data.remote.dtos.UserDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -37,7 +37,7 @@ interface AuthApi {
     suspend fun updateUser(
         @Body request: UpdateUserRequest,
         @Header("Authorization") authHeader: String? = null
-    ): UserDto
+    ): StatusResponse
 
     @POST("api/auth/change-password")
     suspend fun changePassword(

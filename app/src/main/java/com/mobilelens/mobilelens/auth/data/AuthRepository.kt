@@ -54,14 +54,8 @@ class AuthRepository(
         )
     }
 
-    suspend fun updateUserProfile(username: String? = null, email: String? = null): User {
-        val dto = authApi.updateUser(UpdateUserRequest(username = username, email = email, name = username))
-        return User(
-            id = dto.id,
-            username = dto.username ?: dto.name ?: "username",
-            email = dto.email,
-            role = dto.role ?: "Reviewer"
-        )
+    suspend fun updateUserProfile(username: String? = null, email: String? = null) {
+        authApi.updateUser(UpdateUserRequest(username = username, email = email, name = username))
     }
 
     suspend fun changePassword(currentPassword: String, newPassword: String) {

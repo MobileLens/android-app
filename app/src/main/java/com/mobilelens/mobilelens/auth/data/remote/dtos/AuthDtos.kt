@@ -40,6 +40,11 @@ data class UserDto(
 )
 
 @Serializable
+data class StatusResponse(
+    val status: Boolean
+)
+
+@Serializable
 data class SessionDto(
     val id: String = "",
     val userId: String = "",
