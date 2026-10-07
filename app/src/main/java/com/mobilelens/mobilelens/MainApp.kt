@@ -150,12 +150,16 @@ fun MainApp(
                 )
             }
             composable<Screen.Login> {
-                LoginScreen(
-                    onLogin = { email, password ->
-                        authViewModel.login(email, password)
+                LaunchedEffect(currentUser) {
+                    if (currentUser != null) {
                         navController.navigate(Screen.UserSettings) {
                             popUpTo(Screen.Home) { saveState = false }
                         }
+                    }
+                }
+                LoginScreen(
+                    onLogin = { email, password ->
+                        authViewModel.login(email, password)
                     },
                     onNavigateToRegister = {
                         navController.navigate(Screen.Register)
@@ -163,12 +167,16 @@ fun MainApp(
                 )
             }
             composable<Screen.Register> {
-                RegisterScreen(
-                    onRegister = { username, email, password ->
-                        authViewModel.register(username, email, password)
+                LaunchedEffect(currentUser) {
+                    if (currentUser != null) {
                         navController.navigate(Screen.UserSettings) {
                             popUpTo(Screen.Home) { saveState = false }
                         }
+                    }
+                }
+                RegisterScreen(
+                    onRegister = { username, email, password ->
+                        authViewModel.register(username, email, password)
                     },
                     onNavigateToLogin = {
                         navController.navigate(Screen.Login)
@@ -188,15 +196,9 @@ fun MainApp(
                         onUpdateEmail = { newEmail -> authViewModel.updateEmail(newEmail) },
                         onDeleteAccount = {
                             authViewModel.deleteAccount()
-                            navController.navigate(Screen.Login) {
-                                popUpTo(Screen.Home)
-                            }
                         },
                         onLogout = {
                             authViewModel.logout()
-                            navController.navigate(Screen.Login) {
-                                popUpTo(Screen.Home)
-                            }
                         },
                         onDeleteReview = { reviewId -> authViewModel.deleteUserReview(reviewId) },
                         profileError = profileError,

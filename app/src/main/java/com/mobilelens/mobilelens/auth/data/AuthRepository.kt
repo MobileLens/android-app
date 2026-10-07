@@ -73,9 +73,10 @@ class AuthRepository(
     }
 
     suspend fun logout() {
-        try {
-            authApi.signOut()
-        } catch (_: Exception) {}
+        val token = ApiClient.authToken ?: return
         ApiClient.authToken = null
+        try {
+            authApi.signOut(authHeader = "Bearer $token")
+        } catch (_: Exception) {}
     }
 }

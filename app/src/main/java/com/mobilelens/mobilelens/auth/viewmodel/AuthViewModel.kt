@@ -99,20 +99,20 @@ class AuthViewModel(
     }
 
     fun deleteAccount() {
+        _currentUser.value = null
         viewModelScope.launch {
             try {
                 authRepository.logout()
             } catch (_: Exception) {}
-            _currentUser.value = null
         }
     }
 
     fun logout() {
+        _currentUser.value = null
         viewModelScope.launch {
             try {
                 authRepository.logout()
             } catch (_: Exception) {}
-            _currentUser.value = null
         }
     }
 
