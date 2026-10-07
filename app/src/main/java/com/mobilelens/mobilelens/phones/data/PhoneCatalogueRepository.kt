@@ -58,27 +58,13 @@ class PhoneCatalogueRepository {
                 aperture = listOf(lensDto.aperture.toFloat()),
                 cropFactor = lensDto.cropFactor.toFloat(),
                 sensorTypeDenominator = lensDto.cropFactor.toFloat() / 2.7f, // Approximate
-                facing = when (lensDto.facing.lowercase()) {
-                    "front" -> Facing.FRONT
-                    "back", "rear" -> Facing.BACK
-                    else -> Facing.OTHER
-                },
+                facing = facingFromApi(lensDto.facing),
                 pixelPitchUm = lensDto.pixelPitchUm.toFloat(),
                 resolution = lensDto.resolutionMp.toFloat(),
                 activeResolution = lensDto.activeResolutionMp.toFloat(),
                 afZones = lensDto.afZones,
-                stabilization = when (lensDto.ois.lowercase()) {
-                    "ois", "optical" -> Stabilization.OIS
-                    "sensorshift", "sensor-shift" -> Stabilization.SENSORSHIFT
-                    else -> Stabilization.NONE
-                },
-                type = when (lensDto.type.lowercase()) {
-                    "wide" -> LensType.WIDE
-                    "ultrawide", "ultra-wide" -> LensType.ULTRAWIDE
-                    "telephoto" -> LensType.TELEPHOTO
-                    "macro" -> LensType.MACRO
-                    else -> LensType.WIDE
-                },
+                stabilization = stabilizationFromApi(lensDto.ois),
+                type = lensTypeFromApi(lensDto.type),
                 videoResolutions = lensDto.videoModes.map { vm ->
                     VideoResolution(vm.widthPx, vm.heightPx, vm.fpsMax.toInt())
                 }
@@ -96,4 +82,27 @@ class PhoneCatalogueRepository {
             lenses = lenses
         )
     }
+}
+
+// Backend values live in backend-api `camera` table (api/src/db/schema.ts).
+// A few extra aliases are accepted on top of those.
+
+internal fun lensTypeFromApi(value: String): LensType = when (value.lowercase()) {
+    "wide" -> LensType.WIDE
+    "ultrawide", "ultra-wide" -> LensType.ULTRAWIDE
+    "tele", "telephoto" -> LensType.TELEPHOTO
+    "macro" -> LensType.MACRO
+    else -> LensType.OTHER
+}
+
+internal fun facingFromApi(value: String): Facing = when (value.lowercase()) {
+    "front" -> Facing.FRONT
+    "back", "rear" -> Facing.BACK
+    else -> Facing.OTHER
+}
+
+internal fun stabilizationFromApi(value: String): Stabilization = when (value.lowercase()) {
+    "optical", "ois" -> Stabilization.OIS
+    "sensor_shift", "sensorshift", "sensor-shift" -> Stabilization.SENSORSHIFT
+    else -> Stabilization.NONE
 }

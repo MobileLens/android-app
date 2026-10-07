@@ -19,6 +19,7 @@ enum class LensType(val displayName: String) {
     ULTRAWIDE("Ultra-wide"),
     TELEPHOTO("Telephoto"),
     MACRO("Macro"),
+    OTHER("Other"),
 }
 
 /**
