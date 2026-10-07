@@ -276,31 +276,27 @@ fun MainApp(
                 )
             }
             composable<Screen.Catalogue> {
-                val displayResults = if (catalogueState is CatalogueUiState.Success) {
-                    (catalogueState as CatalogueUiState.Success).phones
-                } else {
-                    emptyList()
-                }
-
-                if (catalogueState is CatalogueUiState.Loading) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                when (val state = catalogueState) {
+                    is CatalogueUiState.Loading -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
                     }
-                } else if (catalogueState is CatalogueUiState.Error) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "Error: ${(catalogueState as CatalogueUiState.Error).message}",
-                            modifier = Modifier.padding(16.dp)
+                    is CatalogueUiState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(text = "Error: ${state.message}", modifier = Modifier.padding(16.dp))
+                        }
+                    }
+                    is CatalogueUiState.Success -> {
+                        CatalogueScreen(
+                            phones = state.phones,
+                            selectedPhoneId = selectedPhoneId,
+                            onPhoneClick = { phone ->
+                                navController.navigate(Screen.PhoneDetails(phone.id))
+                            },
+                            isRefreshing = state.isRefreshing
                         )
                     }
-                } else {
-                    CatalogueScreen(
-                        phones = displayResults,
-                        selectedPhoneId = selectedPhoneId,
-                        onPhoneClick = { phone ->
-                            navController.navigate(Screen.PhoneDetails(phone.id))
-                        }
-                    )
                 }
             }
             composable<Screen.PhoneDetails> { backStackEntry ->

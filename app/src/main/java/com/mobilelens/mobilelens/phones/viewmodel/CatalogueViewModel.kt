@@ -16,7 +16,8 @@ private const val SEARCH_DEBOUNCE_MS = 300L
 
 sealed interface CatalogueUiState {
     object Loading : CatalogueUiState
-    data class Success(val phones: List<Phone>) : CatalogueUiState
+    // isRefreshing: a newer search is loading while these (older) results stay on screen
+    data class Success(val phones: List<Phone>, val isRefreshing: Boolean = false) : CatalogueUiState
     data class Error(val message: String) : CatalogueUiState
 }
 
@@ -37,7 +38,13 @@ class CatalogueViewModel : ViewModel() {
         searchJob = viewModelScope.launch {
             // Wait for typing to pause; the next keystroke cancels this job during the delay
             delay(SEARCH_DEBOUNCE_MS)
-            _catalogueState.value = CatalogueUiState.Loading
+            // Keep the current results visible instead of swapping them for a spinner
+            val current = _catalogueState.value
+            _catalogueState.value = if (current is CatalogueUiState.Success) {
+                current.copy(isRefreshing = true)
+            } else {
+                CatalogueUiState.Loading
+            }
             try {
                 // if query is empty we should probably pass null to fetch all
                 val apiQuery = if (query.isBlank()) null else query
