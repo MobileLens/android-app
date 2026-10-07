@@ -1,14 +1,10 @@
 package com.mobilelens.mobilelens
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -16,40 +12,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
-import com.mobilelens.mobilelens.auth.ui.screens.LoginScreen
-import com.mobilelens.mobilelens.auth.ui.screens.RegisterScreen
-import com.mobilelens.mobilelens.auth.ui.screens.UserSettingsScreen
+import com.mobilelens.mobilelens.auth.navigation.authRoutes
 import com.mobilelens.mobilelens.auth.viewmodel.AuthViewModel
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.navigation.TOP_LEVEL_ROUTES
 import com.mobilelens.mobilelens.core.ui.BottomNavigationBar
 import com.mobilelens.mobilelens.core.ui.SearchAppBar
-import com.mobilelens.mobilelens.phones.ui.screens.CatalogueScreen
-import com.mobilelens.mobilelens.phones.ui.screens.FavoritesScreen
-import com.mobilelens.mobilelens.phones.ui.screens.HomeScreen
-import com.mobilelens.mobilelens.phones.ui.screens.PhoneScreen
+import com.mobilelens.mobilelens.phones.navigation.phonesRoutes
 import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
 import com.mobilelens.mobilelens.phones.viewmodel.CatalogueUiState
 import com.mobilelens.mobilelens.phones.viewmodel.CatalogueViewModel
-import com.mobilelens.mobilelens.phones.viewmodel.PhoneDetailsUiState
-import com.mobilelens.mobilelens.phones.viewmodel.PhoneDetailsViewModel
-import com.mobilelens.mobilelens.reviews.ui.screens.ReviewScreen
-import com.mobilelens.mobilelens.reviews.ui.screens.ReviewThreadScreen
-import com.mobilelens.mobilelens.reviews.viewmodel.ReviewDetailsUiState
-import com.mobilelens.mobilelens.reviews.viewmodel.ReviewThreadUiState
-import com.mobilelens.mobilelens.reviews.viewmodel.ReviewViewModel
+import com.mobilelens.mobilelens.reviews.navigation.reviewsRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +44,6 @@ fun MainApp(
     val query = textFieldState.text.toString()
 
     val catalogueState by catalogueViewModel.catalogueState.collectAsState()
-    val favoritePhones by catalogueViewModel.favoritePhones.collectAsState()
     val currentUser by authViewModel.currentUser.collectAsState()
 
     var selectedPhoneId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -144,201 +124,22 @@ fun MainApp(
             startDestination = Screen.Home,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable<Screen.Home> {
-                HomeScreen(
-                    cameraViewModel = cameraViewModel,
-                )
-            }
-            composable<Screen.Login> {
-                LaunchedEffect(currentUser) {
-                    if (currentUser != null) {
-                        navController.navigate(Screen.UserSettings) {
-                            popUpTo(Screen.Home) { saveState = false }
-                        }
+            phonesRoutes(
+                navController = navController,
+                cameraViewModel = cameraViewModel,
+                catalogueViewModel = catalogueViewModel,
+                selectedPhoneId = { selectedPhoneId },
+                favoritePhoneIds = { favoritePhoneIds },
+                onToggleFavorite = { phoneId ->
+                    favoritePhoneIds = if (phoneId in favoritePhoneIds) {
+                        favoritePhoneIds - phoneId
+                    } else {
+                        favoritePhoneIds + phoneId
                     }
                 }
-                LoginScreen(
-                    onLogin = { email, password ->
-                        authViewModel.login(email, password)
-                    },
-                    onNavigateToRegister = {
-                        navController.navigate(Screen.Register)
-                    }
-                )
-            }
-            composable<Screen.Register> {
-                LaunchedEffect(currentUser) {
-                    if (currentUser != null) {
-                        navController.navigate(Screen.UserSettings) {
-                            popUpTo(Screen.Home) { saveState = false }
-                        }
-                    }
-                }
-                RegisterScreen(
-                    onRegister = { username, email, password ->
-                        authViewModel.register(username, email, password)
-                    },
-                    onNavigateToLogin = {
-                        navController.navigate(Screen.Login)
-                    }
-                )
-            }
-            composable<Screen.UserSettings> {
-                val user = currentUser
-                if (user != null) {
-                    val userReviews by authViewModel.userReviews.collectAsState()
-                    val profileError by authViewModel.profileError.collectAsState()
-                    UserSettingsScreen(
-                        user = user,
-                        userReviews = userReviews,
-                        onBackClick = { navController.popBackStack() },
-                        onUpdateUsername = { newName -> authViewModel.updateUsername(newName) },
-                        onUpdateEmail = { newEmail -> authViewModel.updateEmail(newEmail) },
-                        onDeleteAccount = {
-                            authViewModel.deleteAccount()
-                        },
-                        onLogout = {
-                            authViewModel.logout()
-                        },
-                        onDeleteReview = { reviewId -> authViewModel.deleteUserReview(reviewId) },
-                        profileError = profileError,
-                        onClearProfileError = { authViewModel.clearProfileError() }
-                    )
-                } else {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(Screen.Login) {
-                            popUpTo(Screen.Home)
-                        }
-                    }
-                }
-            }
-            composable<Screen.ReviewThread> { backStackEntry ->
-                val route = backStackEntry.toRoute<Screen.ReviewThread>()
-                val reviewViewModel: ReviewViewModel = viewModel()
-                val threadState by reviewViewModel.thread.collectAsState()
-
-                LaunchedEffect(route.phoneId) {
-                    reviewViewModel.loadReviewsForPhone(route.phoneId)
-                }
-
-                when (val state = threadState) {
-                    is ReviewThreadUiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    is ReviewThreadUiState.Success -> {
-                        ReviewThreadScreen(
-                            thread = state.thread,
-                            onReviewClick = { review ->
-                                navController.navigate(Screen.ReviewDetails(reviewId = review.id))
-                            }
-                        )
-                    }
-                    is ReviewThreadUiState.Error -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Error: ${state.message}", modifier = Modifier.padding(16.dp))
-                        }
-                    }
-                }
-            }
-            composable<Screen.ReviewDetails> { backStackEntry ->
-                val route = backStackEntry.toRoute<Screen.ReviewDetails>()
-                val reviewViewModel: ReviewViewModel = viewModel()
-                val selectedReviewState by reviewViewModel.selectedReview.collectAsState()
-
-                LaunchedEffect(route.reviewId) {
-                    reviewViewModel.loadReview(route.reviewId)
-                }
-
-                when (val state = selectedReviewState) {
-                    is ReviewDetailsUiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    is ReviewDetailsUiState.Success -> {
-                        ReviewScreen(review = state.review)
-                    }
-                    is ReviewDetailsUiState.Error -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Error: ${state.message}", modifier = Modifier.padding(16.dp))
-                        }
-                    }
-                }
-            }
-            composable<Screen.Favorites> {
-                FavoritesScreen(
-                    favoritePhones = favoritePhones,
-                    onPhoneClick = { phone ->
-                        navController.navigate(Screen.PhoneDetails(phone.id))
-                    }
-                )
-            }
-            composable<Screen.Catalogue> {
-                when (val state = catalogueState) {
-                    is CatalogueUiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    is CatalogueUiState.Error -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Error: ${state.message}", modifier = Modifier.padding(16.dp))
-                        }
-                    }
-                    is CatalogueUiState.Success -> {
-                        CatalogueScreen(
-                            phones = state.phones,
-                            selectedPhoneId = selectedPhoneId,
-                            onPhoneClick = { phone ->
-                                navController.navigate(Screen.PhoneDetails(phone.id))
-                            },
-                            isRefreshing = state.isRefreshing
-                        )
-                    }
-                }
-            }
-            composable<Screen.PhoneDetails> { backStackEntry ->
-                val route = backStackEntry.toRoute<Screen.PhoneDetails>()
-                val phoneDetailsViewModel: PhoneDetailsViewModel = viewModel()
-                val phoneState by phoneDetailsViewModel.uiState.collectAsState()
-
-                LaunchedEffect(route.phoneId) {
-                    phoneDetailsViewModel.loadPhone(route.phoneId)
-                }
-
-                when (val state = phoneState) {
-                    is PhoneDetailsUiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    is PhoneDetailsUiState.Success -> {
-                        val phone = state.phone
-                        val isFavorited = favoritePhoneIds.contains(phone.id)
-                        PhoneScreen(
-                            phone = phone,
-                            isFavorited = isFavorited,
-                            onFavoriteClick = {
-                                favoritePhoneIds = if (isFavorited) {
-                                    favoritePhoneIds - phone.id
-                                } else {
-                                    favoritePhoneIds + phone.id
-                                }
-                            },
-                            onNavigateToReviews = {
-                                navController.navigate(Screen.ReviewThread(phoneId = phone.id))
-                            }
-                        )
-                    }
-                    is PhoneDetailsUiState.Error -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Error: ${state.message}", modifier = Modifier.padding(16.dp))
-                        }
-                    }
-                }
-            }
+            )
+            reviewsRoutes(navController)
+            authRoutes(navController, authViewModel)
         }
     }
 }
