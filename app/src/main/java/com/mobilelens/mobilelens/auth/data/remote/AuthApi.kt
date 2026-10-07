@@ -1,6 +1,7 @@
 package com.mobilelens.mobilelens.auth.data.remote
 
 import com.mobilelens.mobilelens.auth.data.remote.dtos.AuthResponse
+import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangeEmailRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangePasswordRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.LoginRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.RegisterRequest
@@ -37,6 +38,11 @@ interface AuthApi {
     suspend fun updateUser(
         @Body request: UpdateUserRequest,
         @Header("Authorization") authHeader: String? = null
+    ): StatusResponse
+
+    @POST("api/auth/change-email")
+    suspend fun changeEmail(
+        @Body request: ChangeEmailRequest
     ): StatusResponse
 
     @POST("api/auth/change-password")

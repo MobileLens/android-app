@@ -1,6 +1,7 @@
 package com.mobilelens.mobilelens.auth.data
 
 import com.mobilelens.mobilelens.auth.data.remote.AuthApi
+import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangeEmailRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangePasswordRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.LoginRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.RegisterRequest
@@ -43,8 +44,8 @@ class AuthRepository(
     }
 
     suspend fun getSession(): User? {
-        val token = ApiClient.authToken ?: return null
-        val response = authApi.getSession(authHeader = "Bearer $token")
+        if (ApiClient.authToken == null) return null
+        val response = authApi.getSession()
         val dto = response.user ?: return null
         return User(
             id = dto.id,
@@ -54,8 +55,12 @@ class AuthRepository(
         )
     }
 
-    suspend fun updateUserProfile(username: String? = null, email: String? = null) {
-        authApi.updateUser(UpdateUserRequest(username = username, email = email, name = username))
+    suspend fun updateUserProfile(username: String? = null) {
+        authApi.updateUser(UpdateUserRequest(username = username, name = username))
+    }
+
+    suspend fun changeEmail(newEmail: String) {
+        authApi.changeEmail(ChangeEmailRequest(newEmail = newEmail))
     }
 
     suspend fun changePassword(currentPassword: String, newPassword: String) {

@@ -19,6 +19,9 @@ class AuthViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val _profileError = MutableStateFlow<String?>(null)
+    val profileError: StateFlow<String?> = _profileError.asStateFlow()
+
     private val _userReviews = MutableStateFlow<List<Review>>(emptyList())
     val userReviews: StateFlow<List<Review>> = _userReviews.asStateFlow()
 
@@ -73,13 +76,26 @@ class AuthViewModel(
 
     fun updateEmail(newEmail: String) {
         viewModelScope.launch {
+            _profileError.value = null
             try {
-                authRepository.updateUserProfile(email = newEmail)
-                _currentUser.value = _currentUser.value?.copy(email = newEmail)
+                authRepository.changeEmail(newEmail)
+                // The server answers success even if the address belongs to another account,
+                // so reload the user and check that the e-mail actually changed.
+                val reloaded = authRepository.getSession()
+                if (reloaded != null) {
+                    _currentUser.value = reloaded
+                }
+                if (!reloaded?.email.equals(newEmail, ignoreCase = true)) {
+                    _profileError.value = "Couldn't change e-mail."
+                }
             } catch (_: Exception) {
-                _currentUser.value = _currentUser.value?.copy(email = newEmail)
+                _profileError.value = "Couldn't change e-mail."
             }
         }
+    }
+
+    fun clearProfileError() {
+        _profileError.value = null
     }
 
     fun deleteAccount() {

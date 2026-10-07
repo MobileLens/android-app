@@ -52,7 +52,9 @@ fun UserSettingsScreen(
     onUpdateEmail: (String) -> Unit,
     onDeleteAccount: () -> Unit,
     onLogout: () -> Unit,
-    onDeleteReview: (String) -> Unit = {}
+    onDeleteReview: (String) -> Unit = {},
+    profileError: String? = null,
+    onClearProfileError: () -> Unit = {}
 ) {
     var showChangeUsernameDialog by remember { mutableStateOf(false) }
     var showChangeEmailDialog by remember { mutableStateOf(false) }
@@ -128,6 +130,7 @@ fun UserSettingsScreen(
             AuthPillButton(
                 text = "E-mail",
                 onClick = {
+                    onClearProfileError()
                     newEmailInput = user.email
                     showChangeEmailDialog = true
                 },
@@ -141,6 +144,15 @@ fun UserSettingsScreen(
                     showChangePasswordDialog = true
                 },
                 modifier = Modifier.weight(1f)
+            )
+        }
+
+        if (profileError != null) {
+            Text(
+                text = profileError,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 8.dp)
             )
         }
 

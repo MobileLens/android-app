@@ -19,8 +19,12 @@ data class RegisterRequest(
 @Serializable
 data class UpdateUserRequest(
     val name: String? = null,
-    val username: String? = null,
-    val email: String? = null
+    val username: String? = null
+)
+
+@Serializable
+data class ChangeEmailRequest(
+    val newEmail: String
 )
 
 @Serializable

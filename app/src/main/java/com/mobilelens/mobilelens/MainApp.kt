@@ -179,6 +179,7 @@ fun MainApp(
                 val user = currentUser
                 if (user != null) {
                     val userReviews by authViewModel.userReviews.collectAsState()
+                    val profileError by authViewModel.profileError.collectAsState()
                     UserSettingsScreen(
                         user = user,
                         userReviews = userReviews,
@@ -197,7 +198,9 @@ fun MainApp(
                                 popUpTo(Screen.Home)
                             }
                         },
-                        onDeleteReview = { reviewId -> authViewModel.deleteUserReview(reviewId) }
+                        onDeleteReview = { reviewId -> authViewModel.deleteUserReview(reviewId) },
+                        profileError = profileError,
+                        onClearProfileError = { authViewModel.clearProfileError() }
                     )
                 } else {
                     LaunchedEffect(Unit) {
