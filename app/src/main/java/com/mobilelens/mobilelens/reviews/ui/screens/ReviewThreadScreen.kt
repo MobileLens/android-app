@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
-import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.reviews.model.Review
 import com.mobilelens.mobilelens.reviews.model.ReviewThread
 import com.mobilelens.mobilelens.reviews.ui.components.ReviewCard
@@ -62,7 +61,6 @@ private fun ReviewThreadScreenPreview() {
         ReviewThreadScreen(
             ReviewThread(
                 id = "0",
-                phone = PhoneCatalogue[0],
                 reviews = listOf(
                     Review(
                         id = "1",
