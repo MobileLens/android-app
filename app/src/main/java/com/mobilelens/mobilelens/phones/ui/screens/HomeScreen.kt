@@ -47,11 +47,13 @@ import com.mobilelens.mobilelens.phones.ui.components.DeviceLensDetail
 fun HomeScreen(
     cameraViewModel: CameraViewModel,
     modifier: Modifier = Modifier,
+    onWriteReview: () -> Unit = {},
 ) {
     val uiState by cameraViewModel.uiState.collectAsState()
     HomeScreenContent(
         uiState = uiState,
         modifier = modifier,
+        onWriteReview = onWriteReview,
     )
 }
 
@@ -59,6 +61,7 @@ fun HomeScreen(
 fun HomeScreenContent(
     uiState: CameraUiState,
     modifier: Modifier = Modifier,
+    onWriteReview: () -> Unit = {},
 ) {
     var fabExpanded by remember { mutableStateOf(false) }
 
@@ -96,6 +99,9 @@ fun HomeScreenContent(
                     ExtendedFloatingActionButton(
                         onClick = {
                             fabExpanded = false
+                            if (index == 0) { // Write a review
+                                onWriteReview()
+                            }
                         },
                         icon = { Icon(icon, contentDescription = null) },
                         text = { Text(stringResource(labelRes)) },

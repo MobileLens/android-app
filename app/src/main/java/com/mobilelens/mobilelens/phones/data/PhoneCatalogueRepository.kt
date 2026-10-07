@@ -40,6 +40,14 @@ class PhoneCatalogueRepository {
         return mapToPhone(fullPhoneDto)
     }
 
+    /** The catalogue phone whose model name is exactly [model] (ignoring case), if there is one. */
+    suspend fun findPhoneByModel(model: String): Phone? {
+        val match = phoneApi.getPhones(query = model).data
+            .firstOrNull { it.modelName.equals(model, ignoreCase = true) }
+            ?: return null
+        return getPhoneById(match.id)
+    }
+
     private suspend fun getBrandName(brandId: String): String {
         return brandCache.getOrPut(brandId) {
             try {

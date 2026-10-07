@@ -38,6 +38,7 @@ fun NavGraphBuilder.phonesRoutes(
     composable<Screen.Home> {
         HomeScreen(
             cameraViewModel = cameraViewModel,
+            onWriteReview = { navController.navigate(Screen.WriteReview()) },
         )
     }
     composable<Screen.Favorites> {

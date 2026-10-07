@@ -67,6 +67,9 @@ fun MainApp(
             currentDestination?.hasRoute<Screen.Register>() == true ||
             currentDestination?.hasRoute<Screen.UserSettings>() == true
 
+    // The review editor has its own top bar and needs the room the bottom bar takes
+    val isReviewEditor = currentDestination?.hasRoute<Screen.WriteReview>() == true
+
     fun navigateToCatalogue() {
         navController.navigate(Screen.Catalogue) {
             popUpTo(navController.graph.findStartDestination().id) {
@@ -87,10 +90,12 @@ fun MainApp(
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController)
+            if (!isReviewEditor) {
+                BottomNavigationBar(navController)
+            }
         },
         topBar = {
-            if (!isAuthOrSettingsScreen) {
+            if (!isAuthOrSettingsScreen && !isReviewEditor) {
                 val displayResults = if (catalogueState is CatalogueUiState.Success) {
                     (catalogueState as CatalogueUiState.Success).phones
                 } else {
