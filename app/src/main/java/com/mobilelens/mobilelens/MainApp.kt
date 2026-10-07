@@ -43,6 +43,8 @@ import com.mobilelens.mobilelens.phones.ui.screens.PhoneScreen
 import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
 import com.mobilelens.mobilelens.phones.viewmodel.CatalogueUiState
 import com.mobilelens.mobilelens.phones.viewmodel.CatalogueViewModel
+import com.mobilelens.mobilelens.phones.viewmodel.PhoneDetailsUiState
+import com.mobilelens.mobilelens.phones.viewmodel.PhoneDetailsViewModel
 import com.mobilelens.mobilelens.reviews.ui.screens.ReviewScreen
 import com.mobilelens.mobilelens.reviews.ui.screens.ReviewThreadScreen
 import com.mobilelens.mobilelens.reviews.viewmodel.ReviewDetailsUiState
@@ -303,29 +305,42 @@ fun MainApp(
             }
             composable<Screen.PhoneDetails> { backStackEntry ->
                 val route = backStackEntry.toRoute<Screen.PhoneDetails>()
-                val selectedPhone by catalogueViewModel.selectedPhone.collectAsState()
+                val phoneDetailsViewModel: PhoneDetailsViewModel = viewModel()
+                val phoneState by phoneDetailsViewModel.uiState.collectAsState()
 
                 LaunchedEffect(route.phoneId) {
-                    catalogueViewModel.loadPhoneDetails(route.phoneId)
+                    phoneDetailsViewModel.loadPhone(route.phoneId)
                 }
 
-                if (selectedPhone != null && selectedPhone?.id == route.phoneId) {
-                    val phone = selectedPhone!!
-                    val isFavorited = favoritePhoneIds.contains(phone.id)
-                    PhoneScreen(
-                        phone = phone,
-                        isFavorited = isFavorited,
-                        onFavoriteClick = {
-                            favoritePhoneIds = if (isFavorited) {
-                                favoritePhoneIds - phone.id
-                            } else {
-                                favoritePhoneIds + phone.id
-                            }
-                        },
-                        onNavigateToReviews = {
-                            navController.navigate(Screen.ReviewThread(phoneId = phone.id))
+                when (val state = phoneState) {
+                    is PhoneDetailsUiState.Loading -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
                         }
-                    )
+                    }
+                    is PhoneDetailsUiState.Success -> {
+                        val phone = state.phone
+                        val isFavorited = favoritePhoneIds.contains(phone.id)
+                        PhoneScreen(
+                            phone = phone,
+                            isFavorited = isFavorited,
+                            onFavoriteClick = {
+                                favoritePhoneIds = if (isFavorited) {
+                                    favoritePhoneIds - phone.id
+                                } else {
+                                    favoritePhoneIds + phone.id
+                                }
+                            },
+                            onNavigateToReviews = {
+                                navController.navigate(Screen.ReviewThread(phoneId = phone.id))
+                            }
+                        )
+                    }
+                    is PhoneDetailsUiState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(text = "Error: ${state.message}", modifier = Modifier.padding(16.dp))
+                        }
+                    }
                 }
             }
         }

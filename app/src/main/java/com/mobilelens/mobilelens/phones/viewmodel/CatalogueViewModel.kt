@@ -24,9 +24,6 @@ class CatalogueViewModel : ViewModel() {
     private val _favoritePhones = MutableStateFlow<List<Phone>>(emptyList())
     val favoritePhones: StateFlow<List<Phone>> = _favoritePhones.asStateFlow()
 
-    private val _selectedPhone = MutableStateFlow<Phone?>(null)
-    val selectedPhone: StateFlow<Phone?> = _selectedPhone.asStateFlow()
-
     fun searchPhones(query: String) {
         viewModelScope.launch {
             _catalogueState.value = CatalogueUiState.Loading
@@ -37,16 +34,6 @@ class CatalogueViewModel : ViewModel() {
                 _catalogueState.value = CatalogueUiState.Success(repository.phones.value)
             } catch (e: Exception) {
                 _catalogueState.value = CatalogueUiState.Error(e.message ?: "Failed to load phones")
-            }
-        }
-    }
-
-    fun loadPhoneDetails(id: String) {
-        viewModelScope.launch {
-            try {
-                _selectedPhone.value = repository.getPhoneById(id)
-            } catch (e: Exception) {
-                _selectedPhone.value = null
             }
         }
     }
