@@ -8,10 +8,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.Lens
+import com.mobilelens.mobilelens.phones.ui.activeResolutionText
+import com.mobilelens.mobilelens.phones.ui.aperture35mmText
+import com.mobilelens.mobilelens.phones.ui.apertureText
+import com.mobilelens.mobilelens.phones.ui.cropFactorText
+import com.mobilelens.mobilelens.phones.ui.focalLength35mmText
+import com.mobilelens.mobilelens.phones.ui.focalLengthText
+import com.mobilelens.mobilelens.phones.ui.labelRes
+import com.mobilelens.mobilelens.phones.ui.pixelPitchText
+import com.mobilelens.mobilelens.phones.ui.resolutionText
+import com.mobilelens.mobilelens.phones.ui.sensorTypeText
 
 
 @Composable
@@ -31,13 +43,13 @@ fun LensSpecs(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SpecCard(
-                title = "Focal length",
-                value = lens.focalLengthLabel,
+                title = stringResource(R.string.spec_focal_length),
+                value = lens.focalLengthText(),
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
-                title = "Focal length (35mm)",
-                value = lens.focalLength35mmLabel,
+                title = stringResource(R.string.spec_focal_length_35mm),
+                value = lens.focalLength35mmText(),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -48,13 +60,13 @@ fun LensSpecs(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SpecCard(
-                title = "Aperture",
-                value = lens.apertureLabel,
+                title = stringResource(R.string.spec_aperture),
+                value = lens.apertureText(),
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
-                title = "Aperture (35mm)",
-                value = lens.aperture35mmLabel,
+                title = stringResource(R.string.spec_aperture_35mm),
+                value = lens.aperture35mmText(),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -65,51 +77,51 @@ fun LensSpecs(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SpecCard(
-                title = "Resolution",
-                value = lens.resolutionLabel,
+                title = stringResource(R.string.spec_resolution),
+                value = lens.resolutionText(),
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
-                title = "Active resolution",
-                value = lens.activeResolutionLabel,
+                title = stringResource(R.string.spec_active_resolution),
+                value = lens.activeResolutionText(),
                 modifier = Modifier.weight(1f)
             )
         }
 
-        // Crop factor + sensor type row
+        // Pixel pitch + sensor type row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SpecCard(
-                title = "Pixel pitch",
-                value = lens.pixelPitchLabel,
+                title = stringResource(R.string.spec_pixel_pitch),
+                value = lens.pixelPitchText(),
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
-                title = "Sensor type",
-                value = lens.sensorSizeLabel,
+                title = stringResource(R.string.spec_sensor_type),
+                value = lens.sensorTypeText(),
                 modifier = Modifier.weight(1f)
             )
         }
 
-        // AF zones + OIS
+        // OIS + crop factor + AF zones
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SpecCard(
-                title = "OIS",
-                value = lens.stabilization.displayName,
+                title = stringResource(R.string.spec_stabilization),
+                value = stringResource(lens.stabilization.labelRes()),
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
-                title = "Crop factor",
-                value = lens.cropFactorLabel,
+                title = stringResource(R.string.spec_crop_factor),
+                value = lens.cropFactorText(),
                 modifier = Modifier.weight(1f)
             )
             SpecCard(
-                title = "AF Zones",
+                title = stringResource(R.string.spec_af_zones),
                 value = lens.afZones.toString(),
                 modifier = Modifier.weight(1f)
             )

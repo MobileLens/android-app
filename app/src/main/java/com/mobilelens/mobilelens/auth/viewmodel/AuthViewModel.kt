@@ -2,6 +2,7 @@ package com.mobilelens.mobilelens.auth.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.auth.data.AuthRepository
 import com.mobilelens.mobilelens.auth.model.User
 import com.mobilelens.mobilelens.reviews.model.Review
@@ -19,8 +20,9 @@ class AuthViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    private val _profileError = MutableStateFlow<String?>(null)
-    val profileError: StateFlow<String?> = _profileError.asStateFlow()
+    private val _profileError = MutableStateFlow<Int?>(null)
+    // String resource of the last failed settings action, shown on the settings screen
+    val profileError: StateFlow<Int?> = _profileError.asStateFlow()
 
     private val _userReviews = MutableStateFlow<List<Review>>(emptyList())
     val userReviews: StateFlow<List<Review>> = _userReviews.asStateFlow()
@@ -86,10 +88,10 @@ class AuthViewModel(
                     _currentUser.value = reloaded
                 }
                 if (!reloaded?.email.equals(newEmail, ignoreCase = true)) {
-                    _profileError.value = "Couldn't change e-mail."
+                    _profileError.value = R.string.settings_error_change_email
                 }
             } catch (_: Exception) {
-                _profileError.value = "Couldn't change e-mail."
+                _profileError.value = R.string.settings_error_change_email
             }
         }
     }

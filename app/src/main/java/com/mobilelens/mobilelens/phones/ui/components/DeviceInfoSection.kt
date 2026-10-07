@@ -18,9 +18,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.localizedDate
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 
@@ -65,7 +68,7 @@ fun DeviceInfoSection(
                 if (deviceInfo.releaseDate != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Released: ${deviceInfo.releaseDate}",
+                        text = stringResource(R.string.phone_released, localizedDate(deviceInfo.releaseDate)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -76,7 +79,9 @@ fun DeviceInfoSection(
                 IconButton(onClick = onFavoriteClick) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                        contentDescription = stringResource(
+                            if (isFavorite) R.string.phone_remove_favorite else R.string.phone_add_favorite
+                        ),
                         tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
                 }

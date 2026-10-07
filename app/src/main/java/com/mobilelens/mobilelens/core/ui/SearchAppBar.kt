@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExpandedDockedSearchBar
 import androidx.compose.material3.ExpandedFullScreenSearchBar
@@ -38,6 +39,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,7 +64,8 @@ fun SearchAppBar(
     showBackButton: Boolean = false,
     onBackClick: () -> Unit = {},
     onAccountClick: () -> Unit = {},
-    accountInitial: String = "U",
+    // Initial of the logged-in user; a generic person icon is shown when null
+    accountInitial: String? = null,
 ) {
     val searchBarState = rememberSearchBarState()
     val coroutineScope = rememberCoroutineScope()
@@ -172,8 +176,10 @@ fun SearchAppBar(
             }
 
             if (isCollapsed) {
+                val accountDescription = stringResource(R.string.account)
                 IconButton(
-                    onClick = onAccountClick
+                    onClick = onAccountClick,
+                    modifier = Modifier.semantics { contentDescription = accountDescription }
                 ) {
                     Box(
                         modifier = Modifier
@@ -182,12 +188,21 @@ fun SearchAppBar(
                             .background(MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = accountInitial,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                        if (accountInitial != null) {
+                            Text(
+                                text = accountInitial,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }

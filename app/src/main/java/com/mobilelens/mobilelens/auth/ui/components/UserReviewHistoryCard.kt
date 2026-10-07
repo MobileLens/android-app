@@ -23,8 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.reviews.model.Review
 
 @Composable
@@ -66,7 +68,7 @@ fun UserReviewHistoryCard(
                 }
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowRight,
-                    contentDescription = "View review",
+                    contentDescription = stringResource(R.string.review_open),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -81,7 +83,7 @@ fun UserReviewHistoryCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.Comment,
-                        contentDescription = "Comments",
+                        contentDescription = stringResource(R.string.review_comments),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(end = 6.dp)
                     )
@@ -95,7 +97,7 @@ fun UserReviewHistoryCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Likes",
+                        contentDescription = stringResource(R.string.review_likes),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(end = 6.dp)
                     )
@@ -108,21 +110,21 @@ fun UserReviewHistoryCard(
 
                 Icon(
                     imageVector = Icons.Outlined.Share,
-                    contentDescription = "Share",
+                    contentDescription = stringResource(R.string.review_share),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.clickable { }
                 )
 
                 Icon(
                     imageVector = Icons.Outlined.Edit,
-                    contentDescription = "Edit",
+                    contentDescription = stringResource(R.string.review_edit),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.clickable { }
                 )
 
                 Icon(
                     imageVector = Icons.Outlined.Delete,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.common_delete),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.clickable { onDeleteReview(review.id) }
                 )

@@ -1,9 +1,147 @@
 <resources>
-    <string name="app_name">MobileLens</string>
-    <string name="search_phones">Search phones</string>
+    <string name="app_name" translatable="false">MobileLens</string>
+
+    <!-- Common -->
+    <string name="common_save">Save</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_back">Back</string>
+    <string name="common_open_menu">Open menu</string>
+    <string name="common_close_menu">Close menu</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="nav_catalogue">Catalogue</string>
+
+    <!-- Search bar -->
     <string name="search_phones_hint">Search</string>
     <string name="search_back">Close search</string>
     <string name="clear_search">Clear search</string>
     <string name="no_phones_found">No phones found</string>
-    <string name="phone_camera_summary">%1$d cameras • %2$s mm eq</string>
+    <string name="account">Account</string>
+
+    <!-- Home (this device) -->
+    <string name="home_checking_cameras">Checking this device\'s cameras</string>
+    <string name="home_no_cameras">No cameras found</string>
+    <string name="home_camera_details_unavailable">Camera details were not available from this device.</string>
+
+    <!-- Floating action menu -->
+    <string name="action_write_review">Write a review</string>
+    <string name="action_reviews">Reviews</string>
+    <string name="action_upload">Upload</string>
+    <string name="action_compare">Compare</string>
+
+    <!-- Phones -->
+    <string name="favorites_empty">No favorites yet</string>
+    <!-- %1$s: localized release date -->
+    <string name="phone_released">Released: %1$s</string>
+    <string name="phone_add_favorite">Add to favorites</string>
+    <string name="phone_remove_favorite">Remove from favorites</string>
+    <string name="error_load_phones">Couldn\'t load phones.</string>
+    <string name="error_load_phone">Couldn\'t load this phone.</string>
+
+    <!-- Lens facing -->
+    <string name="facing_front">Front</string>
+    <string name="facing_back">Back</string>
+    <string name="facing_other">Other</string>
+
+    <!-- Lens types -->
+    <string name="lens_type_wide">Wide</string>
+    <string name="lens_type_ultrawide">Ultra-wide</string>
+    <string name="lens_type_telephoto">Telephoto</string>
+    <string name="lens_type_macro">Macro</string>
+    <string name="lens_type_other">Other</string>
+
+    <!-- Image stabilization -->
+    <string name="stabilization_none">None</string>
+    <string name="stabilization_ois">OIS</string>
+    <string name="stabilization_sensor_shift">Sensor-shift</string>
+
+    <!-- Lens tab, e.g. "Back wide". %1$s: facing, %2$s: lens type (lowercased in code) -->
+    <string name="lens_tab_label">%1$s %2$s</string>
+
+    <!-- Spec card titles -->
+    <string name="spec_focal_length">Focal length</string>
+    <string name="spec_focal_length_35mm">Focal length (35mm)</string>
+    <string name="spec_aperture">Aperture</string>
+    <string name="spec_aperture_35mm">Aperture (35mm)</string>
+    <string name="spec_resolution">Resolution</string>
+    <string name="spec_active_resolution">Active resolution</string>
+    <string name="spec_pixel_pitch">Pixel pitch</string>
+    <string name="spec_sensor_type">Sensor type</string>
+    <string name="spec_stabilization">OIS</string>
+    <string name="spec_crop_factor">Crop factor</string>
+    <string name="spec_af_zones">AF Zones</string>
+    <string name="spec_video_resolutions">Video resolutions</string>
+
+    <!-- Spec values. Numbers are formatted with the app locale's decimal separator -->
+    <string name="value_focal_length">%1$.2f mm</string>
+    <string name="value_focal_length_35mm">%1$.0f mm</string>
+    <string name="value_aperture">f/%1$.1f</string>
+    <string name="value_aperture_35mm">f/%1$.2f</string>
+    <string name="value_megapixels">%1$.0f MP</string>
+    <!-- Optical format, e.g. 1/1.28" -->
+    <string name="value_sensor_type">1/%1$.2f\"</string>
+    <string name="value_pixel_pitch">%1$.2f μm</string>
+    <string name="value_crop_factor">%1$.2fx</string>
+
+    <!-- Auth -->
+    <string name="auth_log_in">Log in</string>
+    <string name="auth_register">Register</string>
+    <string name="auth_username">Username</string>
+    <string name="auth_email">E-mail</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_repeat_password">Repeat password</string>
+    <string name="auth_forgot_password">Forgot password?</string>
+    <string name="auth_register_account">Register an account</string>
+    <string name="auth_have_account">Already have an account? Log in</string>
+
+    <!-- User roles -->
+    <string name="role_user">User</string>
+    <string name="role_reviewer">Reviewer</string>
+    <string name="role_moderator">Moderator</string>
+    <string name="role_admin">Admin</string>
+
+    <!-- User settings. %1$s: username -->
+    <string name="settings_title">%1$s\'s settings</string>
+    <string name="settings_personal_info">Personal info</string>
+    <string name="settings_role">Role</string>
+    <string name="settings_change">Change</string>
+    <string name="settings_danger_zone">Danger zone</string>
+    <string name="settings_delete_account">Delete account</string>
+    <string name="settings_log_out">Log out</string>
+    <string name="settings_review_history">Review history</string>
+    <string name="settings_no_review_history">No review history yet.</string>
+    <string name="settings_change_username_title">Change Username</string>
+    <string name="settings_new_username">New Username</string>
+    <string name="settings_change_email_title">Change E-mail</string>
+    <string name="settings_new_email">New E-mail</string>
+    <string name="settings_change_password_title">Change Password</string>
+    <string name="settings_new_password">New Password</string>
+    <string name="settings_delete_account_title">Delete Account</string>
+    <string name="settings_delete_account_message">Are you sure you want to delete your account? This action cannot be undone.</string>
+    <string name="settings_error_change_email">Couldn\'t change e-mail.</string>
+
+    <!-- Reviews -->
+    <!-- %1$s: author name -->
+    <string name="review_by_author">By %1$s</string>
+    <string name="review_no_reviews">No reviews yet.</string>
+    <string name="review_open">Go to review</string>
+    <string name="review_comments">Comments</string>
+    <string name="review_likes">Likes</string>
+    <string name="review_share">Share</string>
+    <string name="review_edit">Edit</string>
+    <string name="error_load_reviews">Couldn\'t load reviews.</string>
+    <string name="error_load_review">Couldn\'t load this review.</string>
+
+    <!-- Review editor. Glyphs are the letters shown on the formatting buttons (e.g. "F" for bold in German) -->
+    <string name="editor_bold_glyph">B</string>
+    <string name="editor_italic_glyph">I</string>
+    <string name="editor_underline_glyph">U</string>
+    <string name="editor_bold">Bold</string>
+    <string name="editor_italic">Italic</string>
+    <string name="editor_underline">Underline</string>
+    <string name="editor_insert_image">Insert image</string>
+    <string name="editor_undo">Undo</string>
 </resources>

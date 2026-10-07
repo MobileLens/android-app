@@ -3,6 +3,7 @@ package com.mobilelens.mobilelens.auth.navigation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -70,7 +71,7 @@ fun NavGraphBuilder.authRoutes(
                     authViewModel.logout()
                 },
                 onDeleteReview = { reviewId -> authViewModel.deleteUserReview(reviewId) },
-                profileError = profileError,
+                profileError = profileError?.let { stringResource(it) },
                 onClearProfileError = { authViewModel.clearProfileError() }
             )
         } else {

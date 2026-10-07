@@ -16,8 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.auth.ui.components.AuthHeaderTitle
 import com.mobilelens.mobilelens.auth.ui.components.AuthPillButton
 import com.mobilelens.mobilelens.auth.ui.components.AuthTextField
@@ -39,14 +41,14 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AuthHeaderTitle(text = "Register")
+        AuthHeaderTitle(text = stringResource(R.string.auth_register))
 
         Spacer(modifier = Modifier.height(32.dp))
 
         AuthTextField(
             value = username,
             onValueChange = { username = it },
-            label = "Username"
+            label = stringResource(R.string.auth_username)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -54,7 +56,7 @@ fun RegisterScreen(
         AuthTextField(
             value = email,
             onValueChange = { email = it },
-            label = "E-mail"
+            label = stringResource(R.string.auth_email)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -62,7 +64,7 @@ fun RegisterScreen(
         AuthTextField(
             value = password,
             onValueChange = { password = it },
-            label = "Password",
+            label = stringResource(R.string.auth_password),
             isPassword = true
         )
 
@@ -71,21 +73,21 @@ fun RegisterScreen(
         AuthTextField(
             value = repeatPassword,
             onValueChange = { repeatPassword = it },
-            label = "Repeat password",
+            label = stringResource(R.string.auth_repeat_password),
             isPassword = true
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         AuthPillButton(
-            text = "Register",
+            text = stringResource(R.string.auth_register),
             onClick = { onRegister(username, email, password) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Already have an account? Log in",
+            text = stringResource(R.string.auth_have_account),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.clickable { onNavigateToLogin() }

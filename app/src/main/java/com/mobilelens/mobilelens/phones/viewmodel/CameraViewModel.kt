@@ -1,7 +1,9 @@
 package com.mobilelens.mobilelens.phones.viewmodel
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.data.BuildInfoRepository
 import com.mobilelens.mobilelens.phones.data.CameraHardwareRepository
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
@@ -19,7 +21,7 @@ sealed interface CameraUiState {
         val lenses: List<Lens>,
         val deviceInfo: DeviceInfo
     ) : CameraUiState
-    data class Fallback(val message: String) : CameraUiState
+    data class Fallback(@StringRes val messageRes: Int) : CameraUiState
 }
 
 class CameraViewModel(
@@ -43,7 +45,7 @@ class CameraViewModel(
             if (cameraList.isNotEmpty()) {
                 _uiState.value = CameraUiState.Success(cameraList, deviceInfo)
             } else {
-                _uiState.value = CameraUiState.Fallback("No cameras :(")
+                _uiState.value = CameraUiState.Fallback(R.string.home_no_cameras)
             }
         }
     }

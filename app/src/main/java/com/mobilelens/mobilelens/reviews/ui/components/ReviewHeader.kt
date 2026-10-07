@@ -8,9 +8,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.localizedDate
 
 @Composable
 fun ReviewHeader(
@@ -28,13 +31,13 @@ fun ReviewHeader(
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "By $author",
+            text = stringResource(R.string.review_by_author, author),
             style = MaterialTheme.typography.titleMedium,
             fontStyle = FontStyle.Italic
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
-            text = createdAt,
+            text = localizedDate(createdAt),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

@@ -1,10 +1,12 @@
 package com.mobilelens.mobilelens.core.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.mobilelens.mobilelens.R
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -22,13 +24,13 @@ sealed interface Screen {
 
 
 data class TopLevelRoute<T : Any>(
-    val name: String,
+    @StringRes val labelRes: Int,
     val route: T,
     val icon: ImageVector
 )
 
 val TOP_LEVEL_ROUTES = listOf(
-    TopLevelRoute("Home", Screen.Home, Icons.Default.Home),
-    TopLevelRoute("Favorites", Screen.Favorites, Icons.Default.Favorite),
-    TopLevelRoute("Catalogue", Screen.Catalogue, Icons.AutoMirrored.Filled.List)
+    TopLevelRoute(R.string.nav_home, Screen.Home, Icons.Default.Home),
+    TopLevelRoute(R.string.nav_favorites, Screen.Favorites, Icons.Default.Favorite),
+    TopLevelRoute(R.string.nav_catalogue, Screen.Catalogue, Icons.AutoMirrored.Filled.List)
 )

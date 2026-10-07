@@ -1,25 +1,25 @@
 package com.mobilelens.mobilelens.phones.model
 
-import java.util.Locale
+// User-facing labels and formatted values live in phones/ui/LensLabels.kt (string resources)
 
-enum class Facing(val displayName: String) {
-    FRONT("Front"),
-    BACK("Back"),
-    OTHER("Other"),
+enum class Facing {
+    FRONT,
+    BACK,
+    OTHER,
 }
 
-enum class Stabilization(val displayName: String) {
-    NONE("None"),
-    OIS("OIS"),
-    SENSORSHIFT("Sensor-shift"),
+enum class Stabilization {
+    NONE,
+    OIS,
+    SENSORSHIFT,
 }
 
-enum class LensType(val displayName: String) {
-    WIDE("Wide"),
-    ULTRAWIDE("Ultra-wide"),
-    TELEPHOTO("Telephoto"),
-    MACRO("Macro"),
-    OTHER("Other"),
+enum class LensType {
+    WIDE,
+    ULTRAWIDE,
+    TELEPHOTO,
+    MACRO,
+    OTHER,
 }
 
 /**
@@ -43,39 +43,4 @@ data class Lens(
     val mainFocalLength35mm = focalLength35mm.firstOrNull() ?: 0f
     val aperture35mm = aperture.map { it * cropFactor }
     val mainAperture = aperture.firstOrNull() ?: 0f
-
-    val focalLength35mmLabel: String
-        get() = focalLength35mm.format("%.0f", " mm")
-
-    val focalLengthLabel: String
-        get() = focalLength.format("%.2f", " mm")
-
-    val apertureLabel: String
-        get() = aperture.format("f/%.1f", separator = "/")
-
-    val aperture35mmLabel: String
-        get() = aperture35mm.format("f/%.2f", separator = "/")
-
-    val resolutionLabel: String
-        get() = String.format(Locale.US, "%.0f MP", resolution)
-
-    val activeResolutionLabel: String
-        get() = String.format(Locale.US, "%.0f MP", activeResolution)
-
-    val sensorSizeLabel: String
-        get() = String.format(Locale.US, "1/%.2f\"", sensorTypeDenominator)
-
-    val pixelPitchLabel: String
-        get() = String.format(Locale.US, "%.2f μm", pixelPitchUm)
-
-    val cropFactorLabel: String
-        get() = String.format(Locale.US, "%.2fx", cropFactor)
-
-    private fun List<Float>.format(
-        pattern: String,
-        unit: String = "",
-        separator: String = ", "
-    ): String = joinToString(separator) {
-        String.format(Locale.US, pattern, it)
-    } + unit
 }

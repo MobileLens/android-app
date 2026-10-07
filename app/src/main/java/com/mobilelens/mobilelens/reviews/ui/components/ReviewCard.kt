@@ -22,8 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.R
 
 @Composable
 fun ReviewCard(
@@ -69,7 +71,7 @@ fun ReviewCard(
 
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowRight,
-                    contentDescription = "Go to review",
+                    contentDescription = stringResource(R.string.review_open),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -92,7 +94,7 @@ fun ReviewCard(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.Comment,
-                        contentDescription = "Comments",
+                        contentDescription = stringResource(R.string.review_comments),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.padding(end = 8.dp)
                     )
@@ -113,7 +115,7 @@ fun ReviewCard(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Likes",
+                        contentDescription = stringResource(R.string.review_likes),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.padding(end = 8.dp)
                     )
@@ -135,7 +137,7 @@ fun ReviewCard(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Share,
-                        contentDescription = "Share",
+                        contentDescription = stringResource(R.string.review_share),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.padding(end = 8.dp)
                     )

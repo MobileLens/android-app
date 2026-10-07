@@ -1,7 +1,10 @@
 package com.mobilelens.mobilelens.phones.viewmodel
 
+import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogueRepository
 import com.mobilelens.mobilelens.phones.model.Phone
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,10 +12,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+private const val TAG = "PhoneDetailsViewModel"
+
 sealed interface PhoneDetailsUiState {
     object Loading : PhoneDetailsUiState
     data class Success(val phone: Phone) : PhoneDetailsUiState
-    data class Error(val message: String) : PhoneDetailsUiState
+    data class Error(@StringRes val messageRes: Int) : PhoneDetailsUiState
 }
 
 // Scoped to a single PhoneDetails back stack entry, so each opened phone keeps its own state
@@ -32,7 +37,8 @@ class PhoneDetailsViewModel : ViewModel() {
             try {
                 _uiState.value = PhoneDetailsUiState.Success(repository.getPhoneById(id))
             } catch (e: Exception) {
-                _uiState.value = PhoneDetailsUiState.Error(e.message ?: "Failed to load phone.")
+                Log.w(TAG, "Failed to load phone $id", e)
+                _uiState.value = PhoneDetailsUiState.Error(R.string.error_load_phone)
             }
         }
     }

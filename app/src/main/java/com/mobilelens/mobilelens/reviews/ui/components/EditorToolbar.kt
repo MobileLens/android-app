@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Image
-import androidx.compose.material.icons.rounded.Undo
+import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -20,11 +20,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.R
 
 @Composable
 fun EditorToolbar(
@@ -58,8 +62,11 @@ fun EditorToolbar(
                 selected = bold,
                 onClick = onBoldClick,
             ) {
+                val boldDescription = stringResource(R.string.editor_bold)
                 Text(
-                    text = "B",
+                    text = stringResource(R.string.editor_bold_glyph),
+                    // Read the action name instead of the single letter
+                    modifier = Modifier.semantics { contentDescription = boldDescription },
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                     ),
@@ -70,8 +77,11 @@ fun EditorToolbar(
                 selected = italic,
                 onClick = onItalicClick,
             ) {
+                val italicDescription = stringResource(R.string.editor_italic)
                 Text(
-                    text = "I",
+                    text = stringResource(R.string.editor_italic_glyph),
+                    // Read the action name instead of the single letter
+                    modifier = Modifier.semantics { contentDescription = italicDescription },
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontStyle = FontStyle.Italic,
                         fontWeight = FontWeight.SemiBold,
@@ -83,8 +93,11 @@ fun EditorToolbar(
                 selected = underline,
                 onClick = onUnderlineClick,
             ) {
+                val underlineDescription = stringResource(R.string.editor_underline)
                 Text(
-                    text = "U",
+                    text = stringResource(R.string.editor_underline_glyph),
+                    // Read the action name instead of the single letter
+                    modifier = Modifier.semantics { contentDescription = underlineDescription },
                     style = MaterialTheme.typography.titleLarge.copy(
                         textDecoration = TextDecoration.Underline,
                         fontWeight = FontWeight.Medium,
@@ -95,14 +108,14 @@ fun EditorToolbar(
             EditorToolbarButton(onClick = onImageClick) {
                 Icon(
                     imageVector = Icons.Rounded.Image,
-                    contentDescription = "Insert image",
+                    contentDescription = stringResource(R.string.editor_insert_image),
                 )
             }
 
             EditorToolbarButton(onClick = onUndoClick) {
                 Icon(
-                    imageVector = Icons.Rounded.Undo,
-                    contentDescription = "Undo",
+                    imageVector = Icons.AutoMirrored.Rounded.Undo,
+                    contentDescription = stringResource(R.string.editor_undo),
                 )
             }
         }

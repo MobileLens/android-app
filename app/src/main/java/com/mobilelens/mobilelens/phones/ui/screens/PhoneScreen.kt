@@ -28,10 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.ui.components.DeviceLensDetail
@@ -63,10 +65,10 @@ fun PhoneScreen(
         ) {
             // Menu items
             val items = listOf(
-                Triple(Icons.Filled.Star, "Reviews", 0),
-                Triple(Icons.AutoMirrored.Filled.CompareArrows, "Compare", 1),
+                Triple(Icons.Filled.Star, R.string.action_reviews, 0),
+                Triple(Icons.AutoMirrored.Filled.CompareArrows, R.string.action_compare, 1),
             )
-            items.forEach { (icon, label, index) ->
+            items.forEach { (icon, labelRes, index) ->
                 AnimatedVisibility(
                     visible = fabExpanded,
                     enter = fadeIn(tween(delayMillis = index * 40)) +
@@ -82,7 +84,7 @@ fun PhoneScreen(
                             }
                         },
                         icon = { Icon(icon, contentDescription = null) },
-                        text = { Text(label) },
+                        text = { Text(stringResource(labelRes)) },
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
@@ -90,10 +92,13 @@ fun PhoneScreen(
             }
 
             // Main toggle FAB
+            val menuDescription = stringResource(
+                if (fabExpanded) R.string.common_close_menu else R.string.common_open_menu
+            )
             FloatingActionButton(
                 onClick = { fabExpanded = !fabExpanded },
                 modifier = Modifier.semantics {
-                    contentDescription = if (fabExpanded) "Close menu" else "Open menu"
+                    contentDescription = menuDescription
                 },
             ) {
                 Icon(

@@ -30,7 +30,7 @@ fun NavGraphBuilder.reviewsRoutes(navController: NavController) {
 
         when (val state = threadState) {
             is ReviewThreadUiState.Loading -> LoadingContent()
-            is ReviewThreadUiState.Error -> ErrorContent(message = state.message)
+            is ReviewThreadUiState.Error -> ErrorContent(messageRes = state.messageRes)
             is ReviewThreadUiState.Success -> {
                 ReviewThreadScreen(
                     thread = state.thread,
@@ -52,7 +52,7 @@ fun NavGraphBuilder.reviewsRoutes(navController: NavController) {
 
         when (val state = selectedReviewState) {
             is ReviewDetailsUiState.Loading -> LoadingContent()
-            is ReviewDetailsUiState.Error -> ErrorContent(message = state.message)
+            is ReviewDetailsUiState.Error -> ErrorContent(messageRes = state.messageRes)
             is ReviewDetailsUiState.Success -> ReviewScreen(review = state.review)
         }
     }

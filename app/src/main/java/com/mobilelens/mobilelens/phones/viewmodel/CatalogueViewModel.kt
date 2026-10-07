@@ -1,7 +1,10 @@
 package com.mobilelens.mobilelens.phones.viewmodel
 
+import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogueRepository
 import com.mobilelens.mobilelens.phones.model.Phone
 import kotlinx.coroutines.CancellationException
@@ -12,13 +15,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+private const val TAG = "CatalogueViewModel"
 private const val SEARCH_DEBOUNCE_MS = 300L
 
 sealed interface CatalogueUiState {
     object Loading : CatalogueUiState
     // isRefreshing: a newer search is loading while these (older) results stay on screen
     data class Success(val phones: List<Phone>, val isRefreshing: Boolean = false) : CatalogueUiState
-    data class Error(val message: String) : CatalogueUiState
+    data class Error(@StringRes val messageRes: Int) : CatalogueUiState
 }
 
 class CatalogueViewModel : ViewModel() {
@@ -54,7 +58,8 @@ class CatalogueViewModel : ViewModel() {
                 // Superseded by a newer search, don't report it as an error
                 throw e
             } catch (e: Exception) {
-                _catalogueState.value = CatalogueUiState.Error(e.message ?: "Failed to load phones")
+                Log.w(TAG, "Failed to load phones", e)
+                _catalogueState.value = CatalogueUiState.Error(R.string.error_load_phones)
             }
         }
     }

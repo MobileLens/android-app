@@ -55,7 +55,7 @@ fun NavGraphBuilder.phonesRoutes(
 
         when (val state = catalogueState) {
             is CatalogueUiState.Loading -> LoadingContent()
-            is CatalogueUiState.Error -> ErrorContent(message = state.message)
+            is CatalogueUiState.Error -> ErrorContent(messageRes = state.messageRes)
             is CatalogueUiState.Success -> {
                 CatalogueScreen(
                     phones = state.phones,
@@ -79,7 +79,7 @@ fun NavGraphBuilder.phonesRoutes(
 
         when (val state = phoneState) {
             is PhoneDetailsUiState.Loading -> LoadingContent()
-            is PhoneDetailsUiState.Error -> ErrorContent(message = state.message)
+            is PhoneDetailsUiState.Error -> ErrorContent(messageRes = state.messageRes)
             is PhoneDetailsUiState.Success -> {
                 val phone = state.phone
                 PhoneScreen(

@@ -31,10 +31,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.auth.model.User
 import com.mobilelens.mobilelens.auth.ui.components.AuthPillButton
 import com.mobilelens.mobilelens.auth.ui.components.AuthTextField
@@ -77,13 +79,13 @@ fun UserSettingsScreen(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.common_back),
                 tint = MaterialTheme.colorScheme.onBackground
             )
         }
 
         Text(
-            text = "${user.username}'s settings",
+            text = stringResource(R.string.settings_title, user.username),
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
@@ -92,22 +94,22 @@ fun UserSettingsScreen(
 
         // Section 1: Personal info
         Text(
-            text = "Personal info",
+            text = stringResource(R.string.settings_personal_info),
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        PersonalInfoRow(label = "Username", value = user.username)
-        PersonalInfoRow(label = "E-mail", value = user.email)
-        PersonalInfoRow(label = "Role", value = user.role)
+        PersonalInfoRow(label = stringResource(R.string.auth_username), value = user.username)
+        PersonalInfoRow(label = stringResource(R.string.auth_email), value = user.email)
+        PersonalInfoRow(label = stringResource(R.string.settings_role), value = roleLabel(user.role))
 
         Spacer(modifier = Modifier.height(28.dp))
 
         // Section 2: Change
         Text(
-            text = "Change",
+            text = stringResource(R.string.settings_change),
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
@@ -119,7 +121,7 @@ fun UserSettingsScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             AuthPillButton(
-                text = "Username",
+                text = stringResource(R.string.auth_username),
                 onClick = {
                     newUsernameInput = user.username
                     showChangeUsernameDialog = true
@@ -128,7 +130,7 @@ fun UserSettingsScreen(
             )
 
             AuthPillButton(
-                text = "E-mail",
+                text = stringResource(R.string.auth_email),
                 onClick = {
                     onClearProfileError()
                     newEmailInput = user.email
@@ -138,7 +140,7 @@ fun UserSettingsScreen(
             )
 
             AuthPillButton(
-                text = "Password",
+                text = stringResource(R.string.auth_password),
                 onClick = {
                     newPasswordInput = ""
                     showChangePasswordDialog = true
@@ -160,7 +162,7 @@ fun UserSettingsScreen(
 
         // Section 3: Danger zone
         Text(
-            text = "Danger zone",
+            text = stringResource(R.string.settings_danger_zone),
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
@@ -183,7 +185,7 @@ fun UserSettingsScreen(
                     tint = Color.White
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Delete account", color = Color.White)
+                Text(stringResource(R.string.settings_delete_account), color = Color.White)
             }
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -192,7 +194,7 @@ fun UserSettingsScreen(
                 onClick = onLogout,
                 modifier = Modifier.padding(top = 2.dp)
             ) {
-                Text("Log out", color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.settings_log_out), color = MaterialTheme.colorScheme.primary)
             }
         }
 
@@ -200,7 +202,7 @@ fun UserSettingsScreen(
 
         // Section 4: Review history
         Text(
-            text = "Review history",
+            text = stringResource(R.string.settings_review_history),
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
@@ -209,7 +211,7 @@ fun UserSettingsScreen(
 
         if (userReviews.isEmpty()) {
             Text(
-                text = "No review history yet.",
+                text = stringResource(R.string.settings_no_review_history),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -227,12 +229,12 @@ fun UserSettingsScreen(
     if (showChangeUsernameDialog) {
         AlertDialog(
             onDismissRequest = { showChangeUsernameDialog = false },
-            title = { Text("Change Username") },
+            title = { Text(stringResource(R.string.settings_change_username_title)) },
             text = {
                 AuthTextField(
                     value = newUsernameInput,
                     onValueChange = { newUsernameInput = it },
-                    label = "New Username"
+                    label = stringResource(R.string.settings_new_username)
                 )
             },
             confirmButton = {
@@ -244,12 +246,12 @@ fun UserSettingsScreen(
                         showChangeUsernameDialog = false
                     }
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.common_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showChangeUsernameDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             }
         )
@@ -258,12 +260,12 @@ fun UserSettingsScreen(
     if (showChangeEmailDialog) {
         AlertDialog(
             onDismissRequest = { showChangeEmailDialog = false },
-            title = { Text("Change E-mail") },
+            title = { Text(stringResource(R.string.settings_change_email_title)) },
             text = {
                 AuthTextField(
                     value = newEmailInput,
                     onValueChange = { newEmailInput = it },
-                    label = "New E-mail"
+                    label = stringResource(R.string.settings_new_email)
                 )
             },
             confirmButton = {
@@ -275,12 +277,12 @@ fun UserSettingsScreen(
                         showChangeEmailDialog = false
                     }
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.common_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showChangeEmailDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             }
         )
@@ -289,23 +291,23 @@ fun UserSettingsScreen(
     if (showChangePasswordDialog) {
         AlertDialog(
             onDismissRequest = { showChangePasswordDialog = false },
-            title = { Text("Change Password") },
+            title = { Text(stringResource(R.string.settings_change_password_title)) },
             text = {
                 AuthTextField(
                     value = newPasswordInput,
                     onValueChange = { newPasswordInput = it },
-                    label = "New Password",
+                    label = stringResource(R.string.settings_new_password),
                     isPassword = true
                 )
             },
             confirmButton = {
                 TextButton(onClick = { showChangePasswordDialog = false }) {
-                    Text("Save")
+                    Text(stringResource(R.string.common_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showChangePasswordDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             }
         )
@@ -314,8 +316,8 @@ fun UserSettingsScreen(
     if (showDeleteAccountDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteAccountDialog = false },
-            title = { Text("Delete Account") },
-            text = { Text("Are you sure you want to delete your account? This action cannot be undone.") },
+            title = { Text(stringResource(R.string.settings_delete_account_title)) },
+            text = { Text(stringResource(R.string.settings_delete_account_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -323,16 +325,26 @@ fun UserSettingsScreen(
                         onDeleteAccount()
                     }
                 ) {
-                    Text("Delete", color = DangerRedColor)
+                    Text(stringResource(R.string.common_delete), color = DangerRedColor)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteAccountDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             }
         )
     }
+}
+
+// Roles come from the backend as identifiers ("user", "reviewer", ...); unknown ones are shown as-is
+@Composable
+private fun roleLabel(role: String): String = when (role.lowercase()) {
+    "user" -> stringResource(R.string.role_user)
+    "reviewer" -> stringResource(R.string.role_reviewer)
+    "moderator" -> stringResource(R.string.role_moderator)
+    "admin" -> stringResource(R.string.role_admin)
+    else -> role
 }
 
 @Preview(showBackground = true)

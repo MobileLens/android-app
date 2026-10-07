@@ -7,6 +7,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -25,10 +26,12 @@ fun BottomNavigationBar(navController: NavHostController) {
     NavigationBar {
         TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
             val isSelected = currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true
+            val label = stringResource(topLevelRoute.labelRes)
 
             NavigationBarItem(
-                icon = { Icon(topLevelRoute.icon, contentDescription = topLevelRoute.name) },
-                label = { Text(topLevelRoute.name) },
+                // The label is already read by accessibility services, so the icon needs no description
+                icon = { Icon(topLevelRoute.icon, contentDescription = null) },
+                label = { Text(label) },
                 selected = isSelected,
                 onClick = {
                     val startDestinationId = navController.graph.findStartDestination().id

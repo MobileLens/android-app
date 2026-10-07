@@ -11,11 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.VideoResolution
 
@@ -33,7 +35,7 @@ fun VideoResolutionsCard(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-           text = "Video resolutions",
+           text = stringResource(R.string.spec_video_resolutions),
            color = MaterialTheme.colorScheme.onSecondaryContainer,
            fontSize = 16.sp,
            fontWeight = FontWeight.Normal

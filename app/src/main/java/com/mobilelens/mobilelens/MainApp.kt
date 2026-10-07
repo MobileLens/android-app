@@ -114,7 +114,7 @@ fun MainApp(
                     },
                     onClear = { selectedPhoneId = null },
                     onAccountClick = { handleAccountClick() },
-                    accountInitial = currentUser?.username?.take(1)?.uppercase() ?: "U"
+                    accountInitial = currentUser?.username?.take(1)?.uppercase()
                 )
             }
         }

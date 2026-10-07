@@ -17,8 +17,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.auth.ui.components.AuthHeaderTitle
 import com.mobilelens.mobilelens.auth.ui.components.AuthPillButton
 import com.mobilelens.mobilelens.auth.ui.components.AuthTextField
@@ -39,14 +41,14 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AuthHeaderTitle(text = "Log in")
+        AuthHeaderTitle(text = stringResource(R.string.auth_log_in))
 
         Spacer(modifier = Modifier.height(32.dp))
 
         AuthTextField(
             value = email,
             onValueChange = { email = it },
-            label = "E-mail"
+            label = stringResource(R.string.auth_email)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -54,7 +56,7 @@ fun LoginScreen(
         AuthTextField(
             value = password,
             onValueChange = { password = it },
-            label = "Password",
+            label = stringResource(R.string.auth_password),
             isPassword = true
         )
 
@@ -65,7 +67,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = "Forgot password?",
+                text = stringResource(R.string.auth_forgot_password),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.clickable { onForgotPasswordClick() }
@@ -74,7 +76,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Register an account",
+                text = stringResource(R.string.auth_register_account),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.clickable { onNavigateToRegister() }
@@ -84,7 +86,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         AuthPillButton(
-            text = "Log in",
+            text = stringResource(R.string.auth_log_in),
             onClick = { onLogin(email, password) }
         )
     }

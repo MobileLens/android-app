@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 import com.mobilelens.mobilelens.phones.model.Lens
+import com.mobilelens.mobilelens.phones.ui.tabLabel
 
 @Composable
 fun DeviceLensDetail(
@@ -45,7 +46,7 @@ fun DeviceLensDetail(
                 Tab(
                     selected = selectedTabIndex == index,
                     onClick = { selectedTabIndex = index },
-                    text = { Text("${lenses[index].facing.displayName} ${lenses[index].type.displayName.lowercase()}") }
+                    text = { Text(lenses[index].tabLabel()) }
                 )
             }
         }

@@ -33,9 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.viewmodel.CameraUiState
 import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
@@ -63,7 +65,7 @@ fun HomeScreenContent(
     Box(modifier = modifier.fillMaxSize()) {
         when (val state = uiState) {
             CameraUiState.Checking -> CameraChecking()
-            is CameraUiState.Fallback -> CameraFallback(state.message)
+            is CameraUiState.Fallback -> CameraFallback(stringResource(state.messageRes))
             is CameraUiState.Success -> DeviceLensDetail(
                 lenses = state.lenses,
                 deviceInfo = state.deviceInfo,
@@ -79,11 +81,11 @@ fun HomeScreenContent(
         ) {
             // Menu items
             val items = listOf(
-                Triple(Icons.Filled.RateReview, "Write a review", 0),
-                Triple(Icons.Filled.Upload, "Upload", 1),
-                Triple(Icons.AutoMirrored.Filled.CompareArrows, "Compare", 2),
+                Triple(Icons.Filled.RateReview, R.string.action_write_review, 0),
+                Triple(Icons.Filled.Upload, R.string.action_upload, 1),
+                Triple(Icons.AutoMirrored.Filled.CompareArrows, R.string.action_compare, 2),
             )
-            items.forEach { (icon, label, index) ->
+            items.forEach { (icon, labelRes, index) ->
                 AnimatedVisibility(
                     visible = fabExpanded,
                     enter = fadeIn(tween(delayMillis = index * 40)) +
@@ -96,7 +98,7 @@ fun HomeScreenContent(
                             fabExpanded = false
                         },
                         icon = { Icon(icon, contentDescription = null) },
-                        text = { Text(label) },
+                        text = { Text(stringResource(labelRes)) },
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
@@ -104,10 +106,13 @@ fun HomeScreenContent(
             }
 
             // Main toggle FAB
+            val menuDescription = stringResource(
+                if (fabExpanded) R.string.common_close_menu else R.string.common_open_menu
+            )
             FloatingActionButton(
                 onClick = { fabExpanded = !fabExpanded },
                 modifier = Modifier.semantics {
-                    contentDescription = if (fabExpanded) "Close menu" else "Open menu"
+                    contentDescription = menuDescription
                 },
             ) {
                 Icon(
@@ -130,7 +135,7 @@ private fun CameraChecking(modifier: Modifier = Modifier) {
     ) {
         CircularProgressIndicator()
         Text(
-            text = "Checking this device's cameras",
+            text = stringResource(R.string.home_checking_cameras),
             modifier = Modifier.padding(top = 16.dp),
             style = MaterialTheme.typography.bodyLarge,
         )
@@ -156,7 +161,7 @@ private fun CameraFallback(
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            text = "Camera details were not available from this device.",
+            text = stringResource(R.string.home_camera_details_unavailable),
             modifier = Modifier.padding(top = 8.dp),
             style = MaterialTheme.typography.bodyMedium,
         )
