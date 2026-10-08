@@ -1,6 +1,7 @@
 package com.mobilelens.mobilelens.phones.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -82,13 +83,16 @@ fun PhoneGalleryScreen(
             scrollBehavior = scrollBehavior,
         )
 
-        when (uiState) {
-            is PhoneGalleryUiState.Loading -> PhotoQuilt(photos = List(LOADING_TILE_COUNT) { null })
-            is PhoneGalleryUiState.Error -> ErrorContent(messageRes = uiState.messageRes)
-            is PhoneGalleryUiState.Success -> if (uiState.photos.isEmpty()) {
-                GalleryEmptyState(modifier = Modifier.fillMaxSize())
-            } else {
-                PhotoQuilt(photos = uiState.photos)
+        // Space left under the bar, so the last row stays on screen
+        Box(modifier = Modifier.weight(1f).fillMaxSize()) {
+            when (uiState) {
+                is PhoneGalleryUiState.Loading -> PhotoQuilt(photos = List(LOADING_TILE_COUNT) { null })
+                is PhoneGalleryUiState.Error -> ErrorContent(messageRes = uiState.messageRes)
+                is PhoneGalleryUiState.Success -> if (uiState.photos.isEmpty()) {
+                    GalleryEmptyState(modifier = Modifier.fillMaxSize())
+                } else {
+                    PhotoQuilt(photos = uiState.photos)
+                }
             }
         }
     }
