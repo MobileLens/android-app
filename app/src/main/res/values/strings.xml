@@ -50,6 +50,7 @@
     <string name="gallery_photo">Photo %1$d of %2$d</string>
     <string name="gallery_empty">No photos yet</string>
     <string name="gallery_empty_supporting">Photos taken with this phone will show up here.</string>
+    <string name="gallery_photo_failed">Couldn\'t load this photo.</string>
     <string name="error_load_photos">Couldn\'t load photos.</string>
 
     <!-- Lens facing -->
