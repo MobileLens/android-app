@@ -20,7 +20,7 @@ sealed interface PhoneGalleryUiState {
     data class Error(@StringRes val messageRes: Int) : PhoneGalleryUiState
 }
 
-// Scoped to a single back stack entry: the phone details screen and the full gallery each get one
+// Owned by the phone details back stack entry. The full gallery reuses this instance.
 class PhoneGalleryViewModel(
     private val repository: PhoneGalleryRepository = PhoneGalleryRepository()
 ) : ViewModel() {
@@ -28,11 +28,14 @@ class PhoneGalleryViewModel(
     val uiState: StateFlow<PhoneGalleryUiState> = _uiState.asStateFlow()
 
     private var loadedPhoneId: String? = null
+    private var loadingPhoneId: String? = null
 
     fun loadPhotos(phoneId: String) {
-        // Skip reloading when returning to this screen from further down the back stack
-        if (phoneId == loadedPhoneId) return
+        // Skip when this phone is already shown or a load for it is in flight.
+        // The full gallery calls this again on the same ViewModel.
+        if (phoneId == loadedPhoneId || phoneId == loadingPhoneId) return
 
+        loadingPhoneId = phoneId
         viewModelScope.launch {
             _uiState.value = PhoneGalleryUiState.Loading
             try {
@@ -41,6 +44,8 @@ class PhoneGalleryViewModel(
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to load photos of phone $phoneId", e)
                 _uiState.value = PhoneGalleryUiState.Error(R.string.error_load_photos)
+            } finally {
+                if (loadingPhoneId == phoneId) loadingPhoneId = null
             }
         }
     }

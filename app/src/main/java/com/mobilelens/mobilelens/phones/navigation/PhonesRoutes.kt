@@ -3,6 +3,7 @@ package com.mobilelens.mobilelens.phones.navigation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -112,7 +113,16 @@ fun NavGraphBuilder.phonesRoutes(
     }
     composable<Screen.PhoneGallery> { backStackEntry ->
         val route = backStackEntry.toRoute<Screen.PhoneGallery>()
-        val galleryViewModel: PhoneGalleryViewModel = viewModel()
+        // The phone screen already loaded this gallery. Reuse its ViewModel so this screen
+        // opens on those photos instead of the loading quilt and a second fetch.
+        val galleryOwner = remember(backStackEntry) {
+            try {
+                navController.getBackStackEntry(Screen.PhoneDetails(route.phoneId))
+            } catch (_: IllegalArgumentException) {
+                backStackEntry
+            }
+        }
+        val galleryViewModel: PhoneGalleryViewModel = viewModel(galleryOwner)
         val galleryState by galleryViewModel.uiState.collectAsState()
 
         LaunchedEffect(route.phoneId) {
