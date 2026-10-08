@@ -46,7 +46,12 @@ class AuthRepository(
     suspend fun getSession(): User? {
         if (ApiClient.authToken == null) return null
         val response = authApi.getSession()
-        val dto = response.user ?: return null
+        val dto = response.user
+        if (dto == null) {
+            // Token is present but the session is gone; drop the stored bearer
+            ApiClient.authToken = null
+            return null
+        }
         return User(
             id = dto.id,
             username = dto.username ?: dto.name ?: "username",

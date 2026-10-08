@@ -17,10 +17,9 @@ okhttpLogging = "5.5.0"
 retrofit = "3.0.0"
 runtime = "1.12.1"
 coil = "2.7.0"
-exifinterface = "1.4.1"
+exifinterface = "1.4.2"
 richtext = "0.20.0"
 runtimeVersion = "1.12.1"
-
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

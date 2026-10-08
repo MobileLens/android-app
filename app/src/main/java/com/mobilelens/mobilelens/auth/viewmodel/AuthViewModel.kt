@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.auth.data.AuthRepository
 import com.mobilelens.mobilelens.auth.model.User
+import com.mobilelens.mobilelens.core.data.remote.ApiClient
 import com.mobilelens.mobilelens.reviews.model.Review
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +40,26 @@ class AuthViewModel(
 
     val isLoggedIn: Boolean
         get() = _currentUser.value != null
+
+    init {
+        restoreSession()
+    }
+
+    /** Reloads the user from a persisted bearer token, or clears it when the session is dead. */
+    private fun restoreSession() {
+        if (ApiClient.authToken == null) return
+        viewModelScope.launch {
+            try {
+                _currentUser.value = authRepository.getSession()
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to restore session", e)
+                if (e is HttpException && e.code() == 401) {
+                    ApiClient.authToken = null
+                    _currentUser.value = null
+                }
+            }
+        }
+    }
 
     fun login(email: String, password: String) {
         viewModelScope.launch {

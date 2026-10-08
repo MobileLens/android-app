@@ -1,6 +1,7 @@
 package com.mobilelens.mobilelens.core.data.remote
 
 import com.mobilelens.mobilelens.BuildConfig
+import com.mobilelens.mobilelens.core.data.AuthTokenStore
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -11,7 +12,23 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 object ApiClient {
     val BASE_URL: String = BuildConfig.BASE_URL
 
-    var authToken: String? = null
+    private var tokenStore: AuthTokenStore? = null
+
+    // Backed by Keystore-encrypted on-disk store once [init] has run
+    var authToken: String?
+        get() = memoryToken ?: tokenStore?.token.also { memoryToken = it }
+        set(value) {
+            memoryToken = value
+            tokenStore?.token = value
+        }
+
+    @Volatile
+    private var memoryToken: String? = null
+
+    fun init(store: AuthTokenStore) {
+        tokenStore = store
+        memoryToken = store.token
+    }
 
     private val json = Json { ignoreUnknownKeys = true }
 
