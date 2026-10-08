@@ -32,6 +32,31 @@
     <string name="action_upload">Upload</string>
     <string name="action_compare">Compare</string>
 
+    <!-- Device camera upload (Home) -->
+    <string name="upload_login_required_title">Sign in required</string>
+    <string name="upload_login_required_message">You need to be logged in to upload camera data from this phone.</string>
+    <string name="upload_login_required_ok">OK</string>
+    <string name="upload_screen_title">Upload cameras</string>
+    <string name="upload_screen_close">Close upload</string>
+    <string name="upload_submit">Upload</string>
+    <string name="upload_submitting">Uploading</string>
+    <!-- %1$s: brand and model of this device -->
+    <string name="upload_device_label">Uploading cameras from %1$s</string>
+    <string name="upload_lenses_heading">All lenses</string>
+    <string name="upload_lenses_supporting">Every camera on this phone is included. Partial uploads aren\'t allowed. Expand a lens to review the specs that will be sent. If this model isn\'t in the catalogue yet, it will be created.</string>
+    <string name="upload_expand_lens">Show lens specs</string>
+    <string name="upload_collapse_lens">Hide lens specs</string>
+    <string name="upload_photos_heading">Full-resolution photos</string>
+    <string name="upload_photos_supporting">Optional. Add photos taken with OEM camera app so we can confirm the true pixel count. Photos must be taken on this phone. The photos will not be uploaded, only the EXIF data will be extracted.</string>
+    <string name="upload_add_photo">Add photo</string>
+    <string name="upload_change_photo">Change photo</string>
+    <string name="upload_remove_photo">Remove photo</string>
+    <string name="upload_photo_attached">Photo attached</string>
+    <string name="upload_succeeded">Camera data uploaded.</string>
+    <string name="upload_error_photo_not_from_device">That photo doesn\'t look like it was taken on this phone. Check the EXIF Make and Model.</string>
+    <string name="upload_error_submit">Couldn\'t upload the cameras. If some were created already, try again later or ask a moderator.</string>
+    <string name="upload_cameras_unavailable">Camera details aren\'t ready yet. Wait until this device\'s lenses have loaded.</string>
+
     <!-- Phones -->
     <string name="favorites_empty">No favorites yet</string>
     <!-- %1$s: localized release date -->

@@ -23,6 +23,8 @@ sealed interface Screen {
     @Serializable data class PhoneDetails(val phoneId: String) : Screen
     /** All photos of a phone. [phoneModel] is only for the title, so the phone isn't fetched again. */
     @Serializable data class PhoneGallery(val phoneId: String, val phoneModel: String) : Screen
+    /** Submit this device's Camera2 lenses (and optional full-res photos) to the catalogue phone. */
+    @Serializable object UploadDeviceCameras : Screen
     @Serializable object Login : Screen
     @Serializable object Register : Screen
     @Serializable object UserSettings : Screen

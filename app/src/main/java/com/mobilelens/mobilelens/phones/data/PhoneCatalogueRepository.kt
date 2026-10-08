@@ -1,9 +1,11 @@
 package com.mobilelens.mobilelens.phones.data
 
 import com.mobilelens.mobilelens.core.data.remote.ApiClient
-import com.mobilelens.mobilelens.phones.data.remote.PhoneApi
-import com.mobilelens.mobilelens.phones.data.remote.dtos.PhoneDto
 import com.mobilelens.mobilelens.phones.data.remote.BrandApi
+import com.mobilelens.mobilelens.phones.data.remote.PhoneApi
+import com.mobilelens.mobilelens.phones.data.remote.dtos.CreateBrandRequest
+import com.mobilelens.mobilelens.phones.data.remote.dtos.CreatePhoneRequest
+import com.mobilelens.mobilelens.phones.data.remote.dtos.PhoneDto
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 import com.mobilelens.mobilelens.phones.model.Facing
 import com.mobilelens.mobilelens.phones.model.Lens
@@ -46,6 +48,25 @@ class PhoneCatalogueRepository {
             .firstOrNull { it.modelName.equals(model, ignoreCase = true) }
             ?: return null
         return getPhoneById(match.id)
+    }
+
+    /**
+     * Catalogue entry for this device: reuse an exact model match, otherwise create the brand
+     * (if needed) and phone so Camera2 lenses can be submitted for a device that isn't listed yet.
+     */
+    suspend fun findOrCreatePhoneForDevice(model: String, brandName: String): Phone {
+        findPhoneByModel(model)?.let { return it }
+
+        val brands = brandApi.getBrands()
+        val brand = brands.firstOrNull { it.name.equals(brandName, ignoreCase = true) }
+            ?: brandApi.createBrand(CreateBrandRequest(name = brandName)).also { created ->
+                brandCache[created.id] = created.name
+            }
+
+        val created = phoneApi.createPhone(
+            CreatePhoneRequest(brandId = brand.id, modelName = model)
+        )
+        return mapToPhone(phoneApi.getPhone(created.id))
     }
 
     private suspend fun getBrandName(brandId: String): String {

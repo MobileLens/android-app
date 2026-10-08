@@ -17,6 +17,7 @@ okhttpLogging = "5.5.0"
 retrofit = "3.0.0"
 runtime = "1.12.1"
 coil = "2.7.0"
+exifinterface = "1.4.1"
 richtext = "0.20.0"
 runtimeVersion = "1.12.1"
 
@@ -45,6 +46,7 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 compose-richtext-commonmark = { module = "com.halilibo.compose-richtext:richtext-commonmark", version.ref = "richtext" }
 compose-richtext-ui = { module = "com.halilibo.compose-richtext:richtext-ui-material3", version.ref = "richtext" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }

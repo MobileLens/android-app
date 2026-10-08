@@ -70,6 +70,8 @@ fun MainApp(
     val isReviewEditor = currentDestination?.hasRoute<Screen.WriteReview>() == true
     // The gallery has its own top bar
     val isGallery = currentDestination?.hasRoute<Screen.PhoneGallery>() == true
+    // Device camera upload has its own top bar
+    val isUploadDevice = currentDestination?.hasRoute<Screen.UploadDeviceCameras>() == true
 
     fun navigateToCatalogue() {
         navController.navigate(Screen.Catalogue) {
@@ -96,7 +98,7 @@ fun MainApp(
             }
         },
         topBar = {
-            if (!isAuthOrSettingsScreen && !isReviewEditor && !isGallery) {
+            if (!isAuthOrSettingsScreen && !isReviewEditor && !isGallery && !isUploadDevice) {
                 val displayResults = if (catalogueState is CatalogueUiState.Success) {
                     (catalogueState as CatalogueUiState.Success).phones
                 } else {
@@ -134,6 +136,7 @@ fun MainApp(
                 navController = navController,
                 cameraViewModel = cameraViewModel,
                 catalogueViewModel = catalogueViewModel,
+                isLoggedIn = { currentUser != null },
                 selectedPhoneId = { selectedPhoneId },
                 favoritePhoneIds = { favoritePhoneIds },
                 onToggleFavorite = { phoneId ->

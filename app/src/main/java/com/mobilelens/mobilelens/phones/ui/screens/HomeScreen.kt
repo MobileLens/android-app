@@ -21,17 +21,20 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,24 +53,31 @@ import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
 @Composable
 fun HomeScreen(
     cameraViewModel: CameraViewModel,
+    isLoggedIn: Boolean,
     modifier: Modifier = Modifier,
     onWriteReview: () -> Unit = {},
+    onUpload: () -> Unit = {},
 ) {
     val uiState by cameraViewModel.uiState.collectAsState()
     HomeScreenContent(
         uiState = uiState,
+        isLoggedIn = isLoggedIn,
         modifier = modifier,
         onWriteReview = onWriteReview,
+        onUpload = onUpload,
     )
 }
 
 @Composable
 fun HomeScreenContent(
     uiState: CameraUiState,
+    isLoggedIn: Boolean,
     modifier: Modifier = Modifier,
     onWriteReview: () -> Unit = {},
+    onUpload: () -> Unit = {},
 ) {
     var fabExpanded by remember { mutableStateOf(false) }
+    var showLoginRequired by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = modifier.fillMaxSize()) {
         when (val state = uiState) {
@@ -104,8 +114,9 @@ fun HomeScreenContent(
                     ExtendedFloatingActionButton(
                         onClick = {
                             fabExpanded = false
-                            if (index == 0) {
-                                onWriteReview()
+                            when (index) {
+                                0 -> onWriteReview()
+                                1 -> if (isLoggedIn) onUpload() else showLoginRequired = true
                             }
                         },
                         icon = { Icon(icon, contentDescription = null) },
@@ -132,6 +143,19 @@ fun HomeScreenContent(
             }
         }
     }
+
+    if (showLoginRequired) {
+        AlertDialog(
+            onDismissRequest = { showLoginRequired = false },
+            title = { Text(stringResource(R.string.upload_login_required_title)) },
+            text = { Text(stringResource(R.string.upload_login_required_message)) },
+            confirmButton = {
+                TextButton(onClick = { showLoginRequired = false }) {
+                    Text(stringResource(R.string.upload_login_required_ok))
+                }
+            },
+        )
+    }
 }
 
 @Composable
@@ -154,8 +178,6 @@ private fun CameraChecking(modifier: Modifier = Modifier) {
     }
 }
 
-// Temporary message
-// TODO: Implement EXIF data extraction for user-uploaded picture
 @Composable
 private fun CameraFallback(
     message: String,
@@ -199,7 +221,8 @@ private fun HomeScreenPreview() {
             uiState = CameraUiState.Success(
                 lenses = PhoneCatalogue[0].lenses,
                 deviceInfo = PhoneCatalogue[0].deviceInfo
-            )
+            ),
+            isLoggedIn = true,
         )
     }
 }
@@ -208,7 +231,7 @@ private fun HomeScreenPreview() {
 @Composable
 private fun HomeScreenCheckingPreview() {
     MaterialTheme {
-        HomeScreenContent(uiState = CameraUiState.Checking)
+        HomeScreenContent(uiState = CameraUiState.Checking, isLoggedIn = false)
     }
 }
 
@@ -216,6 +239,9 @@ private fun HomeScreenCheckingPreview() {
 @Composable
 private fun HomeScreenFallbackPreview() {
     MaterialTheme {
-        HomeScreenContent(uiState = CameraUiState.Fallback(R.string.home_no_cameras))
+        HomeScreenContent(
+            uiState = CameraUiState.Fallback(R.string.home_no_cameras),
+            isLoggedIn = false,
+        )
     }
 }
