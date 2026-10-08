@@ -17,6 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.navigation.TOP_LEVEL_ROUTES
+import com.mobilelens.mobilelens.core.navigation.isAccountScreen
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
@@ -34,6 +35,12 @@ fun BottomNavigationBar(navController: NavHostController) {
                 label = { Text(label) },
                 selected = isSelected,
                 onClick = {
+                    // Account screens sit on top of the tab that opened them. Drop them first,
+                    // otherwise they'd be saved with that tab and come back when it's selected.
+                    while (navController.currentDestination?.isAccountScreen() == true) {
+                        if (!navController.popBackStack()) break
+                    }
+
                     val startDestinationId = navController.graph.findStartDestination().id
                     if (topLevelRoute.route == Screen.Home) {
                         navController.popBackStack(startDestinationId, inclusive = false)

@@ -6,6 +6,8 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import com.mobilelens.mobilelens.R
 import kotlinx.serialization.Serializable
 
@@ -36,3 +38,7 @@ val TOP_LEVEL_ROUTES = listOf(
     TopLevelRoute(R.string.nav_favorites, Screen.Favorites, Icons.Default.Favorite),
     TopLevelRoute(R.string.nav_catalogue, Screen.Catalogue, Icons.AutoMirrored.Filled.List)
 )
+
+/** Login, Register and UserSettings, opened by the account button on top of the current tab. */
+fun NavDestination.isAccountScreen(): Boolean =
+    hasRoute<Screen.Login>() || hasRoute<Screen.Register>() || hasRoute<Screen.UserSettings>()

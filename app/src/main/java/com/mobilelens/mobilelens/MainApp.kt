@@ -24,6 +24,7 @@ import com.mobilelens.mobilelens.auth.navigation.authRoutes
 import com.mobilelens.mobilelens.auth.viewmodel.AuthViewModel
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.navigation.TOP_LEVEL_ROUTES
+import com.mobilelens.mobilelens.core.navigation.isAccountScreen
 import com.mobilelens.mobilelens.core.ui.BottomNavigationBar
 import com.mobilelens.mobilelens.core.ui.SearchAppBar
 import com.mobilelens.mobilelens.phones.navigation.phonesRoutes
@@ -63,9 +64,7 @@ fun MainApp(
         currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true
     }
 
-    val isAuthOrSettingsScreen = currentDestination?.hasRoute<Screen.Login>() == true ||
-            currentDestination?.hasRoute<Screen.Register>() == true ||
-            currentDestination?.hasRoute<Screen.UserSettings>() == true
+    val isAuthOrSettingsScreen = currentDestination?.isAccountScreen() == true
 
     // The review editor has its own top bar and needs the room the bottom bar takes
     val isReviewEditor = currentDestination?.hasRoute<Screen.WriteReview>() == true
