@@ -68,6 +68,8 @@ fun MainApp(
 
     // The review editor has its own top bar and needs the room the bottom bar takes
     val isReviewEditor = currentDestination?.hasRoute<Screen.WriteReview>() == true
+    // The gallery has its own top bar
+    val isGallery = currentDestination?.hasRoute<Screen.PhoneGallery>() == true
 
     fun navigateToCatalogue() {
         navController.navigate(Screen.Catalogue) {
@@ -94,7 +96,7 @@ fun MainApp(
             }
         },
         topBar = {
-            if (!isAuthOrSettingsScreen && !isReviewEditor) {
+            if (!isAuthOrSettingsScreen && !isReviewEditor && !isGallery) {
                 val displayResults = if (catalogueState is CatalogueUiState.Success) {
                     (catalogueState as CatalogueUiState.Success).phones
                 } else {

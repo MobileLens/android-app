@@ -102,6 +102,9 @@ class WriteReviewViewModel(
                     reviewRepository.uploadReviewImage(bytes, mimeType)
                 }
                 uploadedImages += upload
+                // TODO: `storageUrl` is a `minio://` reference, so the image doesn't render. Once the
+                //  upload response also returns the public URL, add it to `StorageUploadResponse`,
+                //  insert that here and match on it in publish().
                 content.insertMarkdownImage(upload.storageUrl)
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to upload review image $uri", e)
@@ -117,7 +120,8 @@ class WriteReviewViewModel(
         if (_publishState.value != PublishReviewUiState.Idle) return
 
         val markdown = content.text.toString()
-        // Images deleted from the text since uploading aren't attached to the review
+        // Images deleted from the text since uploading aren't attached to the review.
+        // TODO: match on the public URL once insertImage() inserts that instead of `storageUrl`
         val images = uploadedImages.filter { it.storageUrl in markdown }
 
         viewModelScope.launch {

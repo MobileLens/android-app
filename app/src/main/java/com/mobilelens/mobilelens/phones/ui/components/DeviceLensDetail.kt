@@ -26,6 +26,8 @@ fun DeviceLensDetail(
     modifier: Modifier = Modifier,
     isFavorite: Boolean = false,
     onFavoriteClick: (() -> Unit)? = null,
+    // Shown below the specs, scrolling with them
+    footer: @Composable () -> Unit = {},
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
@@ -54,6 +56,8 @@ fun DeviceLensDetail(
         if (lenses.isNotEmpty()) {
             LensSpecs(lenses[selectedTabIndex])
         }
+
+        footer()
     }
 }
 

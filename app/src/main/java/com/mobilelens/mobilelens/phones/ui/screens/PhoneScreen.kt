@@ -34,17 +34,22 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.phones.data.MockGalleryPhotos
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.ui.components.DeviceLensDetail
+import com.mobilelens.mobilelens.phones.ui.components.PhoneGallerySection
+import com.mobilelens.mobilelens.phones.viewmodel.PhoneGalleryUiState
 
 @Composable
 fun PhoneScreen(
     phone: Phone,
     isFavorited: Boolean,
     onFavoriteClick: () -> Unit,
+    galleryState: PhoneGalleryUiState,
     modifier: Modifier = Modifier,
-    onNavigateToReviews: () -> Unit = {}
+    onNavigateToReviews: () -> Unit = {},
+    onOpenGallery: () -> Unit = {},
 ) {
     var fabExpanded by remember { mutableStateOf(false) }
 
@@ -54,6 +59,14 @@ fun PhoneScreen(
             deviceInfo = phone.deviceInfo,
             isFavorite = isFavorited,
             onFavoriteClick = onFavoriteClick,
+            footer = {
+                PhoneGallerySection(
+                    uiState = galleryState,
+                    onOpenGallery = onOpenGallery,
+                    // Room to scroll the carousel out from under the FAB
+                    modifier = Modifier.padding(bottom = 88.dp),
+                )
+            },
         )
 
         Column(
@@ -117,6 +130,7 @@ private fun PhoneScreenPreview() {
             phone = PhoneCatalogue[0],
             isFavorited = false,
             onFavoriteClick = {},
+            galleryState = PhoneGalleryUiState.Success(MockGalleryPhotos),
         )
     }
 }

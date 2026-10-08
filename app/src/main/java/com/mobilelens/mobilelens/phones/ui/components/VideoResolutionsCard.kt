@@ -48,8 +48,6 @@ fun VideoResolutionsCard(
             fontWeight = FontWeight.Normal,
             fontFamily = FontFamily.Monospace
         )
-
-        // TODO: Gallery here
     }
 }
 @Preview(showBackground = true)

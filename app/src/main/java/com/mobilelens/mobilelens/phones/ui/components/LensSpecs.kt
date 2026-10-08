@@ -128,8 +128,6 @@ fun LensSpecs(
         }
 
         VideoResolutionsCard(lens.videoResolutions)
-
-        // TODO: add gallery below
     }
 }
 @Preview(showBackground = true)

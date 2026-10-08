@@ -41,6 +41,17 @@
     <string name="error_load_phones">Couldn\'t load phones.</string>
     <string name="error_load_phone">Couldn\'t load this phone.</string>
 
+    <!-- Phone gallery -->
+    <string name="gallery_title">Gallery</string>
+    <string name="gallery_open">Open gallery</string>
+    <!-- %1$s: phone model, e.g. "Pixel 8 Pro gallery" -->
+    <string name="gallery_screen_title">%1$s gallery</string>
+    <!-- %1$d: position of the photo, %2$d: number of photos -->
+    <string name="gallery_photo">Photo %1$d of %2$d</string>
+    <string name="gallery_empty">No photos yet</string>
+    <string name="gallery_empty_supporting">Photos taken with this phone will show up here.</string>
+    <string name="error_load_photos">Couldn\'t load photos.</string>
+
     <!-- Lens facing -->
     <string name="facing_front">Front</string>
     <string name="facing_back">Back</string>

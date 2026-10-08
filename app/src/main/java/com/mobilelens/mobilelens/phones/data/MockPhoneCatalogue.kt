@@ -2,6 +2,7 @@ package com.mobilelens.mobilelens.phones.data
 
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 import com.mobilelens.mobilelens.phones.model.Facing
+import com.mobilelens.mobilelens.phones.model.GalleryPhoto
 import com.mobilelens.mobilelens.phones.model.Lens
 import com.mobilelens.mobilelens.phones.model.LensType
 import com.mobilelens.mobilelens.phones.model.Phone
@@ -97,3 +98,8 @@ val PhoneCatalogue = listOf(
 
 val Phone.displayName: String
     get() = "${deviceInfo.brand} ${deviceInfo.model}"
+
+// Unreachable URLs, so previews show the placeholder each photo has until it loads
+val MockGalleryPhotos = List(7) { index ->
+    GalleryPhoto(id = "$index", imageUrl = "https://example.com/photos/$index.jpg")
+}
