@@ -97,9 +97,9 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
     private fun buildLens(cameraId: String, specs: CameraCharacteristics): Lens? {
         // Physical focal lengths [mm] and apertures [f-number], not 35 mm equivalents.
         // Lists, because some phones have variable focal length (e.g. Xiaomi 17 Ultra, Sony Xperia 1 VI)
-        // or variable aperture (e.g. Samsung Galaxy S10, Xiaomi 17 Ultra)
+        // or variable aperture (e.g. Samsung Galaxy S10, Xiaomi 17 Ultra). The UI shows a single
+        // value, or the min–max span when there is more than one.
         // TODO: check more manufacturers if they aren't providing 35mm equivalents here
-        // TODO: check what focal lengths/apertures look like on phones with variable ones
         val focalLengths = specs.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.toList().orEmpty()
         val apertures = specs.get(CameraCharacteristics.LENS_INFO_AVAILABLE_APERTURES)?.toList().orEmpty()
 

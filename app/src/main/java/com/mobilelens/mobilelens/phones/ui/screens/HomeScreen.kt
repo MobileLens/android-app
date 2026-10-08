@@ -9,12 +9,16 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,17 +35,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
+import com.mobilelens.mobilelens.phones.ui.components.DeviceLensDetail
 import com.mobilelens.mobilelens.phones.viewmodel.CameraUiState
 import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
-import com.mobilelens.mobilelens.phones.ui.components.DeviceLensDetail
 
 @Composable
 fun HomeScreen(
@@ -72,6 +76,8 @@ fun HomeScreenContent(
             is CameraUiState.Success -> DeviceLensDetail(
                 lenses = state.lenses,
                 deviceInfo = state.deviceInfo,
+                // Room to scroll the last card out from under the FAB
+                footer = { Spacer(modifier = Modifier.height(88.dp)) },
             )
         }
 
@@ -82,7 +88,6 @@ fun HomeScreenContent(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Menu items
             val items = listOf(
                 Triple(Icons.Filled.RateReview, R.string.action_write_review, 0),
                 Triple(Icons.Filled.Upload, R.string.action_upload, 1),
@@ -99,7 +104,7 @@ fun HomeScreenContent(
                     ExtendedFloatingActionButton(
                         onClick = {
                             fabExpanded = false
-                            if (index == 0) { // Write a review
+                            if (index == 0) {
                                 onWriteReview()
                             }
                         },
@@ -111,7 +116,6 @@ fun HomeScreenContent(
                 }
             }
 
-            // Main toggle FAB
             val menuDescription = stringResource(
                 if (fabExpanded) R.string.common_close_menu else R.string.common_open_menu
             )
@@ -130,7 +134,6 @@ fun HomeScreenContent(
     }
 }
 
-// Loading screen
 @Composable
 private fun CameraChecking(modifier: Modifier = Modifier) {
     Column(
@@ -138,12 +141,15 @@ private fun CameraChecking(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CircularProgressIndicator()
         Text(
             text = stringResource(R.string.home_checking_cameras),
             modifier = Modifier.padding(top = 16.dp),
             style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -160,16 +166,27 @@ private fun CameraFallback(
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Icon(
+            imageVector = Icons.Filled.PhoneAndroid,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Text(
             text = message,
+            modifier = Modifier.padding(top = 16.dp),
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
         )
         Text(
             text = stringResource(R.string.home_camera_details_unavailable),
             modifier = Modifier.padding(top = 8.dp),
             style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -187,3 +204,18 @@ private fun HomeScreenPreview() {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenCheckingPreview() {
+    MaterialTheme {
+        HomeScreenContent(uiState = CameraUiState.Checking)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenFallbackPreview() {
+    MaterialTheme {
+        HomeScreenContent(uiState = CameraUiState.Fallback(R.string.home_no_cameras))
+    }
+}

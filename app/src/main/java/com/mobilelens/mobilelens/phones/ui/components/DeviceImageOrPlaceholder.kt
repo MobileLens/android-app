@@ -3,7 +3,6 @@ package com.mobilelens.mobilelens.phones.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material3.Icon
@@ -18,38 +17,39 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 
+private val DeviceImageSize = 96.dp
+
 @Composable
 fun DeviceImageOrPlaceholder(
     deviceInfo: DeviceInfo,
 ) {
-    // Load image via Coil or show fallback placeholder icon
+    val imageModifier = Modifier
+        .size(DeviceImageSize)
+        .clip(MaterialTheme.shapes.extraLarge)
+        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+
     if (deviceInfo.imageURL != null) {
         AsyncImage(
             model = deviceInfo.imageURL,
             contentDescription = "${deviceInfo.brand} ${deviceInfo.model}",
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+            modifier = imageModifier,
             contentScale = ContentScale.Fit
         )
     } else {
         Box(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+            modifier = imageModifier,
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.PhoneAndroid,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 private fun DeviceImageOrPlaceholderPreview() {

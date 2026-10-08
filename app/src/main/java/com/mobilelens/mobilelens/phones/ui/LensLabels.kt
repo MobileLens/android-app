@@ -48,16 +48,28 @@ fun Lens.tabLabel(): String {
 }
 
 @Composable
-fun Lens.focalLengthText(): String = focalLength.formatEach(R.string.value_focal_length)
+fun Lens.focalLengthText(): String = focalLength.formatOptics(
+    singleRes = R.string.value_focal_length,
+    rangeRes = R.string.value_focal_length_range,
+)
 
 @Composable
-fun Lens.focalLength35mmText(): String = focalLength35mm.formatEach(R.string.value_focal_length_35mm)
+fun Lens.focalLength35mmText(): String = focalLength35mm.formatOptics(
+    singleRes = R.string.value_focal_length_35mm,
+    rangeRes = R.string.value_focal_length_35mm_range,
+)
 
 @Composable
-fun Lens.apertureText(): String = aperture.formatEach(R.string.value_aperture)
+fun Lens.apertureText(): String = aperture.formatOptics(
+    singleRes = R.string.value_aperture,
+    rangeRes = R.string.value_aperture_range,
+)
 
 @Composable
-fun Lens.aperture35mmText(): String = aperture35mm.formatEach(R.string.value_aperture_35mm)
+fun Lens.aperture35mmText(): String = aperture35mm.formatOptics(
+    singleRes = R.string.value_aperture_35mm,
+    rangeRes = R.string.value_aperture_35mm_range,
+)
 
 @Composable
 fun Lens.resolutionText(): String = stringResource(R.string.value_megapixels, resolution)
@@ -74,7 +86,16 @@ fun Lens.pixelPitchText(): String = stringResource(R.string.value_pixel_pitch, p
 @Composable
 fun Lens.cropFactorText(): String = stringResource(R.string.value_crop_factor, cropFactor)
 
-// Lenses with variable focal length or aperture report several values
+// One reading, or min–max when Camera2 reports several available stops
 @Composable
-private fun List<Float>.formatEach(@StringRes formatRes: Int): String =
-    map { stringResource(formatRes, it) }.joinToString(", ")
+private fun List<Float>.formatOptics(
+    @StringRes singleRes: Int,
+    @StringRes rangeRes: Int,
+): String {
+    val (min, max) = opticsSpan(this) ?: return ""
+    return if (min == max) {
+        stringResource(singleRes, min)
+    } else {
+        stringResource(rangeRes, min, max)
+    }
+}

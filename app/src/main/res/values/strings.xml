@@ -89,9 +89,15 @@
 
     <!-- Spec values. Numbers are formatted with the app locale's decimal separator -->
     <string name="value_focal_length">%1$.2f mm</string>
+    <!-- %1$s–%2$s: physical min and max when the lens zooms -->
+    <string name="value_focal_length_range">%1$.2f – %2$.2f mm</string>
     <string name="value_focal_length_35mm">%1$.0f mm</string>
+    <string name="value_focal_length_35mm_range">%1$.0f – %2$.0f mm</string>
     <string name="value_aperture">f/%1$.1f</string>
+    <!-- %1$s–%2$s: brightest and dimmest stop when aperture is variable -->
+    <string name="value_aperture_range">f/%1$.1f – f/%2$.1f</string>
     <string name="value_aperture_35mm">f/%1$.2f</string>
+    <string name="value_aperture_35mm_range">f/%1$.2f – f/%2$.2f</string>
     <string name="value_megapixels">%1$.0f MP</string>
     <!-- Optical format, e.g. 1/1.28" -->
     <string name="value_sensor_type">1/%1$.2f\"</string>
