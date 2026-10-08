@@ -1,5 +1,6 @@
 package com.mobilelens.mobilelens.auth.navigation
 
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,9 +24,14 @@ fun NavGraphBuilder.authRoutes(
 ) {
     composable<Screen.Login> {
         val currentUser by authViewModel.currentUser.collectAsState()
+        val loginError by authViewModel.loginError.collectAsState()
 
         LaunchedEffect(currentUser) {
             if (currentUser != null) navController.navigateToUserSettings()
+        }
+        // AuthViewModel outlives this screen, so drop the error rather than show it on the next visit
+        DisposableEffect(Unit) {
+            onDispose { authViewModel.clearLoginError() }
         }
         LoginScreen(
             onLogin = { email, password ->
@@ -33,7 +39,9 @@ fun NavGraphBuilder.authRoutes(
             },
             onNavigateToRegister = {
                 navController.navigate(Screen.Register)
-            }
+            },
+            errorMessage = loginError?.let { stringResource(it) },
+            onClearError = { authViewModel.clearLoginError() }
         )
     }
     composable<Screen.Register> {

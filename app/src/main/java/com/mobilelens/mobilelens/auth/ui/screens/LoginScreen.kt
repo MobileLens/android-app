@@ -29,7 +29,9 @@ import com.mobilelens.mobilelens.auth.ui.components.AuthTextField
 fun LoginScreen(
     onLogin: (email: String, password: String) -> Unit,
     onNavigateToRegister: () -> Unit,
-    onForgotPasswordClick: () -> Unit = {}
+    onForgotPasswordClick: () -> Unit = {},
+    errorMessage: String? = null,
+    onClearError: () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -45,9 +47,13 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        // Editing either field hides the error, since it describes the previous attempt
         AuthTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                onClearError()
+            },
             label = stringResource(R.string.auth_email)
         )
 
@@ -55,10 +61,23 @@ fun LoginScreen(
 
         AuthTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                onClearError()
+            },
             label = stringResource(R.string.auth_password),
             isPassword = true
         )
+
+        if (errorMessage != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -99,6 +118,18 @@ private fun LoginScreenPreview() {
         LoginScreen(
             onLogin = { _, _ -> },
             onNavigateToRegister = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoginScreenErrorPreview() {
+    MaterialTheme {
+        LoginScreen(
+            onLogin = { _, _ -> },
+            onNavigateToRegister = {},
+            errorMessage = stringResource(R.string.auth_error_invalid_credentials)
         )
     }
 }

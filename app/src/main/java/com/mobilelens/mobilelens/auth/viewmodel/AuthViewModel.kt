@@ -1,5 +1,7 @@
 package com.mobilelens.mobilelens.auth.viewmodel
 
+import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.R
@@ -10,6 +12,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
+
+private const val TAG = "AuthViewModel"
 
 class AuthViewModel(
     private val authRepository: AuthRepository = AuthRepository()
@@ -19,6 +25,10 @@ class AuthViewModel(
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _loginError = MutableStateFlow<Int?>(null)
+    // String resource of the last failed login, shown on the login screen
+    val loginError: StateFlow<Int?> = _loginError.asStateFlow()
 
     private val _profileError = MutableStateFlow<Int?>(null)
     // String resource of the last failed settings action, shown on the settings screen
@@ -32,20 +42,18 @@ class AuthViewModel(
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
+            _loginError.value = null
             try {
-                _errorMessage.value = null
-                val user = authRepository.login(email, password)
-                _currentUser.value = user
+                _currentUser.value = authRepository.login(email, password)
             } catch (e: Exception) {
-                val derivedUsername = if (email.contains("@")) email.substringBefore("@") else "username"
-                _currentUser.value = User(
-                    username = if (derivedUsername.isNotBlank()) derivedUsername else "username",
-                    email = email.ifBlank { "user@example.com" },
-                    role = "Reviewer"
-                )
-                _errorMessage.value = e.message
+                Log.w(TAG, "Login failed", e)
+                _loginError.value = loginErrorFor(e)
             }
         }
+    }
+
+    fun clearLoginError() {
+        _loginError.value = null
     }
 
     fun register(username: String, email: String, password: String) {
@@ -121,4 +129,12 @@ class AuthViewModel(
     fun deleteUserReview(reviewId: String) {
         _userReviews.value = _userReviews.value.filter { it.id != reviewId }
     }
+}
+
+// The backend answers 401 for a wrong e-mail or password and 400 for a malformed e-mail
+@StringRes
+private fun loginErrorFor(e: Exception): Int = when {
+    e is HttpException && (e.code() == 400 || e.code() == 401) -> R.string.auth_error_invalid_credentials
+    e is IOException -> R.string.auth_error_no_connection
+    else -> R.string.auth_error_login
 }

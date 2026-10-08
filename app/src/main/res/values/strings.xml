@@ -96,6 +96,9 @@
     <string name="auth_forgot_password">Forgot password?</string>
     <string name="auth_register_account">Register an account</string>
     <string name="auth_have_account">Already have an account? Log in</string>
+    <string name="auth_error_invalid_credentials">Incorrect e-mail or password.</string>
+    <string name="auth_error_no_connection">Couldn\'t reach the server. Check your connection.</string>
+    <string name="auth_error_login">Couldn\'t log in. Try again.</string>
 
     <!-- User roles -->
     <string name="role_user">User</string>
