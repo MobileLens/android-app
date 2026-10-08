@@ -97,10 +97,14 @@ fun NavGraphBuilder.phonesRoutes(
                     onNavigateToReviews = {
                         navController.navigate(Screen.ReviewThread(phoneId = phone.id))
                     },
-                    onOpenGallery = {
+                    // Ignores a second tap, which would open another copy of this gallery.
+                    // Single-top covers a second tap that lands before this screen leaves resumed.
+                    onOpenGallery = dropUnlessResumed {
                         navController.navigate(
                             Screen.PhoneGallery(phoneId = phone.id, phoneModel = phone.deviceInfo.model)
-                        )
+                        ) {
+                            launchSingleTop = true
+                        }
                     },
                 )
             }
