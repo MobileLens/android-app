@@ -32,16 +32,13 @@ import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.phones.data.MockGalleryPhotos
 import com.mobilelens.mobilelens.phones.model.GalleryPhoto
+import com.mobilelens.mobilelens.phones.ui.GALLERY_QUILT_COLUMNS
 import com.mobilelens.mobilelens.phones.ui.components.GalleryEmptyState
 import com.mobilelens.mobilelens.phones.ui.components.GalleryPhotoTile
+import com.mobilelens.mobilelens.phones.ui.galleryQuiltSpan
 import com.mobilelens.mobilelens.phones.viewmodel.PhoneGalleryUiState
 
-private const val QUILT_COLUMNS = 5
 private val QuiltRowHeight = 176.dp
-
-// Rows alternate between one full-width photo and a pair whose wider side switches every time:
-// [full] [narrow | wide] [full] [wide | narrow] …
-private val QuiltSpans = intArrayOf(QUILT_COLUMNS, 2, 3, QUILT_COLUMNS, 3, 2)
 
 // Placeholder tiles shown while the photos load
 private const val LOADING_TILE_COUNT = 6
@@ -105,7 +102,7 @@ private fun PhotoQuilt(
     modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(QUILT_COLUMNS),
+        columns = GridCells.Fixed(GALLERY_QUILT_COLUMNS),
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -113,7 +110,7 @@ private fun PhotoQuilt(
     ) {
         itemsIndexed(
             items = photos,
-            span = { index, _ -> GridItemSpan(quiltSpan(index, photos.size)) },
+            span = { index, _ -> GridItemSpan(galleryQuiltSpan(index, photos.size)) },
         ) { index, photo ->
             GalleryPhotoTile(
                 photo = photo,
@@ -126,13 +123,6 @@ private fun PhotoQuilt(
             )
         }
     }
-}
-
-private fun quiltSpan(index: Int, photoCount: Int): Int {
-    val position = index % QuiltSpans.size
-    val startsPair = position == 1 || position == 4
-    // A pair with nothing to fill its second half becomes a full-width row
-    return if (startsPair && index == photoCount - 1) QUILT_COLUMNS else QuiltSpans[position]
 }
 
 @Preview(showBackground = true)
