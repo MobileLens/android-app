@@ -31,9 +31,6 @@ class CatalogueViewModel : ViewModel() {
     private val _catalogueState = MutableStateFlow<CatalogueUiState>(CatalogueUiState.Loading)
     val catalogueState: StateFlow<CatalogueUiState> = _catalogueState.asStateFlow()
 
-    private val _favoritePhones = MutableStateFlow<List<Phone>>(emptyList())
-    val favoritePhones: StateFlow<List<Phone>> = _favoritePhones.asStateFlow()
-
     private var searchJob: Job? = null
 
     fun searchPhones(query: String) {
@@ -60,19 +57,6 @@ class CatalogueViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to load phones", e)
                 _catalogueState.value = CatalogueUiState.Error(R.string.error_load_phones)
-            }
-        }
-    }
-
-    fun loadFavorites(favoriteIds: List<String>) {
-        viewModelScope.launch {
-            try {
-                val favs = favoriteIds.mapNotNull {
-                    try { repository.getPhoneById(it) } catch(e: Exception) { null }
-                }
-                _favoritePhones.value = favs
-            } catch (_: Exception) {
-                _favoritePhones.value = emptyList()
             }
         }
     }

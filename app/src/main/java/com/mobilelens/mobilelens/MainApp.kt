@@ -27,6 +27,7 @@ import com.mobilelens.mobilelens.core.navigation.TOP_LEVEL_ROUTES
 import com.mobilelens.mobilelens.core.navigation.isAccountScreen
 import com.mobilelens.mobilelens.core.ui.BottomNavigationBar
 import com.mobilelens.mobilelens.core.ui.SearchAppBar
+import com.mobilelens.mobilelens.favorites.viewmodel.FavoritesViewModel
 import com.mobilelens.mobilelens.phones.navigation.phonesRoutes
 import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
 import com.mobilelens.mobilelens.phones.viewmodel.CatalogueUiState
@@ -38,7 +39,8 @@ import com.mobilelens.mobilelens.reviews.navigation.reviewsRoutes
 fun MainApp(
     cameraViewModel: CameraViewModel,
     catalogueViewModel: CatalogueViewModel = viewModel(),
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = viewModel(),
+    favoritesViewModel: FavoritesViewModel = viewModel(),
 ) {
     val navController = rememberNavController()
     val textFieldState = rememberTextFieldState()
@@ -46,16 +48,21 @@ fun MainApp(
 
     val catalogueState by catalogueViewModel.catalogueState.collectAsState()
     val currentUser by authViewModel.currentUser.collectAsState()
+    val favoriteIds by favoritesViewModel.favoriteIds.collectAsState()
+    val favoritePhones by favoritesViewModel.favoritePhones.collectAsState()
 
     var selectedPhoneId by rememberSaveable { mutableStateOf<String?>(null) }
-    var favoritePhoneIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
     LaunchedEffect(query) {
         catalogueViewModel.searchPhones(query)
     }
 
-    LaunchedEffect(favoritePhoneIds) {
-        catalogueViewModel.loadFavorites(favoritePhoneIds)
+    LaunchedEffect(currentUser?.id) {
+        if (currentUser != null) {
+            favoritesViewModel.onSignedIn()
+        } else {
+            favoritesViewModel.onSignedOut()
+        }
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -138,14 +145,9 @@ fun MainApp(
                 catalogueViewModel = catalogueViewModel,
                 isLoggedIn = { currentUser != null },
                 selectedPhoneId = { selectedPhoneId },
-                favoritePhoneIds = { favoritePhoneIds },
-                onToggleFavorite = { phoneId ->
-                    favoritePhoneIds = if (phoneId in favoritePhoneIds) {
-                        favoritePhoneIds - phoneId
-                    } else {
-                        favoritePhoneIds + phoneId
-                    }
-                }
+                favoriteIds = { favoriteIds },
+                favoritePhones = { favoritePhones },
+                onToggleFavorite = { phone -> favoritesViewModel.toggleFavorite(phone) },
             )
             reviewsRoutes(navController)
             authRoutes(navController, authViewModel)

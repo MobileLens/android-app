@@ -79,4 +79,3 @@ private fun FavoritesScreenPreview() {
         )
     }
 }
-

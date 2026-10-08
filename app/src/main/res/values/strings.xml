@@ -59,6 +59,8 @@
 
     <!-- Phones -->
     <string name="favorites_empty">No favorites yet</string>
+    <string name="error_load_favorites">Couldn\'t load favorites.</string>
+    <string name="error_toggle_favorite">Couldn\'t update favorite.</string>
     <!-- %1$s: localized release date -->
     <string name="phone_released">Released: %1$s</string>
     <string name="phone_add_favorite">Add to favorites</string>

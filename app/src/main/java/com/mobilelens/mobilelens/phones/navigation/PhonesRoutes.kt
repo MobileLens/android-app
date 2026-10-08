@@ -23,6 +23,7 @@ import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
+import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.ui.screens.CatalogueScreen
 import com.mobilelens.mobilelens.phones.ui.screens.FavoritesScreen
 import com.mobilelens.mobilelens.phones.ui.screens.HomeScreen
@@ -52,8 +53,9 @@ fun NavGraphBuilder.phonesRoutes(
     catalogueViewModel: CatalogueViewModel,
     isLoggedIn: () -> Boolean,
     selectedPhoneId: () -> String?,
-    favoritePhoneIds: () -> List<String>,
-    onToggleFavorite: (phoneId: String) -> Unit,
+    favoriteIds: () -> Set<String>,
+    favoritePhones: () -> List<Phone>,
+    onToggleFavorite: (Phone) -> Unit,
 ) {
     composable<Screen.Home> {
         val context = LocalContext.current
@@ -73,10 +75,8 @@ fun NavGraphBuilder.phonesRoutes(
         )
     }
     composable<Screen.Favorites> {
-        val favoritePhones by catalogueViewModel.favoritePhones.collectAsState()
-
         FavoritesScreen(
-            favoritePhones = favoritePhones,
+            favoritePhones = favoritePhones(),
             onPhoneClick = { phone ->
                 navController.navigate(Screen.PhoneDetails(phone.id))
             }
@@ -119,8 +119,8 @@ fun NavGraphBuilder.phonesRoutes(
                 val phone = state.phone
                 PhoneScreen(
                     phone = phone,
-                    isFavorited = phone.id in favoritePhoneIds(),
-                    onFavoriteClick = { onToggleFavorite(phone.id) },
+                    isFavorited = phone.id in favoriteIds(),
+                    onFavoriteClick = { onToggleFavorite(phone) },
                     galleryState = galleryState,
                     onNavigateToReviews = {
                         navController.navigate(Screen.ReviewThread(phoneId = phone.id))
