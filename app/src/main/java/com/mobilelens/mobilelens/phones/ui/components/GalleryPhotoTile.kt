@@ -1,5 +1,10 @@
 package com.mobilelens.mobilelens.phones.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,13 +28,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.theme.Motion
 import com.mobilelens.mobilelens.phones.data.MockGalleryPhotos
 import com.mobilelens.mobilelens.phones.model.GalleryPhoto
 
 /**
  * A gallery photo cropped to fill the tile. The placeholder shapes show until it has loaded, and
  * on their own when [photo] is null, which stands in for a photo that is still being fetched.
- * A failed load shows a broken-image icon instead of those shapes.
+ * A failed load shows a broken-image icon instead of those shapes. The photo fades in over the
+ * shapes as they fade out.
  */
 @Composable
 fun GalleryPhotoTile(
@@ -69,10 +76,19 @@ private fun GalleryPhotoTileContent(
         modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainerHighest),
         contentAlignment = Alignment.Center,
     ) {
-        if (showPlaceholder) {
+        // Only ever leaves, in step with the image loader's crossfade
+        AnimatedVisibility(
+            visible = showPlaceholder,
+            enter = EnterTransition.None,
+            exit = fadeOut(tween(Motion.DURATION_MEDIUM)),
+        ) {
             PhotoPlaceholder(modifier = Modifier.fillMaxSize(0.6f))
         }
-        if (showError) {
+        AnimatedVisibility(
+            visible = showError,
+            enter = fadeIn(tween(Motion.DURATION_MEDIUM)),
+            exit = fadeOut(tween(Motion.DURATION_SHORT)),
+        ) {
             Icon(
                 imageVector = Icons.Outlined.BrokenImage,
                 contentDescription = stringResource(R.string.gallery_photo_failed),

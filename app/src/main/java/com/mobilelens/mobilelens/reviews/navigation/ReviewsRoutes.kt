@@ -21,6 +21,7 @@ import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
+import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
 import com.mobilelens.mobilelens.reviews.ui.screens.ReviewScreen
 import com.mobilelens.mobilelens.reviews.ui.screens.ReviewThreadScreen
 import com.mobilelens.mobilelens.reviews.ui.screens.WriteReviewScreen
@@ -41,16 +42,18 @@ fun NavGraphBuilder.reviewsRoutes(navController: NavController) {
             reviewViewModel.loadReviewsForPhone(route.phoneId)
         }
 
-        when (val state = threadState) {
-            is ReviewThreadUiState.Loading -> LoadingContent()
-            is ReviewThreadUiState.Error -> ErrorContent(messageRes = state.messageRes)
-            is ReviewThreadUiState.Success -> {
-                ReviewThreadScreen(
-                    thread = state.thread,
-                    onReviewClick = { review ->
-                        navController.navigate(Screen.ReviewDetails(reviewId = review.id))
-                    }
-                )
+        UiStateCrossfade(state = threadState) { state ->
+            when (state) {
+                is ReviewThreadUiState.Loading -> LoadingContent()
+                is ReviewThreadUiState.Error -> ErrorContent(messageRes = state.messageRes)
+                is ReviewThreadUiState.Success -> {
+                    ReviewThreadScreen(
+                        thread = state.thread,
+                        onReviewClick = { review ->
+                            navController.navigate(Screen.ReviewDetails(reviewId = review.id))
+                        }
+                    )
+                }
             }
         }
     }
@@ -63,10 +66,12 @@ fun NavGraphBuilder.reviewsRoutes(navController: NavController) {
             reviewViewModel.loadReview(route.reviewId)
         }
 
-        when (val state = selectedReviewState) {
-            is ReviewDetailsUiState.Loading -> LoadingContent()
-            is ReviewDetailsUiState.Error -> ErrorContent(messageRes = state.messageRes)
-            is ReviewDetailsUiState.Success -> ReviewScreen(review = state.review)
+        UiStateCrossfade(state = selectedReviewState) { state ->
+            when (state) {
+                is ReviewDetailsUiState.Loading -> LoadingContent()
+                is ReviewDetailsUiState.Error -> ErrorContent(messageRes = state.messageRes)
+                is ReviewDetailsUiState.Success -> ReviewScreen(review = state.review)
+            }
         }
     }
     composable<Screen.WriteReview> { backStackEntry ->

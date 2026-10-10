@@ -152,19 +152,17 @@ fun SearchAppBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val isCollapsed = searchBarState.currentValue == SearchBarValue.Collapsed
-
-            if (isCollapsed) {
-                if (showBackButton) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.search_back),
-                        )
-                    }
-                } else {
-                    Box(modifier = Modifier.size(48.dp))
+            // Both side buttons stay while the search is open: the full-screen bar covers them anyway,
+            // and the bar's slot between them must keep its width for the bar to collapse back into
+            if (showBackButton) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.search_back),
+                    )
                 }
+            } else {
+                Box(modifier = Modifier.size(48.dp))
             }
 
             Box(modifier = Modifier.weight(1f)) {
@@ -175,34 +173,32 @@ fun SearchAppBar(
                 )
             }
 
-            if (isCollapsed) {
-                val accountDescription = stringResource(R.string.account)
-                IconButton(
-                    onClick = onAccountClick,
-                    modifier = Modifier.semantics { contentDescription = accountDescription }
+            val accountDescription = stringResource(R.string.account)
+            IconButton(
+                onClick = onAccountClick,
+                modifier = Modifier.semantics { contentDescription = accountDescription }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (accountInitial != null) {
-                            Text(
-                                text = accountInitial,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
+                    if (accountInitial != null) {
+                        Text(
+                            text = accountInitial,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
             }

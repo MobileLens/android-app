@@ -1,7 +1,11 @@
 package com.mobilelens.mobilelens.reviews.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -11,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
@@ -23,7 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -56,6 +58,11 @@ import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material3.RichText
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.LoadingButtonContent
+import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
+import com.mobilelens.mobilelens.core.ui.theme.rememberSlideDistance
+import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXIn
+import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXOut
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.data.displayName
 import com.mobilelens.mobilelens.reviews.ui.MarkdownStyle
@@ -84,6 +91,7 @@ fun WriteReviewScreen(
 ) {
     var showPreview by rememberSaveable { mutableStateOf(false) }
     var showDiscardDialog by rememberSaveable { mutableStateOf(false) }
+    val slideDistance = rememberSlideDistance()
 
     val hasDraft by remember(title, content) {
         derivedStateOf { title.text.isNotBlank() || content.text.isNotBlank() }
@@ -104,6 +112,8 @@ fun WriteReviewScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
+            // Opaque, since it rises over the screen that opened it
+            .background(MaterialTheme.colorScheme.surface)
             // The parent Scaffold already pads for the navigation bar
             .windowInsetsPadding(WindowInsets.ime.exclude(WindowInsets.navigationBars))
     ) {
@@ -124,21 +134,17 @@ fun WriteReviewScreen(
                         enabled = canPublish,
                         modifier = Modifier.padding(end = 8.dp),
                     ) {
-                        if (isPublishing) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
-                                strokeWidth = 2.dp,
-                            )
-                        } else {
-                            Text(stringResource(R.string.review_editor_publish))
-                        }
+                        LoadingButtonContent(
+                            text = stringResource(R.string.review_editor_publish),
+                            loading = isPublishing,
+                        )
                     }
                 },
                 // Insets are handled by the parent Scaffold
                 windowInsets = WindowInsets(0, 0, 0, 0),
             )
 
-            if (isUploadingImage) {
+            AnimatedVisibility(visible = isUploadingImage) {
                 val uploadingDescription = stringResource(R.string.review_editor_uploading_image)
                 LinearProgressIndicator(
                     modifier = Modifier
@@ -165,19 +171,30 @@ fun WriteReviewScreen(
                 )
             }
 
-            if (showPreview) {
-                ReviewPreview(
-                    title = title.text.toString(),
-                    content = content.text.toString(),
-                    modifier = Modifier.weight(1f),
-                )
-            } else {
-                ReviewEditor(
-                    title = title,
-                    content = content,
-                    onInsertImage = onInsertImage,
-                    modifier = Modifier.weight(1f),
-                )
+            // The preview tab is to the right, so it slides in from there
+            AnimatedContent(
+                targetState = showPreview,
+                modifier = Modifier.weight(1f),
+                transitionSpec = {
+                    val forward = targetState
+                    sharedAxisXIn(forward, slideDistance) togetherWith sharedAxisXOut(forward, slideDistance)
+                },
+                label = "ReviewEditorTab",
+            ) { preview ->
+                if (preview) {
+                    ReviewPreview(
+                        title = title.text.toString(),
+                        content = content.text.toString(),
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    ReviewEditor(
+                        title = title,
+                        content = content,
+                        onInsertImage = onInsertImage,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         }
 
@@ -216,21 +233,22 @@ private fun ReviewTarget(
     target: ReviewTargetUiState,
     modifier: Modifier = Modifier,
 ) {
-    val (text, color) = when (target) {
-        is ReviewTargetUiState.Loading ->
-            stringResource(R.string.review_editor_finding_phone) to MaterialTheme.colorScheme.onSurfaceVariant
-        is ReviewTargetUiState.Found ->
-            stringResource(R.string.review_editor_reviewing, target.phone.displayName) to
-                    MaterialTheme.colorScheme.onSurfaceVariant
-        is ReviewTargetUiState.Error ->
-            stringResource(target.messageRes) to MaterialTheme.colorScheme.error
+    UiStateCrossfade(state = target, modifier = modifier) { shownTarget ->
+        val (text, color) = when (shownTarget) {
+            is ReviewTargetUiState.Loading ->
+                stringResource(R.string.review_editor_finding_phone) to MaterialTheme.colorScheme.onSurfaceVariant
+            is ReviewTargetUiState.Found ->
+                stringResource(R.string.review_editor_reviewing, shownTarget.phone.displayName) to
+                        MaterialTheme.colorScheme.onSurfaceVariant
+            is ReviewTargetUiState.Error ->
+                stringResource(shownTarget.messageRes) to MaterialTheme.colorScheme.error
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            color = color,
+        )
     }
-    Text(
-        text = text,
-        modifier = modifier,
-        style = MaterialTheme.typography.labelLarge,
-        color = color,
-    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)

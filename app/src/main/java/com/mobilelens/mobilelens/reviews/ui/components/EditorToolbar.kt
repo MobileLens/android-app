@@ -1,5 +1,6 @@
 package com.mobilelens.mobilelens.reviews.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -17,9 +18,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -128,20 +129,26 @@ private fun EditorToolbarButton(
     onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.size(48.dp),
-        shape = RoundedCornerShape(24.dp),
-        color = if (selected) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            Color.Transparent
-        },
-        contentColor = if (selected) {
+    val selectedColor = MaterialTheme.colorScheme.secondaryContainer
+    val containerColor by animateColorAsState(
+        // A see-through copy of the selected color, so it doesn't pass through grey on the way
+        targetValue = if (selected) selectedColor else selectedColor.copy(alpha = 0f),
+        label = "EditorToolbarButtonContainer",
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (selected) {
             MaterialTheme.colorScheme.onSecondaryContainer
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
+        label = "EditorToolbarButtonContent",
+    )
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.size(48.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = containerColor,
+        contentColor = contentColor,
     ) {
         Box(
             contentAlignment = Alignment.Center,

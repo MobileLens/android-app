@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
@@ -26,6 +27,7 @@ import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
+import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
 import com.mobilelens.mobilelens.phones.model.CatalogueSort
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.ui.components.CatalogueFilterChips
@@ -110,30 +112,32 @@ fun NavGraphBuilder.phonesRoutes(
                 selected = sort,
                 onSelect = catalogueViewModel::selectSort,
             )
-            if (sort == CatalogueSort.ALL) {
+            AnimatedVisibility(visible = sort == CatalogueSort.ALL) {
                 CatalogueFilterChips(
                     filters = filters,
                     brands = brands,
                     onFiltersChange = catalogueViewModel::setFilters,
                 )
             }
-            when (val state = catalogueState) {
-                is CatalogueUiState.Loading -> LoadingContent()
-                is CatalogueUiState.Error -> ErrorContent(
-                    messageRes = state.messageRes,
-                    onRetry = catalogueViewModel::refresh,
-                )
-                is CatalogueUiState.Success -> {
-                    CatalogueScreen(
-                        phones = state.phones,
-                        selectedPhoneId = selectedPhoneId(),
-                        onPhoneClick = { phone ->
-                            navController.navigate(Screen.PhoneDetails(phone.id))
-                        },
-                        onRefresh = catalogueViewModel::refresh,
-                        isRefreshing = state.isRefreshing,
-                        isPullRefreshing = state.isPullRefreshing,
+            UiStateCrossfade(state = catalogueState) { state ->
+                when (state) {
+                    is CatalogueUiState.Loading -> LoadingContent()
+                    is CatalogueUiState.Error -> ErrorContent(
+                        messageRes = state.messageRes,
+                        onRetry = catalogueViewModel::refresh,
                     )
+                    is CatalogueUiState.Success -> {
+                        CatalogueScreen(
+                            phones = state.phones,
+                            selectedPhoneId = selectedPhoneId(),
+                            onPhoneClick = { phone ->
+                                navController.navigate(Screen.PhoneDetails(phone.id))
+                            },
+                            onRefresh = catalogueViewModel::refresh,
+                            isRefreshing = state.isRefreshing,
+                            isPullRefreshing = state.isPullRefreshing,
+                        )
+                    }
                 }
             }
         }
@@ -150,29 +154,31 @@ fun NavGraphBuilder.phonesRoutes(
             galleryViewModel.loadPhotos(route.phoneId)
         }
 
-        when (val state = phoneState) {
-            is PhoneDetailsUiState.Loading -> LoadingContent()
-            is PhoneDetailsUiState.Error -> ErrorContent(messageRes = state.messageRes)
-            is PhoneDetailsUiState.Success -> {
-                val phone = state.phone
-                PhoneScreen(
-                    phone = phone,
-                    isFavorited = phone.id in favoriteIds(),
-                    onFavoriteClick = { onToggleFavorite(phone) },
-                    galleryState = galleryState,
-                    onNavigateToReviews = {
-                        navController.navigate(Screen.ReviewThread(phoneId = phone.id))
-                    },
-                    // Ignores a second tap, which would open another copy of this gallery.
-                    // Single-top covers a second tap that lands before this screen leaves resumed.
-                    onOpenGallery = dropUnlessResumed {
-                        navController.navigate(
-                            Screen.PhoneGallery(phoneId = phone.id, phoneModel = phone.deviceInfo.model)
-                        ) {
-                            launchSingleTop = true
-                        }
-                    },
-                )
+        UiStateCrossfade(state = phoneState) { state ->
+            when (state) {
+                is PhoneDetailsUiState.Loading -> LoadingContent()
+                is PhoneDetailsUiState.Error -> ErrorContent(messageRes = state.messageRes)
+                is PhoneDetailsUiState.Success -> {
+                    val phone = state.phone
+                    PhoneScreen(
+                        phone = phone,
+                        isFavorited = phone.id in favoriteIds(),
+                        onFavoriteClick = { onToggleFavorite(phone) },
+                        galleryState = galleryState,
+                        onNavigateToReviews = {
+                            navController.navigate(Screen.ReviewThread(phoneId = phone.id))
+                        },
+                        // Ignores a second tap, which would open another copy of this gallery.
+                        // Single-top covers a second tap that lands before this screen leaves resumed.
+                        onOpenGallery = dropUnlessResumed {
+                            navController.navigate(
+                                Screen.PhoneGallery(phoneId = phone.id, phoneModel = phone.deviceInfo.model)
+                            ) {
+                                launchSingleTop = true
+                            }
+                        },
+                    )
+                }
             }
         }
     }

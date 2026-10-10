@@ -1,5 +1,8 @@
 package com.mobilelens.mobilelens.phones.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -55,27 +58,34 @@ fun CatalogueScreen(
                 item {
                     Text(
                         text = stringResource(R.string.no_phones_found),
-                        modifier = Modifier.padding(24.dp),
+                        modifier = Modifier
+                            .animateItem()
+                            .padding(24.dp),
                     )
                 }
             } else {
                 itemsIndexed(phones, key = { _, phone -> phone.id }) { _, phone ->
+                    // New results fade in and the ones that stay glide to their new place
                     PhoneListItem(
                         phone = phone,
                         onClick = { onPhoneClick(phone) },
                         isSelected = phone.id == selectedPhoneId,
+                        modifier = Modifier.animateItem(),
                     )
                 }
             }
         }
 
         // Overlaid so the list doesn't shift while a new search loads
-        if (isRefreshing) {
-            LinearProgressIndicator(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter),
-            )
+        AnimatedVisibility(
+            visible = isRefreshing,
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter),
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
     }
 }

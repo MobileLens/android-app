@@ -1,5 +1,7 @@
 package com.mobilelens.mobilelens.phones.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.theme.fadeThroughIn
+import com.mobilelens.mobilelens.core.ui.theme.fadeThroughOut
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.ui.components.PhoneListItem
@@ -31,39 +35,49 @@ fun FavoritesScreen(
     onPhoneClick: (Phone) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (favoritePhones.isEmpty()) {
-        Box(
-            modifier = modifier.fillMaxSize().padding(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+    // Only switching between the empty state and the list fades; the list animates its own items
+    AnimatedContent(
+        targetState = favoritePhones,
+        modifier = modifier,
+        transitionSpec = { fadeThroughIn() togetherWith fadeThroughOut() },
+        contentKey = { it.isEmpty() },
+        label = "Favorites",
+    ) { phones ->
+        if (phones.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(24.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.outline
-                )
-                Text(
-                    text = stringResource(R.string.favorites_empty),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 16.dp),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.outline
+                    )
+                    Text(
+                        text = stringResource(R.string.favorites_empty),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 16.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
-        }
-    } else {
-        LazyColumn(
-            modifier = modifier.fillMaxSize(),
-        ) {
-            items(favoritePhones, key = { it.id }) { phone ->
-                PhoneListItem(
-                    phone = phone,
-                    onClick = { onPhoneClick(phone) }
-                )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                items(phones, key = { it.id }) { phone ->
+                    PhoneListItem(
+                        phone = phone,
+                        onClick = { onPhoneClick(phone) },
+                        modifier = Modifier.animateItem(),
+                    )
+                }
             }
         }
     }

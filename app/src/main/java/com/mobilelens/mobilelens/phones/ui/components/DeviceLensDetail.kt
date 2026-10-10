@@ -1,5 +1,7 @@
 package com.mobilelens.mobilelens.phones.ui.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +17,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.core.ui.theme.rememberSlideDistance
+import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXIn
+import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXOut
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 import com.mobilelens.mobilelens.phones.model.Lens
@@ -33,6 +38,7 @@ fun DeviceLensDetail(
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
     val safeTabIndex = selectedTabIndex.coerceIn(0, (lenses.size - 1).coerceAtLeast(0))
+    val slideDistance = rememberSlideDistance()
 
     Column(
         modifier = modifier
@@ -59,7 +65,18 @@ fun DeviceLensDetail(
                 }
             }
 
-            LensSpecs(lenses[safeTabIndex])
+            // Slides the way the tabs are laid out, so a lens to the right comes in from the right
+            AnimatedContent(
+                targetState = safeTabIndex,
+                transitionSpec = {
+                    val forward = targetState > initialState
+                    sharedAxisXIn(forward, slideDistance) togetherWith sharedAxisXOut(forward, slideDistance)
+                },
+                label = "LensSpecs",
+            ) { index ->
+                // The lens list may have changed since this tab was left
+                lenses.getOrNull(index)?.let { LensSpecs(it) }
+            }
         }
 
         footer()

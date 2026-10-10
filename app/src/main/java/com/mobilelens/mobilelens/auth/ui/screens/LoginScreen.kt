@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.auth.ui.components.AuthErrorText
 import com.mobilelens.mobilelens.auth.ui.components.AuthHeaderTitle
 import com.mobilelens.mobilelens.auth.ui.components.AuthPillButton
 import com.mobilelens.mobilelens.auth.ui.components.AuthTextField
@@ -69,15 +70,7 @@ fun LoginScreen(
             isPassword = true
         )
 
-        if (errorMessage != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = errorMessage,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        AuthErrorText(message = errorMessage)
 
         Spacer(modifier = Modifier.height(12.dp))
 

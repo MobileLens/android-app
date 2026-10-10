@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.auth.model.User
+import com.mobilelens.mobilelens.auth.ui.components.AuthErrorText
 import com.mobilelens.mobilelens.auth.ui.components.AuthPillButton
 import com.mobilelens.mobilelens.auth.ui.components.AuthTextField
 import com.mobilelens.mobilelens.auth.ui.components.DangerRedColor
@@ -149,14 +150,7 @@ fun UserSettingsScreen(
             )
         }
 
-        if (profileError != null) {
-            Text(
-                text = profileError,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
+        AuthErrorText(message = profileError)
 
         Spacer(modifier = Modifier.height(28.dp))
 

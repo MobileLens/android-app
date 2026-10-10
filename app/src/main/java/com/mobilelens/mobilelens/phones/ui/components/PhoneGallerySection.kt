@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
 import com.mobilelens.mobilelens.phones.data.MockGalleryPhotos
 import com.mobilelens.mobilelens.phones.model.GalleryPhoto
 import com.mobilelens.mobilelens.phones.viewmodel.PhoneGalleryUiState
@@ -65,27 +66,30 @@ fun PhoneGallerySection(
             }
         }
 
-        when (uiState) {
-            is PhoneGalleryUiState.Loading -> PhotoCarousel(
-                photos = List(LOADING_ITEM_COUNT) { null },
-                onPhotoClick = onOpenGallery,
-            )
-            is PhoneGalleryUiState.Error -> Text(
-                text = stringResource(uiState.messageRes),
-                modifier = Modifier.padding(horizontal = 16.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            is PhoneGalleryUiState.Success -> if (uiState.photos.isEmpty()) {
-                GalleryEmptyState(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.extraLarge)
-                        .background(MaterialTheme.colorScheme.surfaceContainerLow),
+        // Also eases the section's height when the photos turn out to be missing
+        UiStateCrossfade(state = uiState) { state ->
+            when (state) {
+                is PhoneGalleryUiState.Loading -> PhotoCarousel(
+                    photos = List(LOADING_ITEM_COUNT) { null },
+                    onPhotoClick = onOpenGallery,
                 )
-            } else {
-                PhotoCarousel(photos = uiState.photos, onPhotoClick = onOpenGallery)
+                is PhoneGalleryUiState.Error -> Text(
+                    text = stringResource(state.messageRes),
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                is PhoneGalleryUiState.Success -> if (state.photos.isEmpty()) {
+                    GalleryEmptyState(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.extraLarge)
+                            .background(MaterialTheme.colorScheme.surfaceContainerLow),
+                    )
+                } else {
+                    PhotoCarousel(photos = state.photos, onPhotoClick = onOpenGallery)
+                }
             }
         }
     }

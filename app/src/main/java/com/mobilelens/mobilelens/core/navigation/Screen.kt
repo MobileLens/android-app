@@ -46,3 +46,10 @@ val TOP_LEVEL_ROUTES = listOf(
 /** Login, Register and UserSettings, opened by the account button on top of the current tab. */
 fun NavDestination.isAccountScreen(): Boolean =
     hasRoute<Screen.Login>() || hasRoute<Screen.Register>() || hasRoute<Screen.UserSettings>()
+
+/** The bottom bar's tabs. */
+fun NavDestination.isTopLevel(): Boolean = TOP_LEVEL_ROUTES.any { hasRoute(it.route::class) }
+
+/** Full-screen tasks that rise over the screen that opened them and close back down to it. */
+fun NavDestination.isSheet(): Boolean =
+    hasRoute<Screen.WriteReview>() || hasRoute<Screen.UploadDeviceCameras>()

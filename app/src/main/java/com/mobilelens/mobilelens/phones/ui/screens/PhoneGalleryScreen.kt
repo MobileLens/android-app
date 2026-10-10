@@ -1,7 +1,6 @@
 package com.mobilelens.mobilelens.phones.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -30,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.ui.ErrorContent
+import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
 import com.mobilelens.mobilelens.phones.data.MockGalleryPhotos
 import com.mobilelens.mobilelens.phones.model.GalleryPhoto
 import com.mobilelens.mobilelens.phones.ui.GALLERY_QUILT_COLUMNS
@@ -81,14 +81,14 @@ fun PhoneGalleryScreen(
         )
 
         // Space left under the bar, so the last row stays on screen
-        Box(modifier = Modifier.weight(1f).fillMaxSize()) {
-            when (uiState) {
+        UiStateCrossfade(state = uiState, modifier = Modifier.weight(1f).fillMaxSize()) { state ->
+            when (state) {
                 is PhoneGalleryUiState.Loading -> PhotoQuilt(photos = List(LOADING_TILE_COUNT) { null })
-                is PhoneGalleryUiState.Error -> ErrorContent(messageRes = uiState.messageRes)
-                is PhoneGalleryUiState.Success -> if (uiState.photos.isEmpty()) {
+                is PhoneGalleryUiState.Error -> ErrorContent(messageRes = state.messageRes)
+                is PhoneGalleryUiState.Success -> if (state.photos.isEmpty()) {
                     GalleryEmptyState(modifier = Modifier.fillMaxSize())
                 } else {
-                    PhotoQuilt(photos = uiState.photos)
+                    PhotoQuilt(photos = state.photos)
                 }
             }
         }

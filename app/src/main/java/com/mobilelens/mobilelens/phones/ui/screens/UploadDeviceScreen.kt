@@ -1,7 +1,12 @@
 package com.mobilelens.mobilelens.phones.ui.screens
 
 import android.net.Uri
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,16 +19,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -44,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -51,7 +54,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.ui.ErrorContent
+import com.mobilelens.mobilelens.core.ui.LoadingButtonContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
+import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
+import com.mobilelens.mobilelens.core.ui.theme.Motion
+import com.mobilelens.mobilelens.core.ui.theme.fadeThroughIn
+import com.mobilelens.mobilelens.core.ui.theme.fadeThroughOut
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 import com.mobilelens.mobilelens.phones.model.Lens
@@ -74,7 +82,12 @@ fun UploadDeviceScreen(
 ) {
     val isSubmitting = submitState == UploadSubmitState.Submitting
 
-    Box(modifier = modifier.fillMaxSize()) {
+    // Opaque, since it rises over the screen that opened it
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
                 title = { Text(stringResource(R.string.upload_screen_title)) },
@@ -93,20 +106,16 @@ fun UploadDeviceScreen(
                         enabled = canSubmit,
                         modifier = Modifier.padding(end = 8.dp),
                     ) {
-                        if (isSubmitting) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
-                                strokeWidth = 2.dp,
-                            )
-                        } else {
-                            Text(stringResource(R.string.upload_submit))
-                        }
+                        LoadingButtonContent(
+                            text = stringResource(R.string.upload_submit),
+                            loading = isSubmitting,
+                        )
                     }
                 },
                 windowInsets = WindowInsets(0, 0, 0, 0),
             )
 
-            if (isSubmitting) {
+            AnimatedVisibility(visible = isSubmitting) {
                 val uploadingDescription = stringResource(R.string.upload_submitting)
                 LinearProgressIndicator(
                     modifier = Modifier
@@ -115,17 +124,19 @@ fun UploadDeviceScreen(
                 )
             }
 
-            when (val state = uiState) {
-                UploadDeviceUiState.Loading -> LoadingContent()
-                is UploadDeviceUiState.Error -> ErrorContent(messageRes = state.messageRes)
-                is UploadDeviceUiState.Ready -> UploadReadyContent(
-                    deviceInfo = state.deviceInfo,
-                    lenses = state.lenses,
-                    photoUris = state.photoUris,
-                    onAddPhoto = onAddPhoto,
-                    onRemovePhoto = onRemovePhoto,
-                    enabled = !isSubmitting,
-                )
+            UiStateCrossfade(state = uiState) { state ->
+                when (state) {
+                    UploadDeviceUiState.Loading -> LoadingContent()
+                    is UploadDeviceUiState.Error -> ErrorContent(messageRes = state.messageRes)
+                    is UploadDeviceUiState.Ready -> UploadReadyContent(
+                        deviceInfo = state.deviceInfo,
+                        lenses = state.lenses,
+                        photoUris = state.photoUris,
+                        onAddPhoto = onAddPhoto,
+                        onRemovePhoto = onRemovePhoto,
+                        enabled = !isSubmitting,
+                    )
+                }
             }
         }
 
@@ -232,6 +243,12 @@ private fun UploadLensRow(
     val toggleDescription = stringResource(
         if (expanded) R.string.upload_collapse_lens else R.string.upload_expand_lens
     )
+    // The chevron turns over to point up while the specs are open
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        animationSpec = tween(Motion.DURATION_MEDIUM, easing = Motion.Emphasized),
+        label = "LensChevronRotation",
+    )
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -252,8 +269,9 @@ private fun UploadLensRow(
                 modifier = Modifier.semantics { contentDescription = toggleDescription },
             ) {
                 Icon(
-                    imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    imageVector = Icons.Filled.ExpandMore,
                     contentDescription = null,
+                    modifier = Modifier.rotate(chevronRotation),
                 )
             }
         }
@@ -285,7 +303,7 @@ private fun LensPhotoRow(
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(text = label, style = MaterialTheme.typography.bodyLarge)
-            if (hasPhoto) {
+            AnimatedVisibility(visible = hasPhoto) {
                 Text(
                     text = stringResource(R.string.upload_photo_attached),
                     style = MaterialTheme.typography.bodySmall,
@@ -293,16 +311,20 @@ private fun LensPhotoRow(
                 )
             }
         }
-        if (hasPhoto) {
+        AnimatedVisibility(visible = hasPhoto) {
             TextButton(onClick = onRemovePhoto, enabled = enabled) {
                 Text(stringResource(R.string.upload_remove_photo))
             }
-            OutlinedButton(onClick = onAddPhoto, enabled = enabled) {
-                Text(stringResource(R.string.upload_change_photo))
-            }
-        } else {
-            OutlinedButton(onClick = onAddPhoto, enabled = enabled) {
-                Text(stringResource(R.string.upload_add_photo))
+        }
+        OutlinedButton(onClick = onAddPhoto, enabled = enabled) {
+            AnimatedContent(
+                targetState = hasPhoto,
+                transitionSpec = { fadeThroughIn() togetherWith fadeThroughOut() },
+                label = "PhotoButtonLabel",
+            ) { attached ->
+                Text(
+                    stringResource(if (attached) R.string.upload_change_photo else R.string.upload_add_photo)
+                )
             }
         }
     }
