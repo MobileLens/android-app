@@ -36,6 +36,12 @@ android {
         compose = true
         buildConfig = true
     }
+    // The language can be changed in the app, so every translation has to be installed
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
 }
 
 dependencies {

@@ -28,6 +28,8 @@ sealed interface Screen {
     @Serializable object Login : Screen
     @Serializable object Register : Screen
     @Serializable object UserSettings : Screen
+    /** The app's own preferences (theme, language), opened from the account menu. */
+    @Serializable object AppSettings : Screen
 }
 
 
@@ -43,9 +45,10 @@ val TOP_LEVEL_ROUTES = listOf(
     TopLevelRoute(R.string.nav_catalogue, Screen.Catalogue, Icons.AutoMirrored.Filled.List)
 )
 
-/** Login, Register and UserSettings, opened by the account button on top of the current tab. */
+/** Login, Register, UserSettings and AppSettings, opened from the account menu on top of the current tab. */
 fun NavDestination.isAccountScreen(): Boolean =
-    hasRoute<Screen.Login>() || hasRoute<Screen.Register>() || hasRoute<Screen.UserSettings>()
+    hasRoute<Screen.Login>() || hasRoute<Screen.Register>() || hasRoute<Screen.UserSettings>() ||
+            hasRoute<Screen.AppSettings>()
 
 /** The bottom bar's tabs. */
 fun NavDestination.isTopLevel(): Boolean = TOP_LEVEL_ROUTES.any { hasRoute(it.route::class) }

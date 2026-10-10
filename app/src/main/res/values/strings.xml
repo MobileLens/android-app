@@ -19,6 +19,9 @@
     <string name="search_back">Close search</string>
     <string name="clear_search">Clear search</string>
     <string name="no_phones_found">No phones found</string>
+
+    <!-- Account menu, opened from the avatar in the top bar -->
+    <string name="account_menu">Account and settings</string>
     <string name="account">Account</string>
 
     <!-- Catalogue -->
@@ -194,6 +197,23 @@
     <string name="settings_delete_account_title">Delete Account</string>
     <string name="settings_delete_account_message">Are you sure you want to delete your account? This action cannot be undone.</string>
     <string name="settings_error_change_email">Couldn\'t change e-mail.</string>
+
+    <!-- App settings -->
+    <string name="app_settings_title">Settings</string>
+    <string name="app_settings_appearance">Appearance</string>
+    <string name="app_settings_theme">Theme</string>
+    <string name="app_settings_theme_system">System</string>
+    <string name="app_settings_theme_light">Light</string>
+    <string name="app_settings_theme_dark">Dark</string>
+    <string name="app_settings_dynamic_color">Material You</string>
+    <string name="app_settings_dynamic_color_supporting">Use colors from your wallpaper</string>
+    <string name="app_settings_general">General</string>
+    <string name="app_settings_language">Language</string>
+    <string name="app_settings_language_system">System default</string>
+    <string name="app_settings_about">About</string>
+    <string name="app_settings_version">Version</string>
+    <!-- %1$s: version name, %2$d: version code, e.g. "1.0 (1)" -->
+    <string name="app_settings_version_value">%1$s (%2$d)</string>
 
     <!-- Reviews -->
     <!-- %1$s: author name -->

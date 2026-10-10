@@ -1,0 +1,258 @@
+<resources>
+    <!-- Common -->
+    <string name="common_save">Zapisz</string>
+    <string name="common_cancel">Anuluj</string>
+    <string name="common_delete">Usuń</string>
+    <string name="common_back">Wstecz</string>
+    <string name="common_open_menu">Otwórz menu</string>
+    <string name="common_close_menu">Zamknij menu</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_home">Start</string>
+    <string name="nav_favorites">Ulubione</string>
+    <string name="nav_catalogue">Katalog</string>
+
+    <!-- Search bar -->
+    <string name="search_phones_hint">Szukaj</string>
+    <string name="search_back">Zamknij wyszukiwanie</string>
+    <string name="clear_search">Wyczyść wyszukiwanie</string>
+    <string name="no_phones_found">Nie znaleziono telefonów</string>
+
+    <!-- Account menu, opened from the avatar in the top bar -->
+    <string name="account_menu">Konto i ustawienia</string>
+    <string name="account">Konto</string>
+
+    <!-- Catalogue -->
+    <string name="catalogue_tab_all">Wszystkie</string>
+    <string name="catalogue_tab_new">Nowe</string>
+    <string name="catalogue_tab_trending">Popularne</string>
+    <string name="action_retry">Spróbuj ponownie</string>
+    <string name="filter_brand">Marka</string>
+    <string name="filter_lens">Obiektyw</string>
+    <string name="filter_stabilization">Stabilizacja</string>
+    <string name="filter_optical_zoom">Zoom optyczny</string>
+    <string name="filter_verified">Zweryfikowane</string>
+    <string name="filter_any">Dowolne</string>
+    <string name="filter_clear">Wyczyść</string>
+
+    <!-- Home (this device) -->
+    <string name="home_checking_cameras">Sprawdzanie aparatów tego urządzenia</string>
+    <string name="home_no_cameras">Nie znaleziono aparatów</string>
+    <string name="home_camera_details_unavailable">To urządzenie nie udostępniło szczegółów aparatów.</string>
+
+    <!-- Floating action menu -->
+    <string name="action_write_review">Napisz recenzję</string>
+    <string name="action_reviews">Recenzje</string>
+    <string name="action_upload">Prześlij</string>
+    <string name="action_compare">Porównaj</string>
+
+    <!-- Device camera upload (Home) -->
+    <string name="upload_login_required_title">Wymagane logowanie</string>
+    <string name="upload_login_required_message">Aby przesłać dane aparatów z tego telefonu, musisz się zalogować.</string>
+    <string name="upload_login_required_ok">OK</string>
+    <string name="upload_screen_title">Prześlij aparaty</string>
+    <string name="upload_screen_close">Zamknij przesyłanie</string>
+    <string name="upload_submit">Prześlij</string>
+    <string name="upload_submitting">Przesyłanie</string>
+    <!-- %1$s: brand and model of this device -->
+    <string name="upload_device_label">Przesyłanie aparatów z urządzenia %1$s</string>
+    <string name="upload_lenses_heading">Wszystkie obiektywy</string>
+    <string name="upload_lenses_supporting">Przesyłane są wszystkie aparaty tego telefonu. Częściowe przesyłanie nie jest dozwolone. Rozwiń obiektyw, aby sprawdzić parametry, które zostaną wysłane. Jeśli tego modelu nie ma jeszcze w katalogu, zostanie utworzony.</string>
+    <string name="upload_expand_lens">Pokaż parametry obiektywu</string>
+    <string name="upload_collapse_lens">Ukryj parametry obiektywu</string>
+    <string name="upload_photos_heading">Zdjęcia w pełnej rozdzielczości</string>
+    <string name="upload_photos_supporting">Opcjonalnie. Dodaj zdjęcia zrobione fabryczną aplikacją aparatu, abyśmy mogli potwierdzić rzeczywistą liczbę pikseli. Zdjęcia muszą być zrobione tym telefonem. Same zdjęcia nie zostaną przesłane, odczytane zostaną tylko dane EXIF.</string>
+    <string name="upload_add_photo">Dodaj zdjęcie</string>
+    <string name="upload_change_photo">Zmień zdjęcie</string>
+    <string name="upload_remove_photo">Usuń zdjęcie</string>
+    <string name="upload_photo_attached">Dołączono zdjęcie</string>
+    <string name="upload_succeeded">Przesłano dane aparatów.</string>
+    <string name="upload_error_photo_not_from_device">To zdjęcie nie wygląda na zrobione tym telefonem. Sprawdź pola Make i Model w danych EXIF.</string>
+    <string name="upload_error_submit">Nie udało się przesłać aparatów. Jeśli część z nich została już utworzona, spróbuj ponownie później lub poproś o pomoc moderatora.</string>
+    <string name="upload_error_device_not_in_catalogue">Tego urządzenia nie ma jeszcze w katalogu, a nowe urządzenia mogą dodawać tylko moderatorzy. Poproś moderatora o jego dodanie i spróbuj ponownie.</string>
+    <string name="upload_error_invalid_camera">Serwer odrzucił dane aparatów odczytane z tego urządzenia.</string>
+    <string name="upload_error_banned">To konto zostało zablokowane i nie może przesyłać danych.</string>
+    <string name="upload_cameras_unavailable">Szczegóły aparatów nie są jeszcze gotowe. Poczekaj, aż obiektywy tego urządzenia zostaną wczytane.</string>
+
+    <!-- Phones -->
+    <string name="favorites_empty">Brak ulubionych</string>
+    <string name="error_load_favorites">Nie udało się wczytać ulubionych.</string>
+    <string name="error_toggle_favorite">Nie udało się zaktualizować ulubionych.</string>
+    <!-- %1$s: localized release date -->
+    <string name="phone_released">Premiera: %1$s</string>
+    <string name="phone_add_favorite">Dodaj do ulubionych</string>
+    <string name="phone_remove_favorite">Usuń z ulubionych</string>
+    <string name="error_load_phones">Nie udało się wczytać telefonów.</string>
+    <string name="error_load_phone">Nie udało się wczytać tego telefonu.</string>
+
+    <!-- Phone gallery -->
+    <string name="gallery_title">Galeria</string>
+    <string name="gallery_open">Otwórz galerię</string>
+    <!-- %1$s: phone model, e.g. "Galeria: Pixel 8 Pro" -->
+    <string name="gallery_screen_title">Galeria: %1$s</string>
+    <!-- %1$d: position of the photo, %2$d: number of photos -->
+    <string name="gallery_photo">Zdjęcie %1$d z %2$d</string>
+    <string name="gallery_empty">Brak zdjęć</string>
+    <string name="gallery_empty_supporting">Tutaj pojawią się zdjęcia zrobione tym telefonem.</string>
+    <string name="gallery_photo_failed">Nie udało się wczytać tego zdjęcia.</string>
+    <string name="error_load_photos">Nie udało się wczytać zdjęć.</string>
+
+    <!-- Lens facing -->
+    <string name="facing_front">Przedni</string>
+    <string name="facing_back">Tylny</string>
+    <string name="facing_other">Inny</string>
+
+    <!-- Lens types -->
+    <string name="lens_type_wide">Szerokokątny</string>
+    <string name="lens_type_ultrawide">Ultraszerokokątny</string>
+    <string name="lens_type_telephoto">Teleobiektyw</string>
+    <string name="lens_type_macro">Makro</string>
+    <string name="lens_type_other">Inny</string>
+
+    <!-- Image stabilization -->
+    <string name="stabilization_none">Brak</string>
+    <string name="stabilization_ois">OIS</string>
+    <string name="stabilization_sensor_shift">Przesuw matrycy</string>
+
+    <!-- Lens tab, e.g. "Tylny szerokokątny". %1$s: facing, %2$s: lens type (lowercased in code) -->
+    <string name="lens_tab_label">%1$s %2$s</string>
+
+    <!-- Spec card titles -->
+    <string name="spec_focal_length">Ogniskowa</string>
+    <string name="spec_focal_length_35mm">Ogniskowa (35 mm)</string>
+    <string name="spec_aperture">Przysłona</string>
+    <string name="spec_aperture_35mm">Przysłona (35 mm)</string>
+    <string name="spec_resolution">Rozdzielczość</string>
+    <string name="spec_active_resolution">Rozdzielczość efektywna</string>
+    <string name="spec_pixel_pitch">Rozmiar piksela</string>
+    <string name="spec_sensor_type">Typ matrycy</string>
+    <string name="spec_stabilization">OIS</string>
+    <string name="spec_crop_factor">Crop</string>
+    <string name="spec_af_zones">Strefy AF</string>
+    <string name="spec_video_resolutions">Rozdzielczości wideo</string>
+
+    <!-- Spec values. Numbers are formatted with the app locale's decimal separator -->
+    <string name="value_focal_length">%1$.2f mm</string>
+    <!-- %1$s–%2$s: physical min and max when the lens zooms -->
+    <string name="value_focal_length_range">%1$.2f – %2$.2f mm</string>
+    <string name="value_focal_length_35mm">%1$.0f mm</string>
+    <string name="value_focal_length_35mm_range">%1$.0f – %2$.0f mm</string>
+    <string name="value_aperture">f/%1$.1f</string>
+    <!-- %1$s–%2$s: brightest and dimmest stop when aperture is variable -->
+    <string name="value_aperture_range">f/%1$.1f – f/%2$.1f</string>
+    <string name="value_aperture_35mm">f/%1$.2f</string>
+    <string name="value_aperture_35mm_range">f/%1$.2f – f/%2$.2f</string>
+    <string name="value_megapixels">%1$.0f MP</string>
+    <!-- Optical format, e.g. 1/1,28" -->
+    <string name="value_sensor_type">1/%1$.2f\"</string>
+    <string name="value_pixel_pitch">%1$.2f μm</string>
+    <string name="value_crop_factor">%1$.2fx</string>
+
+    <!-- Auth -->
+    <string name="auth_log_in">Zaloguj się</string>
+    <string name="auth_register">Zarejestruj się</string>
+    <string name="auth_username">Nazwa użytkownika</string>
+    <string name="auth_email">E-mail</string>
+    <string name="auth_password">Hasło</string>
+    <string name="auth_repeat_password">Powtórz hasło</string>
+    <string name="auth_forgot_password">Nie pamiętasz hasła?</string>
+    <string name="auth_register_account">Załóż konto</string>
+    <string name="auth_have_account">Masz już konto? Zaloguj się</string>
+    <string name="auth_error_invalid_credentials">Nieprawidłowy e-mail lub hasło.</string>
+    <string name="auth_error_no_connection">Nie udało się połączyć z serwerem. Sprawdź połączenie.</string>
+    <string name="auth_error_login">Nie udało się zalogować. Spróbuj ponownie.</string>
+    <string name="auth_error_banned">To konto zostało zablokowane.</string>
+    <string name="auth_error_email_not_verified">Najpierw potwierdź adres e-mail, a potem się zaloguj.</string>
+    <string name="auth_error_password_weak">Hasło musi mieć co najmniej 8 znaków i zawierać małą literę, wielką literę, cyfrę oraz znak specjalny.</string>
+    <string name="auth_error_passwords_differ">Hasła nie są takie same.</string>
+    <string name="auth_error_register">Nie udało się utworzyć konta. Spróbuj ponownie.</string>
+    <string name="auth_error_register_exists">Konto z tym adresem e-mail już istnieje.</string>
+    <string name="auth_error_register_invalid_email">Podaj prawidłowy adres e-mail.</string>
+    <string name="auth_error_register_verify_email">Konto zostało utworzone. Potwierdź adres e-mail, a potem się zaloguj.</string>
+
+    <!-- User roles -->
+    <string name="role_user">Użytkownik</string>
+    <string name="role_reviewer">Recenzent</string>
+    <string name="role_moderator">Moderator</string>
+    <string name="role_admin">Administrator</string>
+
+    <!-- User settings. %1$s: username -->
+    <string name="settings_title">Ustawienia: %1$s</string>
+    <string name="settings_personal_info">Dane osobowe</string>
+    <string name="settings_role">Rola</string>
+    <string name="settings_change">Zmień</string>
+    <string name="settings_danger_zone">Strefa zagrożenia</string>
+    <string name="settings_delete_account">Usuń konto</string>
+    <string name="settings_log_out">Wyloguj się</string>
+    <string name="settings_review_history">Historia recenzji</string>
+    <string name="settings_no_review_history">Brak historii recenzji.</string>
+    <string name="settings_change_username_title">Zmień nazwę użytkownika</string>
+    <string name="settings_new_username">Nowa nazwa użytkownika</string>
+    <string name="settings_change_email_title">Zmień e-mail</string>
+    <string name="settings_new_email">Nowy e-mail</string>
+    <string name="settings_change_password_title">Zmień hasło</string>
+    <string name="settings_new_password">Nowe hasło</string>
+    <string name="settings_delete_account_title">Usuń konto</string>
+    <string name="settings_delete_account_message">Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć.</string>
+    <string name="settings_error_change_email">Nie udało się zmienić adresu e-mail.</string>
+
+    <!-- App settings -->
+    <string name="app_settings_title">Ustawienia</string>
+    <string name="app_settings_appearance">Wygląd</string>
+    <string name="app_settings_theme">Motyw</string>
+    <string name="app_settings_theme_system">Systemowy</string>
+    <string name="app_settings_theme_light">Jasny</string>
+    <string name="app_settings_theme_dark">Ciemny</string>
+    <string name="app_settings_dynamic_color">Material You</string>
+    <string name="app_settings_dynamic_color_supporting">Używaj kolorów z tapety</string>
+    <string name="app_settings_general">Ogólne</string>
+    <string name="app_settings_language">Język</string>
+    <string name="app_settings_language_system">Język systemu</string>
+    <string name="app_settings_about">O aplikacji</string>
+    <string name="app_settings_version">Wersja</string>
+    <!-- %1$s: version name, %2$d: version code, e.g. "1.0 (1)" -->
+    <string name="app_settings_version_value">%1$s (%2$d)</string>
+
+    <!-- Reviews -->
+    <!-- %1$s: author name -->
+    <string name="review_by_author">Autor: %1$s</string>
+    <string name="review_no_reviews">Brak recenzji.</string>
+    <string name="review_open">Przejdź do recenzji</string>
+    <string name="review_comments">Komentarze</string>
+    <string name="review_likes">Polubienia</string>
+    <string name="review_share">Udostępnij</string>
+    <string name="review_edit">Edytuj</string>
+    <string name="error_load_reviews">Nie udało się wczytać recenzji.</string>
+    <string name="error_load_review">Nie udało się wczytać tej recenzji.</string>
+
+    <!-- Review editor. Glyphs are the letters shown on the formatting buttons -->
+    <string name="editor_bold_glyph">B</string>
+    <string name="editor_italic_glyph">I</string>
+    <string name="editor_underline_glyph">U</string>
+    <string name="editor_bold">Pogrubienie</string>
+    <string name="editor_italic">Kursywa</string>
+    <string name="editor_underline">Podkreślenie</string>
+    <string name="editor_insert_image">Wstaw obraz</string>
+    <string name="editor_undo">Cofnij</string>
+    <string name="review_editor_title">Napisz recenzję</string>
+    <string name="review_editor_close">Zamknij edytor</string>
+    <string name="review_editor_publish">Opublikuj</string>
+    <string name="review_editor_tab_write">Pisz</string>
+    <string name="review_editor_tab_preview">Podgląd</string>
+    <string name="review_editor_title_hint">Tytuł</string>
+    <string name="review_editor_content_hint">Opisz swoje wrażenia z aparatów tego telefonu. Możesz używać Markdown.</string>
+    <string name="review_editor_preview_empty">Nie ma jeszcze nic do podglądu.</string>
+    <!-- %1$s: phone brand and model -->
+    <string name="review_editor_reviewing">Recenzja: %1$s</string>
+    <string name="review_editor_finding_phone">Wyszukiwanie telefonu…</string>
+    <string name="review_editor_device_not_in_catalogue">Tego urządzenia nie ma jeszcze w katalogu, więc nie można go zrecenzować.</string>
+    <string name="review_editor_uploading_image">Przesyłanie obrazu</string>
+    <string name="review_editor_published">Recenzja została wysłana do moderacji.</string>
+    <string name="review_editor_published_live">Recenzja została opublikowana.</string>
+    <string name="review_editor_discard_title">Odrzucić recenzję?</string>
+    <string name="review_editor_discard_message">Twój szkic zostanie utracony.</string>
+    <string name="review_editor_discard">Odrzuć</string>
+    <string name="review_editor_keep_editing">Edytuj dalej</string>
+    <string name="error_upload_review_image">Nie udało się przesłać obrazu.</string>
+    <string name="error_publish_review">Nie udało się opublikować recenzji. Zaloguj się i spróbuj ponownie.</string>
+</resources>

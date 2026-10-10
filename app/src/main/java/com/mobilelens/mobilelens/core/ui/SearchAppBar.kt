@@ -10,6 +10,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExpandedDockedSearchBar
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +28,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopSearchBar
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.testTag
@@ -64,6 +72,7 @@ fun SearchAppBar(
     showBackButton: Boolean = false,
     onBackClick: () -> Unit = {},
     onAccountClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     // Initial of the logged-in user; a generic person icon is shown when null
     accountInitial: String? = null,
 ) {
@@ -173,35 +182,11 @@ fun SearchAppBar(
                 )
             }
 
-            val accountDescription = stringResource(R.string.account)
-            IconButton(
-                onClick = onAccountClick,
-                modifier = Modifier.semantics { contentDescription = accountDescription }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (accountInitial != null) {
-                        Text(
-                            text = accountInitial,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            }
+            AccountMenuButton(
+                accountInitial = accountInitial,
+                onAccountClick = onAccountClick,
+                onSettingsClick = onSettingsClick,
+            )
         }
 
         if (searchBarState.currentValue == SearchBarValue.Expanded) {
@@ -224,6 +209,70 @@ fun SearchAppBar(
     }
 }
 
+/** The user's avatar, opening a menu that leads to their account or to the app's settings. */
+@Composable
+private fun AccountMenuButton(
+    accountInitial: String?,
+    onAccountClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    // The menu drops down from the avatar
+    Box {
+        val menuDescription = stringResource(R.string.account_menu)
+        IconButton(
+            onClick = { expanded = true },
+            modifier = Modifier.semantics { contentDescription = menuDescription }
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                if (accountInitial != null) {
+                    Text(
+                        text = accountInitial,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.account)) },
+                onClick = {
+                    expanded = false
+                    onAccountClick()
+                },
+                leadingIcon = { Icon(Icons.Outlined.AccountCircle, contentDescription = null) },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.app_settings_title)) },
+                onClick = {
+                    expanded = false
+                    onSettingsClick()
+                },
+                leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
+            )
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable

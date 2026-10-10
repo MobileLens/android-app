@@ -48,6 +48,7 @@ import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
 import com.mobilelens.mobilelens.phones.viewmodel.CatalogueUiState
 import com.mobilelens.mobilelens.phones.viewmodel.CatalogueViewModel
 import com.mobilelens.mobilelens.reviews.navigation.reviewsRoutes
+import com.mobilelens.mobilelens.settings.navigation.settingsRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,6 +114,10 @@ fun MainApp(
         }
     }
 
+    fun handleSettingsClick() {
+        navController.navigate(Screen.AppSettings) { launchSingleTop = true }
+    }
+
     val showTopBar = !isAuthOrSettingsScreen && !isReviewEditor && !isGallery && !isUploadDevice
     val showBottomBar = !isReviewEditor
     val navTransitions = rememberNavTransitions()
@@ -169,6 +174,7 @@ fun MainApp(
                         },
                         onClear = { selectedPhoneId = null },
                         onAccountClick = { handleAccountClick() },
+                        onSettingsClick = { handleSettingsClick() },
                         accountInitial = currentUser?.username?.take(1)?.uppercase()
                     )
                 }
@@ -201,6 +207,7 @@ fun MainApp(
             )
             reviewsRoutes(navController)
             authRoutes(navController, authViewModel)
+            settingsRoutes(navController)
         }
     }
 }
