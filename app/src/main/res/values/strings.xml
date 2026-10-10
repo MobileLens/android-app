@@ -21,6 +21,19 @@
     <string name="no_phones_found">No phones found</string>
     <string name="account">Account</string>
 
+    <!-- Catalogue -->
+    <string name="catalogue_tab_all">All</string>
+    <string name="catalogue_tab_new">New</string>
+    <string name="catalogue_tab_trending">Trending</string>
+    <string name="action_retry">Retry</string>
+    <string name="filter_brand">Brand</string>
+    <string name="filter_lens">Lens</string>
+    <string name="filter_stabilization">Stabilization</string>
+    <string name="filter_optical_zoom">Optical zoom</string>
+    <string name="filter_verified">Verified</string>
+    <string name="filter_any">Any</string>
+    <string name="filter_clear">Clear</string>
+
     <!-- Home (this device) -->
     <string name="home_checking_cameras">Checking this device\'s cameras</string>
     <string name="home_no_cameras">No cameras found</string>

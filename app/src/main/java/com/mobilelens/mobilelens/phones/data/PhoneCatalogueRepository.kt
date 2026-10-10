@@ -7,6 +7,9 @@ import com.mobilelens.mobilelens.phones.data.remote.PhoneApi
 import com.mobilelens.mobilelens.phones.data.remote.dtos.CreateBrandRequest
 import com.mobilelens.mobilelens.phones.data.remote.dtos.CreatePhoneRequest
 import com.mobilelens.mobilelens.phones.data.remote.dtos.PhoneDto
+import com.mobilelens.mobilelens.phones.model.Brand
+import com.mobilelens.mobilelens.phones.model.CatalogueFilters
+import com.mobilelens.mobilelens.phones.model.CatalogueSort
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 import com.mobilelens.mobilelens.phones.model.Facing
 import com.mobilelens.mobilelens.phones.model.Lens
@@ -32,14 +35,29 @@ class PhoneCatalogueRepository {
     private val _phones = MutableStateFlow<List<Phone>>(emptyList())
     val phones: StateFlow<List<Phone>> = _phones.asStateFlow()
 
-    suspend fun loadPhones(query: String? = null) {
-        val response = phoneApi.getPhones(query = query)
+    suspend fun loadPhones(
+        query: String? = null,
+        sort: CatalogueSort = CatalogueSort.ALL,
+        filters: CatalogueFilters = CatalogueFilters(),
+    ) {
+        val response = phoneApi.getPhones(
+            query = query,
+            brandId = filters.brandId,
+            sort = sort.apiValue,
+            cameraType = filters.lensType?.let(::lensTypeToApi),
+            ois = filters.stabilization?.let(::stabilizationToApi),
+            verified = filters.verifiedOnly.takeIf { it },
+            opticalZoom = filters.opticalZoom.takeIf { it },
+        )
         val phoneList = response.data.map { listDto ->
             val fullPhoneDto = phoneApi.getPhone(listDto.id)
             mapToPhone(fullPhoneDto)
         }
         _phones.value = phoneList
     }
+
+    suspend fun getBrands(): List<Brand> =
+        brandApi.getBrands().map { Brand(id = it.id, name = it.name) }
 
     suspend fun getPhoneById(id: String): Phone {
         val fullPhoneDto = phoneApi.getPhone(id)
@@ -152,4 +170,20 @@ internal fun stabilizationFromApi(value: String): Stabilization = when (value.lo
     "optical", "ois" -> Stabilization.OIS
     "sensor_shift", "sensorshift", "sensor-shift" -> Stabilization.SENSORSHIFT
     else -> Stabilization.NONE
+}
+
+// The reverse mappings, for the catalogue filters
+
+internal fun lensTypeToApi(type: LensType): String = when (type) {
+    LensType.WIDE -> "wide"
+    LensType.ULTRAWIDE -> "ultrawide"
+    LensType.TELEPHOTO -> "tele"
+    LensType.MACRO -> "macro"
+    LensType.OTHER -> "other"
+}
+
+internal fun stabilizationToApi(value: Stabilization): String = when (value) {
+    Stabilization.NONE -> "none"
+    Stabilization.OIS -> "optical"
+    Stabilization.SENSORSHIFT -> "sensor_shift"
 }

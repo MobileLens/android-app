@@ -4,6 +4,8 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -11,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -23,7 +26,10 @@ import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
+import com.mobilelens.mobilelens.phones.model.CatalogueSort
 import com.mobilelens.mobilelens.phones.model.Phone
+import com.mobilelens.mobilelens.phones.ui.components.CatalogueFilterChips
+import com.mobilelens.mobilelens.phones.ui.components.CatalogueSortTabs
 import com.mobilelens.mobilelens.phones.ui.screens.CatalogueScreen
 import com.mobilelens.mobilelens.phones.ui.screens.FavoritesScreen
 import com.mobilelens.mobilelens.phones.ui.screens.HomeScreen
@@ -83,20 +89,52 @@ fun NavGraphBuilder.phonesRoutes(
         )
     }
     composable<Screen.Catalogue> {
+        val context = LocalContext.current
         val catalogueState by catalogueViewModel.catalogueState.collectAsState()
+        val sort by catalogueViewModel.sort.collectAsState()
+        val filters by catalogueViewModel.filters.collectAsState()
+        val brands by catalogueViewModel.brands.collectAsState()
+        val errorMessageRes by catalogueViewModel.errorMessageRes.collectAsState()
 
-        when (val state = catalogueState) {
-            is CatalogueUiState.Loading -> LoadingContent()
-            is CatalogueUiState.Error -> ErrorContent(messageRes = state.messageRes)
-            is CatalogueUiState.Success -> {
-                CatalogueScreen(
-                    phones = state.phones,
-                    selectedPhoneId = selectedPhoneId(),
-                    onPhoneClick = { phone ->
-                        navController.navigate(Screen.PhoneDetails(phone.id))
-                    },
-                    isRefreshing = state.isRefreshing
+        // A failed pull-to-refresh leaves the old results up, so say why nothing changed
+        val errorMessage = errorMessageRes?.let { stringResource(it) }
+        LaunchedEffect(errorMessage) {
+            if (errorMessage != null) {
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                catalogueViewModel.errorMessageShown()
+            }
+        }
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            CatalogueSortTabs(
+                selected = sort,
+                onSelect = catalogueViewModel::selectSort,
+            )
+            if (sort == CatalogueSort.ALL) {
+                CatalogueFilterChips(
+                    filters = filters,
+                    brands = brands,
+                    onFiltersChange = catalogueViewModel::setFilters,
                 )
+            }
+            when (val state = catalogueState) {
+                is CatalogueUiState.Loading -> LoadingContent()
+                is CatalogueUiState.Error -> ErrorContent(
+                    messageRes = state.messageRes,
+                    onRetry = catalogueViewModel::refresh,
+                )
+                is CatalogueUiState.Success -> {
+                    CatalogueScreen(
+                        phones = state.phones,
+                        selectedPhoneId = selectedPhoneId(),
+                        onPhoneClick = { phone ->
+                            navController.navigate(Screen.PhoneDetails(phone.id))
+                        },
+                        onRefresh = catalogueViewModel::refresh,
+                        isRefreshing = state.isRefreshing,
+                        isPullRefreshing = state.isPullRefreshing,
+                    )
+                }
             }
         }
     }

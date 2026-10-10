@@ -26,6 +26,12 @@ interface PhoneApi {
     suspend fun getPhones(
         @Query("q") query: String? = null,
         @Query("brand_id") brandId: String? = null,
+        @Query("sort") sort: String? = null,
+        @Query("camera_type") cameraType: String? = null,
+        @Query("ois") ois: String? = null,
+        // The backend reads only the literal "true"; null leaves the parameter out
+        @Query("verified") verified: Boolean? = null,
+        @Query("optical_zoom") opticalZoom: Boolean? = null,
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 20,
     ): PhonesResponse

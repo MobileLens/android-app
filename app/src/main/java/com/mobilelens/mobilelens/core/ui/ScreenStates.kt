@@ -2,11 +2,13 @@ package com.mobilelens.mobilelens.core.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,9 +30,17 @@ fun LoadingContent(modifier: Modifier = Modifier) {
 fun ErrorContent(
     @StringRes messageRes: Int,
     modifier: Modifier = Modifier,
+    onRetry: (() -> Unit)? = null,
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = stringResource(messageRes), modifier = Modifier.padding(16.dp))
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = stringResource(messageRes), modifier = Modifier.padding(16.dp))
+            if (onRetry != null) {
+                TextButton(onClick = onRetry) {
+                    Text(text = stringResource(R.string.action_retry))
+                }
+            }
+        }
     }
 }
 

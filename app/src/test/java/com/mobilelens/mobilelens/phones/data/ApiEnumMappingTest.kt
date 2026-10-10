@@ -1,5 +1,6 @@
 package com.mobilelens.mobilelens.phones.data
 
+import com.mobilelens.mobilelens.phones.model.CatalogueSort
 import com.mobilelens.mobilelens.phones.model.Facing
 import com.mobilelens.mobilelens.phones.model.LensType
 import com.mobilelens.mobilelens.phones.model.Stabilization
@@ -100,5 +101,25 @@ class ApiEnumMappingTest {
     fun stabilization_unknownValueFallsBackToNone() {
         assertEquals(Stabilization.NONE, stabilizationFromApi("gyro"))
         assertEquals(Stabilization.NONE, stabilizationFromApi(""))
+    }
+
+    // --- CatalogueSort ---
+
+    @Test
+    fun catalogueSort_apiValuesMatchBackendSorts() {
+        // `SORTS` in backend-api/api/src/routes/smartphones.ts
+        assertEquals(listOf("name", "new", "trending"), CatalogueSort.entries.map { it.apiValue }.sorted())
+    }
+
+    // --- Reverse mappings (catalogue filters) ---
+
+    @Test
+    fun lensType_toApiRoundTrips() {
+        LensType.entries.forEach { assertEquals(it, lensTypeFromApi(lensTypeToApi(it))) }
+    }
+
+    @Test
+    fun stabilization_toApiRoundTrips() {
+        Stabilization.entries.forEach { assertEquals(it, stabilizationFromApi(stabilizationToApi(it))) }
     }
 }

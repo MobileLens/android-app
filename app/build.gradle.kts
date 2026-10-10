@@ -17,7 +17,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val baseUrl = project.findProperty("BASE_URL") as? String ?: "http://127.0.0.1:3000/"
+        val baseUrl = project.findProperty("BASE_URL") as? String ?: "https://mobilelens.duckdns.org/"
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
@@ -47,7 +47,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.runtime)
+//    implementation(libs.androidx.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
