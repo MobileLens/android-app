@@ -40,9 +40,11 @@ fun ReviewCard(
     onShareClick: () -> Unit = {}
 ) {
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onCardClick() },
+        onClick = onCardClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         Column(
             modifier = Modifier
@@ -59,20 +61,20 @@ fun ReviewCard(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
                         text = author,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                     contentDescription = stringResource(R.string.review_open),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -95,13 +97,13 @@ fun ReviewCard(
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.Comment,
                         contentDescription = stringResource(R.string.review_comments),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(end = 8.dp)
                     )
                     Text(
                         text = commentCount.toString(),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -116,14 +118,14 @@ fun ReviewCard(
                     Icon(
                         imageVector = Icons.Outlined.FavoriteBorder,
                         contentDescription = stringResource(R.string.review_likes),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(end = 8.dp)
                     )
 
                     Text(
                         text = likeCount.toString(),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -138,7 +140,7 @@ fun ReviewCard(
                     Icon(
                         imageVector = Icons.Outlined.Share,
                         contentDescription = stringResource(R.string.review_share),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(end = 8.dp)
                     )
                 }
