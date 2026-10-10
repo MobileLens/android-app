@@ -1,5 +1,6 @@
 package com.mobilelens.mobilelens.auth.data
 
+import com.mobilelens.mobilelens.auth.data.remote.AccountApi
 import com.mobilelens.mobilelens.auth.data.remote.AuthApi
 import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangeEmailRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangePasswordRequest
@@ -16,7 +17,8 @@ import kotlinx.serialization.json.decodeFromJsonElement
 class EmailVerificationRequiredException : Exception()
 
 class AuthRepository(
-    private val authApi: AuthApi = ApiClient.createService()
+    private val authApi: AuthApi = ApiClient.createService(),
+    private val accountApi: AccountApi = ApiClient.createService()
 ) {
     suspend fun login(email: String, password: String): User {
         val response = authApi.signInWithEmail(LoginRequest(email = email, password = password))
@@ -83,13 +85,21 @@ class AuthRepository(
         authApi.changeEmail(ChangeEmailRequest(newEmail = newEmail))
     }
 
+    /** Signs out every other device. This one stays signed in on the new session the backend returns. */
     suspend fun changePassword(currentPassword: String, newPassword: String) {
-        authApi.changePassword(
+        val response = authApi.changePassword(
             ChangePasswordRequest(
                 currentPassword = currentPassword,
                 newPassword = newPassword
             )
         )
+        response.token?.let { ApiClient.authToken = it }
+    }
+
+    suspend fun deleteAccount() {
+        accountApi.deleteAccount()
+        // The backend has already ended every session, so there is nothing to sign out of
+        ApiClient.authToken = null
     }
 
     suspend fun logout() {

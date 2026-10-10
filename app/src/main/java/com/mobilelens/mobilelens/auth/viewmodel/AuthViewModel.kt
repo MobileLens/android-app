@@ -11,7 +11,6 @@ import com.mobilelens.mobilelens.auth.data.isStrongPassword
 import com.mobilelens.mobilelens.auth.model.User
 import com.mobilelens.mobilelens.core.data.remote.ApiClient
 import com.mobilelens.mobilelens.core.data.remote.apiErrorCode
-import com.mobilelens.mobilelens.reviews.model.Review
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +19,15 @@ import retrofit2.HttpException
 import java.io.IOException
 
 private const val TAG = "AuthViewModel"
+
+/** Progress of a change to the account that one of the account screen's dialogs is saving. */
+sealed interface AccountEditState {
+    object Idle : AccountEditState
+    object Saving : AccountEditState
+    data class Failed(@StringRes val messageRes: Int) : AccountEditState
+    /** Done; [messageRes] confirms it once the dialog has closed. */
+    data class Saved(@StringRes val messageRes: Int) : AccountEditState
+}
 
 class AuthViewModel(
     private val authRepository: AuthRepository = AuthRepository()
@@ -35,12 +43,8 @@ class AuthViewModel(
     // String resource of the last failed login, shown on the login screen
     val loginError: StateFlow<Int?> = _loginError.asStateFlow()
 
-    private val _profileError = MutableStateFlow<Int?>(null)
-    // String resource of the last failed settings action, shown on the settings screen
-    val profileError: StateFlow<Int?> = _profileError.asStateFlow()
-
-    private val _userReviews = MutableStateFlow<List<Review>>(emptyList())
-    val userReviews: StateFlow<List<Review>> = _userReviews.asStateFlow()
+    private val _accountEdit = MutableStateFlow<AccountEditState>(AccountEditState.Idle)
+    val accountEdit: StateFlow<AccountEditState> = _accountEdit.asStateFlow()
 
     val isLoggedIn: Boolean
         get() = _currentUser.value != null
@@ -101,47 +105,67 @@ class AuthViewModel(
         }
     }
 
-    fun updateUsername(newUsername: String) {
-        viewModelScope.launch {
-            try {
-                authRepository.updateUserProfile(username = newUsername)
-                _currentUser.value = _currentUser.value?.copy(username = newUsername)
-            } catch (_: Exception) {
-                _currentUser.value = _currentUser.value?.copy(username = newUsername)
+    fun updateUsername(newUsername: String) =
+        saveAccountEdit("Username change failed", ::usernameErrorFor) {
+            authRepository.updateUserProfile(username = newUsername)
+            _currentUser.value = _currentUser.value?.copy(username = newUsername)
+            R.string.settings_username_changed
+        }
+
+    fun updateEmail(newEmail: String) =
+        saveAccountEdit("E-mail change failed", ::emailErrorFor) {
+            authRepository.changeEmail(newEmail)
+            // The backend switches the address only once the link it e-mails is opened, and quietly
+            // does nothing when another account has it, so check whether it changed right away
+            val reloaded = runCatching { authRepository.getSession() }.getOrNull()
+            if (reloaded != null) {
+                _currentUser.value = reloaded
             }
+            if (reloaded?.email.equals(newEmail, ignoreCase = true)) {
+                R.string.settings_email_changed
+            } else {
+                R.string.settings_email_confirmation_sent
+            }
+        }
+
+    fun changePassword(currentPassword: String, newPassword: String) {
+        if (!isStrongPassword(newPassword)) {
+            _accountEdit.value = AccountEditState.Failed(R.string.auth_error_password_weak)
+            return
+        }
+        saveAccountEdit("Password change failed", ::passwordChangeErrorFor) {
+            authRepository.changePassword(currentPassword, newPassword)
+            R.string.settings_password_changed
         }
     }
 
-    fun updateEmail(newEmail: String) {
-        viewModelScope.launch {
-            _profileError.value = null
-            try {
-                authRepository.changeEmail(newEmail)
-                // The server answers success even if the address belongs to another account,
-                // so reload the user and check that the e-mail actually changed.
-                val reloaded = authRepository.getSession()
-                if (reloaded != null) {
-                    _currentUser.value = reloaded
-                }
-                if (!reloaded?.email.equals(newEmail, ignoreCase = true)) {
-                    _profileError.value = R.string.settings_error_change_email
-                }
-            } catch (_: Exception) {
-                _profileError.value = R.string.settings_error_change_email
-            }
+    fun deleteAccount() =
+        saveAccountEdit("Account deletion failed", ::deleteAccountErrorFor) {
+            authRepository.deleteAccount()
+            _currentUser.value = null
+            R.string.settings_account_deleted
         }
+
+    /** Forgets the last result, once it's been shown or its dialog has closed. */
+    fun clearAccountEdit() {
+        _accountEdit.value = AccountEditState.Idle
     }
 
-    fun clearProfileError() {
-        _profileError.value = null
-    }
-
-    fun deleteAccount() {
-        _currentUser.value = null
+    // Runs one account change at a time; [save] returns the message confirming it
+    private fun saveAccountEdit(
+        failureLog: String,
+        errorFor: (Exception) -> Int,
+        save: suspend () -> Int,
+    ) {
+        if (_accountEdit.value == AccountEditState.Saving) return
+        _accountEdit.value = AccountEditState.Saving
         viewModelScope.launch {
-            try {
-                authRepository.logout()
-            } catch (_: Exception) {}
+            _accountEdit.value = try {
+                AccountEditState.Saved(save())
+            } catch (e: Exception) {
+                Log.w(TAG, failureLog, e)
+                AccountEditState.Failed(errorFor(e))
+            }
         }
     }
 
@@ -152,10 +176,6 @@ class AuthViewModel(
                 authRepository.logout()
             } catch (_: Exception) {}
         }
-    }
-
-    fun deleteUserReview(reviewId: String) {
-        _userReviews.value = _userReviews.value.filter { it.id != reviewId }
     }
 }
 
@@ -182,4 +202,37 @@ private fun registerErrorFor(e: Exception): Int = when {
     }
     e is IOException -> R.string.auth_error_no_connection
     else -> R.string.auth_error_register
+}
+
+@StringRes
+private fun usernameErrorFor(e: Exception): Int = when (e) {
+    is IOException -> R.string.auth_error_no_connection
+    // Usernames are unique, and a taken one fails as a server error
+    else -> R.string.settings_error_change_username
+}
+
+@StringRes
+private fun emailErrorFor(e: Exception): Int = when {
+    // The dialog doesn't send the current address, so a 400 means a malformed one
+    e is HttpException && e.code() == 400 -> R.string.auth_error_register_invalid_email
+    e is IOException -> R.string.auth_error_no_connection
+    else -> R.string.settings_error_change_email
+}
+
+@StringRes
+private fun passwordChangeErrorFor(e: Exception): Int = when {
+    e is HttpException -> when (e.apiErrorCode) {
+        "INVALID_PASSWORD" -> R.string.settings_error_wrong_password
+        "PASSWORD_TOO_WEAK", "PASSWORD_TOO_SHORT", "PASSWORD_TOO_LONG", "PASSWORD_REQUIRED" ->
+            R.string.auth_error_password_weak
+        else -> R.string.settings_error_change_password
+    }
+    e is IOException -> R.string.auth_error_no_connection
+    else -> R.string.settings_error_change_password
+}
+
+@StringRes
+private fun deleteAccountErrorFor(e: Exception): Int = when (e) {
+    is IOException -> R.string.auth_error_no_connection
+    else -> R.string.settings_error_delete_account
 }

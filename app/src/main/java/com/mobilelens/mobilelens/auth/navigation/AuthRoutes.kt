@@ -1,18 +1,26 @@
 package com.mobilelens.mobilelens.auth.navigation
 
+import android.widget.Toast
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.mobilelens.mobilelens.auth.ui.screens.LoginScreen
 import com.mobilelens.mobilelens.auth.ui.screens.RegisterScreen
 import com.mobilelens.mobilelens.auth.ui.screens.UserSettingsScreen
+import com.mobilelens.mobilelens.auth.viewmodel.AccountEditState
 import com.mobilelens.mobilelens.auth.viewmodel.AuthViewModel
 import com.mobilelens.mobilelens.core.navigation.Screen
+import com.mobilelens.mobilelens.reviews.viewmodel.MyReviewsViewModel
 
 /**
  * Login, Register and UserSettings. Navigation between them follows `currentUser`: Login/Register
@@ -67,26 +75,63 @@ fun NavGraphBuilder.authRoutes(
     }
     composable<Screen.UserSettings> {
         val currentUser by authViewModel.currentUser.collectAsState()
+        val accountEdit by authViewModel.accountEdit.collectAsState()
         val user = currentUser
+        val context = LocalContext.current
+        val snackbarHostState = remember { SnackbarHostState() }
+
+        val savedMessage = (accountEdit as? AccountEditState.Saved)?.let { stringResource(it.messageRes) }
+        LaunchedEffect(savedMessage) {
+            if (savedMessage != null) {
+                // A deleted account leaves this screen at once, so it gets a toast rather than a snackbar
+                if (authViewModel.currentUser.value == null) {
+                    Toast.makeText(context, savedMessage, Toast.LENGTH_SHORT).show()
+                } else {
+                    snackbarHostState.showSnackbar(savedMessage)
+                }
+                // Cleared only afterwards: clearing changes this effect's key, which would cancel it
+                authViewModel.clearAccountEdit()
+            }
+        }
+        // AuthViewModel outlives this screen, so don't bring a stale result back on the next visit
+        DisposableEffect(Unit) {
+            onDispose { authViewModel.clearAccountEdit() }
+        }
 
         if (user != null) {
-            val userReviews by authViewModel.userReviews.collectAsState()
-            val profileError by authViewModel.profileError.collectAsState()
+            val myReviewsViewModel: MyReviewsViewModel = viewModel()
+            val reviewsState by myReviewsViewModel.reviews.collectAsState()
+            val reviewMessageRes by myReviewsViewModel.message.collectAsState()
+
+            // Also runs on the way back from a review, refreshing the list in place
+            LaunchedEffect(Unit) {
+                myReviewsViewModel.loadReviews()
+            }
+            val reviewMessage = reviewMessageRes?.let { stringResource(it) }
+            LaunchedEffect(reviewMessage) {
+                if (reviewMessage != null) {
+                    snackbarHostState.showSnackbar(reviewMessage)
+                    myReviewsViewModel.messageShown()
+                }
+            }
+
             UserSettingsScreen(
                 user = user,
-                userReviews = userReviews,
-                onBackClick = { navController.popBackStack() },
-                onUpdateUsername = { newName -> authViewModel.updateUsername(newName) },
-                onUpdateEmail = { newEmail -> authViewModel.updateEmail(newEmail) },
-                onDeleteAccount = {
-                    authViewModel.deleteAccount()
+                reviewsState = reviewsState,
+                editState = accountEdit,
+                onBackClick = dropUnlessResumed { navController.popBackStack() },
+                onUpdateUsername = authViewModel::updateUsername,
+                onUpdateEmail = authViewModel::updateEmail,
+                onChangePassword = authViewModel::changePassword,
+                onDeleteAccount = authViewModel::deleteAccount,
+                onClearEditState = authViewModel::clearAccountEdit,
+                onLogout = authViewModel::logout,
+                onReviewClick = { reviewId ->
+                    navController.navigate(Screen.ReviewDetails(reviewId = reviewId))
                 },
-                onLogout = {
-                    authViewModel.logout()
-                },
-                onDeleteReview = { reviewId -> authViewModel.deleteUserReview(reviewId) },
-                profileError = profileError?.let { stringResource(it) },
-                onClearProfileError = { authViewModel.clearProfileError() }
+                onDeleteReview = myReviewsViewModel::deleteReview,
+                onRetryReviews = myReviewsViewModel::loadReviews,
+                snackbarHostState = snackbarHostState,
             )
         } else {
             LaunchedEffect(Unit) {

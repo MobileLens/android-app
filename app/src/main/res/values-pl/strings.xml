@@ -176,25 +176,53 @@
     <string name="role_moderator">Moderator</string>
     <string name="role_admin">Administrator</string>
 
-    <!-- User settings. %1$s: username -->
-    <string name="settings_title">Ustawienia: %1$s</string>
-    <string name="settings_personal_info">Dane osobowe</string>
-    <string name="settings_role">Rola</string>
-    <string name="settings_change">Zmień</string>
+    <!-- Account screen -->
+    <string name="settings_section_profile">Profil</string>
+    <string name="settings_section_security">Logowanie i bezpieczeństwo</string>
+    <string name="settings_section_reviews">Twoje recenzje</string>
     <string name="settings_danger_zone">Strefa zagrożenia</string>
-    <string name="settings_delete_account">Usuń konto</string>
+    <!-- %1$s: role name, e.g. "Recenzent" -->
+    <string name="settings_role_description">Rola: %1$s</string>
+    <string name="settings_password_supporting">Zmień hasło, którym się logujesz</string>
     <string name="settings_log_out">Wyloguj się</string>
-    <string name="settings_review_history">Historia recenzji</string>
-    <string name="settings_no_review_history">Brak historii recenzji.</string>
+    <string name="settings_log_out_supporting">Zakończ sesję na tym urządzeniu</string>
+    <string name="settings_delete_account">Usuń konto</string>
+    <string name="settings_delete_account_supporting">Trwale usuń profil i dane logowania</string>
+    <string name="settings_no_reviews">Nie masz jeszcze żadnych recenzji.</string>
+    <string name="settings_review_status_published">Opublikowana</string>
+    <string name="settings_review_status_pending">W moderacji</string>
+    <string name="settings_review_status_hidden">Ukryta</string>
+    <string name="settings_review_status_draft">Szkic</string>
+    <!-- %1$s: review status, %2$s: date of the last update, e.g. "Opublikowana · 3 paź 2026" -->
+    <string name="settings_review_status_date">%1$s · %2$s</string>
     <string name="settings_change_username_title">Zmień nazwę użytkownika</string>
     <string name="settings_new_username">Nowa nazwa użytkownika</string>
     <string name="settings_change_email_title">Zmień e-mail</string>
     <string name="settings_new_email">Nowy e-mail</string>
+    <string name="settings_change_email_supporting">Zmianę potwierdzisz linkiem, który wyślemy e-mailem.</string>
     <string name="settings_change_password_title">Zmień hasło</string>
+    <string name="settings_current_password">Obecne hasło</string>
     <string name="settings_new_password">Nowe hasło</string>
-    <string name="settings_delete_account_title">Usuń konto</string>
-    <string name="settings_delete_account_message">Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć.</string>
+    <string name="settings_repeat_new_password">Powtórz nowe hasło</string>
+    <string name="settings_change_password_supporting">To urządzenie pozostanie zalogowane, a inne zostaną wylogowane.</string>
+    <string name="settings_password_hint">Co najmniej 8 znaków, w tym mała i wielka litera, cyfra oraz znak specjalny.</string>
+    <string name="settings_delete_account_title">Usunąć konto?</string>
+    <string name="settings_delete_account_message">Twój profil, ulubione i dane logowania zostaną usunięte. Opublikowane recenzje i komentarze pozostaną, oznaczone jako pochodzące z usuniętego konta. Tej operacji nie można cofnąć.</string>
+    <string name="settings_delete_review_title">Usunąć recenzję?</string>
+    <!-- %1$s: review title -->
+    <string name="settings_delete_review_message">Recenzja „%1$s” zostanie trwale usunięta razem ze zdjęciami, komentarzami i polubieniami.</string>
+    <string name="settings_username_changed">Zmieniono nazwę użytkownika.</string>
+    <string name="settings_email_changed">Zmieniono adres e-mail.</string>
+    <string name="settings_email_confirmation_sent">Wysłaliśmy e-mail z linkiem do potwierdzenia zmiany.</string>
+    <string name="settings_password_changed">Zmieniono hasło. Inne urządzenia zostały wylogowane.</string>
+    <string name="settings_account_deleted">Konto zostało usunięte.</string>
+    <string name="settings_review_deleted">Usunięto recenzję.</string>
+    <string name="settings_error_change_username">Nie udało się zmienić nazwy użytkownika. Może być już zajęta.</string>
     <string name="settings_error_change_email">Nie udało się zmienić adresu e-mail.</string>
+    <string name="settings_error_change_password">Nie udało się zmienić hasła. Spróbuj ponownie.</string>
+    <string name="settings_error_wrong_password">Obecne hasło jest nieprawidłowe.</string>
+    <string name="settings_error_delete_account">Nie udało się usunąć konta. Spróbuj ponownie.</string>
+    <string name="settings_error_delete_review">Nie udało się usunąć recenzji. Spróbuj ponownie.</string>
 
     <!-- App settings -->
     <string name="app_settings_title">Ustawienia</string>
@@ -221,7 +249,6 @@
     <string name="review_comments">Komentarze</string>
     <string name="review_likes">Polubienia</string>
     <string name="review_share">Udostępnij</string>
-    <string name="review_edit">Edytuj</string>
     <string name="error_load_reviews">Nie udało się wczytać recenzji.</string>
     <string name="error_load_review">Nie udało się wczytać tej recenzji.</string>
 

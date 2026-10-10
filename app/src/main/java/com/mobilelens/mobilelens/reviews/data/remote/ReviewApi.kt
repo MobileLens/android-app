@@ -18,6 +18,10 @@ interface ReviewApi {
         @Query("smartphone_id") smartphoneId: String
     ): List<ReviewDto>
 
+    // Every review the signed-in user wrote, whatever its status, most recently updated first
+    @GET("api/reviews/mine")
+    suspend fun getMyReviews(): List<ReviewDto>
+
     @GET("api/reviews/pending")
     suspend fun getPendingReviews(): List<ReviewDto>
 

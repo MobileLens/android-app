@@ -1,370 +1,375 @@
 package com.mobilelens.mobilelens.auth.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.DeleteForever
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.auth.model.User
-import com.mobilelens.mobilelens.auth.ui.components.AuthErrorText
-import com.mobilelens.mobilelens.auth.ui.components.AuthPillButton
-import com.mobilelens.mobilelens.auth.ui.components.AuthTextField
-import com.mobilelens.mobilelens.auth.ui.components.DangerRedColor
-import com.mobilelens.mobilelens.auth.ui.components.PersonalInfoRow
-import com.mobilelens.mobilelens.auth.ui.components.UserReviewHistoryCard
+import com.mobilelens.mobilelens.auth.ui.components.ChangeEmailDialog
+import com.mobilelens.mobilelens.auth.ui.components.ChangePasswordDialog
+import com.mobilelens.mobilelens.auth.ui.components.ChangeUsernameDialog
+import com.mobilelens.mobilelens.auth.ui.components.DeleteAccountDialog
+import com.mobilelens.mobilelens.auth.ui.components.DeleteReviewDialog
+import com.mobilelens.mobilelens.auth.ui.components.ProfileHeader
+import com.mobilelens.mobilelens.auth.ui.components.UserReviewListItem
+import com.mobilelens.mobilelens.auth.viewmodel.AccountEditState
 import com.mobilelens.mobilelens.reviews.model.Review
+import com.mobilelens.mobilelens.reviews.viewmodel.MyReviewsUiState
+import com.mobilelens.mobilelens.settings.ui.components.SettingsSectionHeader
 
+/** The account screen's dialogs that save something; only one is open at a time. */
+private enum class AccountDialog { Username, Email, Password, DeleteAccount }
+
+/**
+ * The signed-in user's account: profile, password, their reviews, logging out and deleting the
+ * account. Has its own top bar, so MainApp hides the search bar here.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserSettingsScreen(
     user: User,
-    userReviews: List<Review>,
+    reviewsState: MyReviewsUiState,
+    // Progress of whatever the open dialog is saving
+    editState: AccountEditState,
     onBackClick: () -> Unit,
     onUpdateUsername: (String) -> Unit,
     onUpdateEmail: (String) -> Unit,
+    onChangePassword: (currentPassword: String, newPassword: String) -> Unit,
     onDeleteAccount: () -> Unit,
+    onClearEditState: () -> Unit,
     onLogout: () -> Unit,
-    onDeleteReview: (String) -> Unit = {},
-    profileError: String? = null,
-    onClearProfileError: () -> Unit = {}
+    onReviewClick: (String) -> Unit,
+    onDeleteReview: (String) -> Unit,
+    onRetryReviews: () -> Unit,
+    modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-    var showChangeUsernameDialog by remember { mutableStateOf(false) }
-    var showChangeEmailDialog by remember { mutableStateOf(false) }
-    var showChangePasswordDialog by remember { mutableStateOf(false) }
-    var showDeleteAccountDialog by remember { mutableStateOf(false) }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    var openDialog by rememberSaveable { mutableStateOf<AccountDialog?>(null) }
+    var reviewToDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
+    // The screen's background shows through, as on the other screens
+    val itemColors = ListItemDefaults.colors(containerColor = Color.Transparent)
 
-    var newUsernameInput by remember { mutableStateOf(user.username) }
-    var newEmailInput by remember { mutableStateOf(user.email) }
-    var newPasswordInput by remember { mutableStateOf("") }
+    // A dialog closes once its change is saved, and the route confirms it in the snackbar
+    LaunchedEffect(editState) {
+        if (editState is AccountEditState.Saved) openDialog = null
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier.padding(bottom = 8.dp)
+    // Opening or closing a dialog drops the result of the previous one
+    fun showDialog(dialog: AccountDialog?) {
+        onClearEditState()
+        openDialog = dialog
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(R.string.common_back),
-                tint = MaterialTheme.colorScheme.onBackground
-            )
-        }
-
-        Text(
-            text = stringResource(R.string.settings_title, user.username),
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-
-        // Section 1: Personal info
-        Text(
-            text = stringResource(R.string.settings_personal_info),
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        PersonalInfoRow(label = stringResource(R.string.auth_username), value = user.username)
-        PersonalInfoRow(label = stringResource(R.string.auth_email), value = user.email)
-        PersonalInfoRow(label = stringResource(R.string.settings_role), value = roleLabel(user.role))
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        // Section 2: Change
-        Text(
-            text = stringResource(R.string.settings_change),
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            AuthPillButton(
-                text = stringResource(R.string.auth_username),
-                onClick = {
-                    newUsernameInput = user.username
-                    showChangeUsernameDialog = true
+            LargeTopAppBar(
+                title = { Text(stringResource(R.string.account)) },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back),
+                        )
+                    }
                 },
-                modifier = Modifier.weight(1f)
+                // Insets are handled by the parent Scaffold
+                windowInsets = WindowInsets(0, 0, 0, 0),
+                scrollBehavior = scrollBehavior,
             )
 
-            AuthPillButton(
-                text = stringResource(R.string.auth_email),
-                onClick = {
-                    onClearProfileError()
-                    newEmailInput = user.email
-                    showChangeEmailDialog = true
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            AuthPillButton(
-                text = stringResource(R.string.auth_password),
-                onClick = {
-                    newPasswordInput = ""
-                    showChangePasswordDialog = true
-                },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        AuthErrorText(message = profileError)
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        // Section 3: Danger zone
-        Text(
-            text = stringResource(R.string.settings_danger_zone),
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(
-                onClick = { showDeleteAccountDialog = true },
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = DangerRedColor)
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(bottom = 24.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.Delete,
-                    contentDescription = null,
-                    tint = Color.White
+                item(key = "header") {
+                    ProfileHeader(user = user)
+                }
+
+                item(key = "profile") {
+                    SettingsSectionHeader(text = stringResource(R.string.settings_section_profile))
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.auth_username)) },
+                        supportingContent = { Text(user.username) },
+                        leadingContent = { Icon(Icons.Outlined.Person, contentDescription = null) },
+                        modifier = Modifier.clickable(role = Role.Button) { showDialog(AccountDialog.Username) },
+                        colors = itemColors,
+                    )
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.auth_email)) },
+                        supportingContent = { Text(user.email) },
+                        leadingContent = { Icon(Icons.Outlined.Email, contentDescription = null) },
+                        modifier = Modifier.clickable(role = Role.Button) { showDialog(AccountDialog.Email) },
+                        colors = itemColors,
+                    )
+                }
+
+                item(key = "security") {
+                    SettingsSectionHeader(text = stringResource(R.string.settings_section_security))
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.auth_password)) },
+                        supportingContent = { Text(stringResource(R.string.settings_password_supporting)) },
+                        leadingContent = { Icon(Icons.Outlined.Lock, contentDescription = null) },
+                        modifier = Modifier.clickable(role = Role.Button) { showDialog(AccountDialog.Password) },
+                        colors = itemColors,
+                    )
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.settings_log_out)) },
+                        supportingContent = { Text(stringResource(R.string.settings_log_out_supporting)) },
+                        leadingContent = { Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null) },
+                        modifier = Modifier.clickable(role = Role.Button, onClick = onLogout),
+                        colors = itemColors,
+                    )
+                }
+
+                item(key = "reviews_header") {
+                    SettingsSectionHeader(text = stringResource(R.string.settings_section_reviews))
+                }
+                reviewsSection(
+                    state = reviewsState,
+                    onReviewClick = onReviewClick,
+                    onDeleteClick = { review -> reviewToDeleteId = review.id },
+                    onRetry = onRetryReviews,
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.settings_delete_account), color = Color.White)
-            }
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            TextButton(
-                onClick = onLogout,
-                modifier = Modifier.padding(top = 2.dp)
-            ) {
-                Text(stringResource(R.string.settings_log_out), color = MaterialTheme.colorScheme.primary)
+                item(key = "danger_zone") {
+                    SettingsSectionHeader(text = stringResource(R.string.settings_danger_zone))
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.settings_delete_account)) },
+                        supportingContent = { Text(stringResource(R.string.settings_delete_account_supporting)) },
+                        leadingContent = { Icon(Icons.Outlined.DeleteForever, contentDescription = null) },
+                        modifier = Modifier.clickable(role = Role.Button) { showDialog(AccountDialog.DeleteAccount) },
+                        colors = ListItemDefaults.colors(
+                            containerColor = Color.Transparent,
+                            headlineColor = MaterialTheme.colorScheme.error,
+                            leadingIconColor = MaterialTheme.colorScheme.error,
+                        ),
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
-
-        // Section 4: Review history
-        Text(
-            text = stringResource(R.string.settings_review_history),
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 12.dp)
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
         )
+    }
 
-        if (userReviews.isEmpty()) {
-            Text(
-                text = stringResource(R.string.settings_no_review_history),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+    val saving = editState == AccountEditState.Saving
+    val editError = (editState as? AccountEditState.Failed)?.let { stringResource(it.messageRes) }
+    when (openDialog) {
+        AccountDialog.Username -> ChangeUsernameDialog(
+            currentUsername = user.username,
+            saving = saving,
+            errorMessage = editError,
+            onSave = onUpdateUsername,
+            onClearError = onClearEditState,
+            onDismiss = { showDialog(null) },
+        )
+        AccountDialog.Email -> ChangeEmailDialog(
+            currentEmail = user.email,
+            saving = saving,
+            errorMessage = editError,
+            onSave = onUpdateEmail,
+            onClearError = onClearEditState,
+            onDismiss = { showDialog(null) },
+        )
+        AccountDialog.Password -> ChangePasswordDialog(
+            saving = saving,
+            errorMessage = editError,
+            onSave = onChangePassword,
+            onClearError = onClearEditState,
+            onDismiss = { showDialog(null) },
+        )
+        AccountDialog.DeleteAccount -> DeleteAccountDialog(
+            deleting = saving,
+            errorMessage = editError,
+            onConfirm = onDeleteAccount,
+            onDismiss = { showDialog(null) },
+        )
+        null -> {}
+    }
+
+    // Looked up again, since the list may have changed while the dialog was open
+    val reviewToDelete = (reviewsState as? MyReviewsUiState.Success)?.reviews
+        ?.firstOrNull { it.id == reviewToDeleteId }
+    if (reviewToDelete != null) {
+        DeleteReviewDialog(
+            reviewTitle = reviewToDelete.title,
+            onConfirm = {
+                reviewToDeleteId = null
+                onDeleteReview(reviewToDelete.id)
+            },
+            onDismiss = { reviewToDeleteId = null },
+        )
+    }
+}
+
+private fun LazyListScope.reviewsSection(
+    state: MyReviewsUiState,
+    onReviewClick: (String) -> Unit,
+    onDeleteClick: (Review) -> Unit,
+    onRetry: () -> Unit,
+) {
+    when (state) {
+        MyReviewsUiState.Loading -> item(key = "reviews_loading") {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        is MyReviewsUiState.Error -> item(key = "reviews_error") {
+            ListItem(
+                headlineContent = { Text(stringResource(state.messageRes)) },
+                trailingContent = {
+                    TextButton(onClick = onRetry) {
+                        Text(stringResource(R.string.action_retry))
+                    }
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             )
+        }
+        is MyReviewsUiState.Success -> if (state.reviews.isEmpty()) {
+            item(key = "reviews_empty") {
+                Text(
+                    text = stringResource(R.string.settings_no_reviews),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
         } else {
-            userReviews.forEach { review ->
-                UserReviewHistoryCard(
+            items(state.reviews, key = { it.id }) { review ->
+                UserReviewListItem(
                     review = review,
-                    onDeleteReview = onDeleteReview
+                    deleting = review.id in state.deletingIds,
+                    onClick = { onReviewClick(review.id) },
+                    onDelete = { onDeleteClick(review) },
+                    modifier = Modifier.animateItem(),
                 )
             }
         }
     }
-
-    // Dialogs
-    if (showChangeUsernameDialog) {
-        AlertDialog(
-            onDismissRequest = { showChangeUsernameDialog = false },
-            title = { Text(stringResource(R.string.settings_change_username_title)) },
-            text = {
-                AuthTextField(
-                    value = newUsernameInput,
-                    onValueChange = { newUsernameInput = it },
-                    label = stringResource(R.string.settings_new_username)
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newUsernameInput.isNotBlank()) {
-                            onUpdateUsername(newUsernameInput)
-                        }
-                        showChangeUsernameDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.common_save))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showChangeUsernameDialog = false }) {
-                    Text(stringResource(R.string.common_cancel))
-                }
-            }
-        )
-    }
-
-    if (showChangeEmailDialog) {
-        AlertDialog(
-            onDismissRequest = { showChangeEmailDialog = false },
-            title = { Text(stringResource(R.string.settings_change_email_title)) },
-            text = {
-                AuthTextField(
-                    value = newEmailInput,
-                    onValueChange = { newEmailInput = it },
-                    label = stringResource(R.string.settings_new_email)
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newEmailInput.isNotBlank()) {
-                            onUpdateEmail(newEmailInput)
-                        }
-                        showChangeEmailDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.common_save))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showChangeEmailDialog = false }) {
-                    Text(stringResource(R.string.common_cancel))
-                }
-            }
-        )
-    }
-
-    if (showChangePasswordDialog) {
-        AlertDialog(
-            onDismissRequest = { showChangePasswordDialog = false },
-            title = { Text(stringResource(R.string.settings_change_password_title)) },
-            text = {
-                AuthTextField(
-                    value = newPasswordInput,
-                    onValueChange = { newPasswordInput = it },
-                    label = stringResource(R.string.settings_new_password),
-                    isPassword = true
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { showChangePasswordDialog = false }) {
-                    Text(stringResource(R.string.common_save))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showChangePasswordDialog = false }) {
-                    Text(stringResource(R.string.common_cancel))
-                }
-            }
-        )
-    }
-
-    if (showDeleteAccountDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteAccountDialog = false },
-            title = { Text(stringResource(R.string.settings_delete_account_title)) },
-            text = { Text(stringResource(R.string.settings_delete_account_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteAccountDialog = false
-                        onDeleteAccount()
-                    }
-                ) {
-                    Text(stringResource(R.string.common_delete), color = DangerRedColor)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteAccountDialog = false }) {
-                    Text(stringResource(R.string.common_cancel))
-                }
-            }
-        )
-    }
 }
 
-// Roles come from the backend as identifiers ("user", "reviewer", ...); unknown ones are shown as-is
-@Composable
-private fun roleLabel(role: String): String = when (role.lowercase()) {
-    "user" -> stringResource(R.string.role_user)
-    "reviewer" -> stringResource(R.string.role_reviewer)
-    "moderator" -> stringResource(R.string.role_moderator)
-    "admin" -> stringResource(R.string.role_admin)
-    else -> role
-}
+private val previewReviews = listOf(
+    Review(
+        id = "rev_1",
+        title = "Pixel 9 Pro: the telephoto finally earns its place",
+        author = "maciek",
+        content = "",
+        createdAt = "2026-09-19T10:00:00.000Z",
+        updatedAt = "2026-10-03T10:00:00.000Z",
+        commentCount = 3,
+        likeCount = 12,
+        assets = emptyList(),
+        status = "published",
+    ),
+    Review(
+        id = "rev_2",
+        title = "Galaxy S24 Ultra night mode",
+        author = "maciek",
+        content = "",
+        createdAt = "2026-10-09T10:00:00.000Z",
+        updatedAt = "2026-10-09T10:00:00.000Z",
+        commentCount = 0,
+        likeCount = 0,
+        assets = emptyList(),
+        status = "pending",
+    ),
+)
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, heightDp = 1000)
 @Composable
 private fun UserSettingsScreenPreview() {
     MaterialTheme {
         UserSettingsScreen(
-            user = User(username = "username", email = "user@example.com", role = "Reviewer"),
-            userReviews = listOf(
-                Review(
-                    id = "rev_1",
-                    title = "Review title",
-                    author = "Author",
-                    content = "Sample content",
-                    createdAt = "2025-01-01",
-                    updatedAt = "2025-01-01",
-                    commentCount = 14,
-                    likeCount = 45,
-                    assets = emptyList()
-                )
-            ),
+            user = User(username = "maciek", email = "maciek@example.com", role = "reviewer"),
+            reviewsState = MyReviewsUiState.Success(previewReviews),
+            editState = AccountEditState.Idle,
             onBackClick = {},
             onUpdateUsername = {},
             onUpdateEmail = {},
+            onChangePassword = { _, _ -> },
             onDeleteAccount = {},
-            onLogout = {}
+            onClearEditState = {},
+            onLogout = {},
+            onReviewClick = {},
+            onDeleteReview = {},
+            onRetryReviews = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UserSettingsScreenNoReviewsPreview() {
+    MaterialTheme {
+        UserSettingsScreen(
+            user = User(username = "maciek", email = "maciek@example.com", role = "user"),
+            reviewsState = MyReviewsUiState.Success(emptyList()),
+            editState = AccountEditState.Idle,
+            onBackClick = {},
+            onUpdateUsername = {},
+            onUpdateEmail = {},
+            onChangePassword = { _, _ -> },
+            onDeleteAccount = {},
+            onClearEditState = {},
+            onLogout = {},
+            onReviewClick = {},
+            onDeleteReview = {},
+            onRetryReviews = {},
         )
     }
 }

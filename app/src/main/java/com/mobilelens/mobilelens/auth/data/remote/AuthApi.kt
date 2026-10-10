@@ -47,9 +47,10 @@ interface AuthApi {
         @Body request: ChangeEmailRequest
     ): StatusResponse
 
+    // With revokeOtherSessions the current session ends too, and `token` is its replacement
     @POST("api/auth/change-password")
     suspend fun changePassword(
         @Body request: ChangePasswordRequest,
         @Header("Authorization") authHeader: String? = null
-    )
+    ): AuthResponse
 }

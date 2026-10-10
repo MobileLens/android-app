@@ -25,6 +25,19 @@ class ReviewRepository(
         return reviews
     }
 
+    /** The signed-in user's reviews, including ones still in moderation or hidden. */
+    suspend fun getMyReviews(): List<Review> {
+        val reviews = reviewApi.getMyReviews().map(::mapToReview)
+        reviews.forEach { reviewCache[it.id] = it }
+        return reviews
+    }
+
+    /** Deletes the review with its media, comments and likes. Only its author or an admin may. */
+    suspend fun deleteReview(id: String) {
+        reviewApi.deleteReview(id)
+        reviewCache.remove(id)
+    }
+
     // Served from memory when the review was already loaded as part of a thread
     suspend fun getReview(id: String): Review {
         reviewCache[id]?.let { return it }

@@ -178,25 +178,53 @@
     <string name="role_moderator">Moderator</string>
     <string name="role_admin">Admin</string>
 
-    <!-- User settings. %1$s: username -->
-    <string name="settings_title">%1$s\'s settings</string>
-    <string name="settings_personal_info">Personal info</string>
-    <string name="settings_role">Role</string>
-    <string name="settings_change">Change</string>
+    <!-- Account screen -->
+    <string name="settings_section_profile">Profile</string>
+    <string name="settings_section_security">Sign-in &amp; security</string>
+    <string name="settings_section_reviews">Your reviews</string>
     <string name="settings_danger_zone">Danger zone</string>
-    <string name="settings_delete_account">Delete account</string>
+    <!-- %1$s: role name, e.g. "Reviewer" -->
+    <string name="settings_role_description">Role: %1$s</string>
+    <string name="settings_password_supporting">Change the password you log in with</string>
     <string name="settings_log_out">Log out</string>
-    <string name="settings_review_history">Review history</string>
-    <string name="settings_no_review_history">No review history yet.</string>
-    <string name="settings_change_username_title">Change Username</string>
-    <string name="settings_new_username">New Username</string>
-    <string name="settings_change_email_title">Change E-mail</string>
-    <string name="settings_new_email">New E-mail</string>
-    <string name="settings_change_password_title">Change Password</string>
-    <string name="settings_new_password">New Password</string>
-    <string name="settings_delete_account_title">Delete Account</string>
-    <string name="settings_delete_account_message">Are you sure you want to delete your account? This action cannot be undone.</string>
+    <string name="settings_log_out_supporting">End your session on this device</string>
+    <string name="settings_delete_account">Delete account</string>
+    <string name="settings_delete_account_supporting">Permanently remove your profile and sign-in details</string>
+    <string name="settings_no_reviews">You haven\'t written any reviews yet.</string>
+    <string name="settings_review_status_published">Published</string>
+    <string name="settings_review_status_pending">In moderation</string>
+    <string name="settings_review_status_hidden">Hidden</string>
+    <string name="settings_review_status_draft">Draft</string>
+    <!-- %1$s: review status, %2$s: date of the last update, e.g. "Published · Oct 3, 2026" -->
+    <string name="settings_review_status_date">%1$s · %2$s</string>
+    <string name="settings_change_username_title">Change username</string>
+    <string name="settings_new_username">New username</string>
+    <string name="settings_change_email_title">Change e-mail</string>
+    <string name="settings_new_email">New e-mail</string>
+    <string name="settings_change_email_supporting">You\'ll confirm the change with a link we send by e-mail.</string>
+    <string name="settings_change_password_title">Change password</string>
+    <string name="settings_current_password">Current password</string>
+    <string name="settings_new_password">New password</string>
+    <string name="settings_repeat_new_password">Repeat new password</string>
+    <string name="settings_change_password_supporting">This device stays logged in. Other devices will be logged out.</string>
+    <string name="settings_password_hint">At least 8 characters, with a lowercase letter, an uppercase letter, a digit and a special character.</string>
+    <string name="settings_delete_account_title">Delete account?</string>
+    <string name="settings_delete_account_message">Your profile, favorites and sign-in details will be deleted. Reviews and comments you posted stay, shown as from a deleted account. This can\'t be undone.</string>
+    <string name="settings_delete_review_title">Delete review?</string>
+    <!-- %1$s: review title -->
+    <string name="settings_delete_review_message">“%1$s” will be deleted for good, along with its photos, comments and likes.</string>
+    <string name="settings_username_changed">Username changed.</string>
+    <string name="settings_email_changed">E-mail changed.</string>
+    <string name="settings_email_confirmation_sent">We\'ve e-mailed you a link to confirm the change.</string>
+    <string name="settings_password_changed">Password changed. Other devices were logged out.</string>
+    <string name="settings_account_deleted">Your account was deleted.</string>
+    <string name="settings_review_deleted">Review deleted.</string>
+    <string name="settings_error_change_username">Couldn\'t change the username. It may already be taken.</string>
     <string name="settings_error_change_email">Couldn\'t change e-mail.</string>
+    <string name="settings_error_change_password">Couldn\'t change the password. Try again.</string>
+    <string name="settings_error_wrong_password">The current password is incorrect.</string>
+    <string name="settings_error_delete_account">Couldn\'t delete the account. Try again.</string>
+    <string name="settings_error_delete_review">Couldn\'t delete the review. Try again.</string>
 
     <!-- App settings -->
     <string name="app_settings_title">Settings</string>
@@ -223,7 +251,6 @@
     <string name="review_comments">Comments</string>
     <string name="review_likes">Likes</string>
     <string name="review_share">Share</string>
-    <string name="review_edit">Edit</string>
     <string name="error_load_reviews">Couldn\'t load reviews.</string>
     <string name="error_load_review">Couldn\'t load this review.</string>
 

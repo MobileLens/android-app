@@ -14,7 +14,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 val PurplePillColor = Color(0xFF65558F)
-val DangerRedColor = Color(0xFFB3261E)
 
 @Composable
 fun AuthPillButton(
