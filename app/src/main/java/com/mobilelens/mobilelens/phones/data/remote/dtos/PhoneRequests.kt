@@ -9,11 +9,3 @@ data class CreatePhoneRequest(
     val imageUrl: String? = null,
     val releaseDate: String? = null
 )
-
-@Serializable
-data class UpdatePhoneRequest(
-    val modelName: String? = null,
-    val imageUrl: String? = null,
-    val releaseDate: String? = null,
-    val brandId: String? = null
-)

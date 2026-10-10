@@ -22,9 +22,6 @@ interface ReviewApi {
     @GET("api/reviews/mine")
     suspend fun getMyReviews(): List<ReviewDto>
 
-    @GET("api/reviews/pending")
-    suspend fun getPendingReviews(): List<ReviewDto>
-
     @GET("api/reviews/{id}")
     suspend fun getReview(
         @Path("id") id: String

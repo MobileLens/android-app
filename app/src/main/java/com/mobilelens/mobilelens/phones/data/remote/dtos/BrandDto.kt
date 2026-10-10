@@ -14,9 +14,3 @@ data class CreateBrandRequest(
     val name: String,
     val logoUrl: String? = null
 )
-
-@Serializable
-data class UpdateBrandRequest(
-    val name: String? = null,
-    val logoUrl: String? = null
-)

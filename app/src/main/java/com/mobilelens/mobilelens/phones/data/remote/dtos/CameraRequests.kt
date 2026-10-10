@@ -25,16 +25,3 @@ data class CreateCameraRequest(
     val ois: String = "none",
     val videoModes: List<VideoModeInput> = emptyList()
 )
-
-@Serializable
-data class ReviewCameraRequest(
-    val status: String,
-    val focalLengthMm: Double? = null,
-    val aperture: Double? = null,
-    val cropFactor: Double? = null,
-    val pixelPitchUm: Double? = null,
-    val resolutionMp: Double? = null,
-    val activeResolutionMp: Double? = null,
-    val afZones: Int? = null,
-    val ois: String? = null
-)
