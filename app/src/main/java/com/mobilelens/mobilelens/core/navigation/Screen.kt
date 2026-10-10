@@ -17,7 +17,11 @@ sealed interface Screen {
     @Serializable object Favorites : Screen
     @Serializable object Catalogue : Screen
     @Serializable data class ReviewThread(val phoneId: String) : Screen
-    @Serializable data class ReviewDetails(val reviewId: String) : Screen
+    /** [scrollToComments] opens the review already scrolled down to its comments. */
+    @Serializable data class ReviewDetails(
+        val reviewId: String,
+        val scrollToComments: Boolean = false,
+    ) : Screen
     /** Review editor; a null [phoneId] reviews this device. */
     @Serializable data class WriteReview(val phoneId: String? = null) : Screen
     @Serializable data class PhoneDetails(val phoneId: String) : Screen

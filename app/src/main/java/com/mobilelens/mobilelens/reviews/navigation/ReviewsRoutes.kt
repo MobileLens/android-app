@@ -75,7 +75,9 @@ fun NavGraphBuilder.reviewsRoutes(
                         },
                         // The comments live on the review's own screen
                         onCommentClick = { review ->
-                            navController.navigate(Screen.ReviewDetails(reviewId = review.id))
+                            navController.navigate(
+                                Screen.ReviewDetails(reviewId = review.id, scrollToComments = true)
+                            )
                         },
                         // A signed-out viewer can't like, so the heart sends them to log in
                         onLikeClick = { review ->
@@ -141,6 +143,7 @@ fun NavGraphBuilder.reviewsRoutes(
                     val user = currentUser
                     ReviewScreen(
                         review = state.review,
+                        scrollToComments = route.scrollToComments,
                         commentsState = commentsState,
                         draft = commentsViewModel.draft,
                         isPosting = isPosting,

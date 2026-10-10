@@ -18,13 +18,17 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +41,7 @@ import com.mobilelens.mobilelens.reviews.ui.components.ReviewCommentsSection
 import com.mobilelens.mobilelens.reviews.ui.components.ReviewHeader
 import com.mobilelens.mobilelens.reviews.ui.components.ReviewLikeButton
 import com.mobilelens.mobilelens.reviews.viewmodel.CommentsUiState
+import kotlin.math.roundToInt
 
 /**
  * A review with its likes and comments. Only a published review can be liked or commented on, so
@@ -45,6 +50,8 @@ import com.mobilelens.mobilelens.reviews.viewmodel.CommentsUiState
 @Composable
 fun ReviewScreen(
     review: Review,
+    // Scrolls down to the comments once, when the screen opens
+    scrollToComments: Boolean,
     commentsState: CommentsUiState,
     draft: String,
     isPosting: Boolean,
@@ -61,13 +68,23 @@ fun ReviewScreen(
 ) {
     var commentToDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
     val published = review.status == "published"
+    val scrollState = rememberScrollState()
+    // Top of the comments inside the scrolled content, known once they've been laid out
+    var commentsTop by remember { mutableIntStateOf(-1) }
+    var scrolledToComments by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(scrollToComments, commentsTop) {
+        if (scrollToComments && !scrolledToComments && commentsTop >= 0) {
+            scrolledToComments = true
+            scrollState.animateScrollTo(commentsTop)
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(16.dp)
         ) {
             ReviewHeader(
@@ -109,6 +126,10 @@ fun ReviewScreen(
                     onDeleteClick = { comment -> commentToDeleteId = comment.id },
                     onRetry = onRetryComments,
                     onLoginClick = onLoginClick,
+                    modifier = Modifier.onGloballyPositioned { coordinates ->
+                        // Relative to the scrolled content, so it doesn't change as it scrolls
+                        commentsTop = coordinates.positionInParent().y.roundToInt()
+                    },
                 )
             }
         }
@@ -183,6 +204,7 @@ fun PreviewReviewScreen() {
                 likedByMe = true,
                 assets = emptyList()
             ),
+            scrollToComments = false,
             commentsState = CommentsUiState.Success(
                 listOf(
                     ReviewComment(
