@@ -40,10 +40,4 @@ interface UploadApi {
     suspend fun uploadReviewMedia(
         @Part file: MultipartBody.Part
     ): StorageUploadResponse
-
-    @Multipart
-    @POST("api/upload/device-image/upload")
-    suspend fun uploadDeviceImage(
-        @Part file: MultipartBody.Part
-    ): StorageUploadResponse
 }
