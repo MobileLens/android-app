@@ -180,6 +180,7 @@
     <string name="settings_section_profile">Profil</string>
     <string name="settings_section_security">Logowanie i bezpieczeństwo</string>
     <string name="settings_section_reviews">Twoje recenzje</string>
+    <string name="settings_section_cameras">Twoje aparaty</string>
     <string name="settings_danger_zone">Strefa zagrożenia</string>
     <!-- %1$s: role name, e.g. "Recenzent" -->
     <string name="settings_role_description">Rola: %1$s</string>
@@ -195,6 +196,15 @@
     <string name="settings_review_status_draft">Szkic</string>
     <!-- %1$s: review status, %2$s: date of the last update, e.g. "Opublikowana · 3 paź 2026" -->
     <string name="settings_review_status_date">%1$s · %2$s</string>
+    <string name="settings_no_cameras">Nie masz jeszcze zgłoszonych aparatów.</string>
+    <string name="settings_camera_status_pending">W moderacji</string>
+    <string name="settings_camera_status_approved">Zatwierdzony</string>
+    <string name="settings_camera_status_rejected">Odrzucony</string>
+    <!-- %1$s: status aparatu, %2$s: data zgłoszenia, np. "Zatwierdzony · 3 paź 2026" -->
+    <string name="settings_camera_status_date">%1$s · %2$s</string>
+    <!-- %1$s: obiektyw, %2$s: ogniskowa, %3$s: rozdzielczość -->
+    <string name="settings_camera_headline">%1$s · %2$s · %3$s</string>
+    <string name="settings_camera_unknown_phone">Nieznany telefon</string>
     <string name="settings_change_username_title">Zmień nazwę użytkownika</string>
     <string name="settings_new_username">Nowa nazwa użytkownika</string>
     <string name="settings_change_email_title">Zmień e-mail</string>
@@ -250,6 +260,7 @@
     <string name="review_likes">Polubienia</string>
     <string name="review_share">Udostępnij</string>
     <string name="error_load_reviews">Nie udało się wczytać recenzji.</string>
+    <string name="error_load_my_cameras">Nie udało się wczytać Twoich aparatów.</string>
     <string name="error_load_review">Nie udało się wczytać tej recenzji.</string>
 
     <!-- Review editor. Glyphs are the letters shown on the formatting buttons -->

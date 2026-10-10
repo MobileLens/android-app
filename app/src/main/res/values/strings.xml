@@ -182,6 +182,7 @@
     <string name="settings_section_profile">Profile</string>
     <string name="settings_section_security">Sign-in &amp; security</string>
     <string name="settings_section_reviews">Your reviews</string>
+    <string name="settings_section_cameras">Your cameras</string>
     <string name="settings_danger_zone">Danger zone</string>
     <!-- %1$s: role name, e.g. "Reviewer" -->
     <string name="settings_role_description">Role: %1$s</string>
@@ -197,6 +198,15 @@
     <string name="settings_review_status_draft">Draft</string>
     <!-- %1$s: review status, %2$s: date of the last update, e.g. "Published · Oct 3, 2026" -->
     <string name="settings_review_status_date">%1$s · %2$s</string>
+    <string name="settings_no_cameras">You haven\'t submitted any cameras yet.</string>
+    <string name="settings_camera_status_pending">In moderation</string>
+    <string name="settings_camera_status_approved">Approved</string>
+    <string name="settings_camera_status_rejected">Rejected</string>
+    <!-- %1$s: camera status, %2$s: date it was submitted, e.g. "Approved · Oct 3, 2026" -->
+    <string name="settings_camera_status_date">%1$s · %2$s</string>
+    <!-- %1$s: lens, e.g. "Back wide", %2$s: focal length, %3$s: resolution -->
+    <string name="settings_camera_headline">%1$s · %2$s · %3$s</string>
+    <string name="settings_camera_unknown_phone">Unknown phone</string>
     <string name="settings_change_username_title">Change username</string>
     <string name="settings_new_username">New username</string>
     <string name="settings_change_email_title">Change e-mail</string>
@@ -252,6 +262,7 @@
     <string name="review_likes">Likes</string>
     <string name="review_share">Share</string>
     <string name="error_load_reviews">Couldn\'t load reviews.</string>
+    <string name="error_load_my_cameras">Couldn\'t load your cameras.</string>
     <string name="error_load_review">Couldn\'t load this review.</string>
 
     <!-- Review editor. Glyphs are the letters shown on the formatting buttons (e.g. "F" for bold in German) -->

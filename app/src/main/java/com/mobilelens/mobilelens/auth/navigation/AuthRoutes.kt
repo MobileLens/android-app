@@ -20,6 +20,7 @@ import com.mobilelens.mobilelens.auth.ui.screens.UserSettingsScreen
 import com.mobilelens.mobilelens.auth.viewmodel.AccountEditState
 import com.mobilelens.mobilelens.auth.viewmodel.AuthViewModel
 import com.mobilelens.mobilelens.core.navigation.Screen
+import com.mobilelens.mobilelens.phones.viewmodel.MyCamerasViewModel
 import com.mobilelens.mobilelens.reviews.viewmodel.MyReviewsViewModel
 
 /**
@@ -102,10 +103,13 @@ fun NavGraphBuilder.authRoutes(
             val myReviewsViewModel: MyReviewsViewModel = viewModel()
             val reviewsState by myReviewsViewModel.reviews.collectAsState()
             val reviewMessageRes by myReviewsViewModel.message.collectAsState()
+            val myCamerasViewModel: MyCamerasViewModel = viewModel()
+            val camerasState by myCamerasViewModel.cameras.collectAsState()
 
             // Also runs on the way back from a review, refreshing the list in place
             LaunchedEffect(Unit) {
                 myReviewsViewModel.loadReviews()
+                myCamerasViewModel.loadCameras()
             }
             val reviewMessage = reviewMessageRes?.let { stringResource(it) }
             LaunchedEffect(reviewMessage) {
@@ -118,6 +122,7 @@ fun NavGraphBuilder.authRoutes(
             UserSettingsScreen(
                 user = user,
                 reviewsState = reviewsState,
+                camerasState = camerasState,
                 editState = accountEdit,
                 onBackClick = dropUnlessResumed { navController.popBackStack() },
                 onUpdateUsername = authViewModel::updateUsername,
@@ -131,6 +136,10 @@ fun NavGraphBuilder.authRoutes(
                 },
                 onDeleteReview = myReviewsViewModel::deleteReview,
                 onRetryReviews = myReviewsViewModel::loadReviews,
+                onCameraClick = { phoneId ->
+                    navController.navigate(Screen.PhoneDetails(phoneId = phoneId))
+                },
+                onRetryCameras = myCamerasViewModel::loadCameras,
                 snackbarHostState = snackbarHostState,
             )
         } else {

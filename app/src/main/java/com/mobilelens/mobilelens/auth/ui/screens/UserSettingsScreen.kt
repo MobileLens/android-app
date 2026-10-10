@@ -54,8 +54,13 @@ import com.mobilelens.mobilelens.auth.ui.components.ChangeUsernameDialog
 import com.mobilelens.mobilelens.auth.ui.components.DeleteAccountDialog
 import com.mobilelens.mobilelens.auth.ui.components.DeleteReviewDialog
 import com.mobilelens.mobilelens.auth.ui.components.ProfileHeader
+import com.mobilelens.mobilelens.auth.ui.components.UserCameraListItem
 import com.mobilelens.mobilelens.auth.ui.components.UserReviewListItem
 import com.mobilelens.mobilelens.auth.viewmodel.AccountEditState
+import com.mobilelens.mobilelens.phones.model.Facing
+import com.mobilelens.mobilelens.phones.model.LensType
+import com.mobilelens.mobilelens.phones.model.SubmittedCamera
+import com.mobilelens.mobilelens.phones.viewmodel.MyCamerasUiState
 import com.mobilelens.mobilelens.reviews.model.Review
 import com.mobilelens.mobilelens.reviews.viewmodel.MyReviewsUiState
 import com.mobilelens.mobilelens.settings.ui.components.SettingsSectionHeader
@@ -72,6 +77,7 @@ private enum class AccountDialog { Username, Email, Password, DeleteAccount }
 fun UserSettingsScreen(
     user: User,
     reviewsState: MyReviewsUiState,
+    camerasState: MyCamerasUiState,
     // Progress of whatever the open dialog is saving
     editState: AccountEditState,
     onBackClick: () -> Unit,
@@ -84,6 +90,8 @@ fun UserSettingsScreen(
     onReviewClick: (String) -> Unit,
     onDeleteReview: (String) -> Unit,
     onRetryReviews: () -> Unit,
+    onCameraClick: (phoneId: String) -> Unit,
+    onRetryCameras: () -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
@@ -177,6 +185,15 @@ fun UserSettingsScreen(
                     onReviewClick = onReviewClick,
                     onDeleteClick = { review -> reviewToDeleteId = review.id },
                     onRetry = onRetryReviews,
+                )
+
+                item(key = "cameras_header") {
+                    SettingsSectionHeader(text = stringResource(R.string.settings_section_cameras))
+                }
+                camerasSection(
+                    state = camerasState,
+                    onCameraClick = onCameraClick,
+                    onRetry = onRetryCameras,
                 )
 
                 item(key = "danger_zone") {
@@ -303,6 +320,79 @@ private fun LazyListScope.reviewsSection(
     }
 }
 
+private fun LazyListScope.camerasSection(
+    state: MyCamerasUiState,
+    onCameraClick: (phoneId: String) -> Unit,
+    onRetry: () -> Unit,
+) {
+    when (state) {
+        MyCamerasUiState.Loading -> item(key = "cameras_loading") {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        is MyCamerasUiState.Error -> item(key = "cameras_error") {
+            ListItem(
+                headlineContent = { Text(stringResource(state.messageRes)) },
+                trailingContent = {
+                    TextButton(onClick = onRetry) {
+                        Text(stringResource(R.string.action_retry))
+                    }
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            )
+        }
+        is MyCamerasUiState.Success -> if (state.cameras.isEmpty()) {
+            item(key = "cameras_empty") {
+                Text(
+                    text = stringResource(R.string.settings_no_cameras),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
+        } else {
+            items(state.cameras, key = { it.id }) { camera ->
+                UserCameraListItem(
+                    camera = camera,
+                    onClick = { onCameraClick(camera.phoneId) },
+                    modifier = Modifier.animateItem(),
+                )
+            }
+        }
+    }
+}
+
+private val previewCameras = listOf(
+    SubmittedCamera(
+        id = "cam_1",
+        phoneId = "phone_1",
+        phoneName = "Pixel 9 Pro",
+        type = LensType.WIDE,
+        facing = Facing.BACK,
+        focalLengthMm = 6.9,
+        resolutionMp = 50.0,
+        status = "approved",
+        submittedAt = "2026-10-03T10:00:00.000Z",
+    ),
+    SubmittedCamera(
+        id = "cam_2",
+        phoneId = "phone_1",
+        phoneName = "Pixel 9 Pro",
+        type = LensType.TELEPHOTO,
+        facing = Facing.BACK,
+        focalLengthMm = 11.0,
+        resolutionMp = 48.0,
+        status = "pending",
+        submittedAt = "2026-10-09T10:00:00.000Z",
+    ),
+)
+
 private val previewReviews = listOf(
     Review(
         id = "rev_1",
@@ -337,6 +427,7 @@ private fun UserSettingsScreenPreview() {
         UserSettingsScreen(
             user = User(username = "maciek", email = "maciek@example.com", role = "reviewer"),
             reviewsState = MyReviewsUiState.Success(previewReviews),
+            camerasState = MyCamerasUiState.Success(previewCameras),
             editState = AccountEditState.Idle,
             onBackClick = {},
             onUpdateUsername = {},
@@ -348,6 +439,8 @@ private fun UserSettingsScreenPreview() {
             onReviewClick = {},
             onDeleteReview = {},
             onRetryReviews = {},
+            onCameraClick = {},
+            onRetryCameras = {},
         )
     }
 }
@@ -359,6 +452,7 @@ private fun UserSettingsScreenNoReviewsPreview() {
         UserSettingsScreen(
             user = User(username = "maciek", email = "maciek@example.com", role = "user"),
             reviewsState = MyReviewsUiState.Success(emptyList()),
+            camerasState = MyCamerasUiState.Success(emptyList()),
             editState = AccountEditState.Idle,
             onBackClick = {},
             onUpdateUsername = {},
@@ -370,6 +464,8 @@ private fun UserSettingsScreenNoReviewsPreview() {
             onReviewClick = {},
             onDeleteReview = {},
             onRetryReviews = {},
+            onCameraClick = {},
+            onRetryCameras = {},
         )
     }
 }

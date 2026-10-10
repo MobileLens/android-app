@@ -13,6 +13,10 @@ interface CameraApi {
         @Query("smartphone_id") smartphoneId: String
     ): List<LensDto>
 
+    // Every camera the signed-in user submitted, whatever its status, newest first
+    @GET("api/cameras/mine")
+    suspend fun getMyCameras(): List<LensDto>
+
     @POST("api/cameras")
     suspend fun createCamera(
         @Body body: CreateCameraRequest
