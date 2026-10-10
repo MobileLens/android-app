@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.outlined.Comment
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
@@ -34,6 +35,7 @@ fun ReviewCard(
     commentCount: Int,
     likeCount: Int,
     modifier: Modifier = Modifier,
+    liked: Boolean = false,
     onCardClick: () -> Unit = {},
     onCommentClick: () -> Unit = {},
     onLikeClick: () -> Unit = {},
@@ -116,9 +118,15 @@ fun ReviewCard(
                         .padding(4.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.FavoriteBorder,
-                        contentDescription = stringResource(R.string.review_likes),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        imageVector = if (liked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = stringResource(
+                            if (liked) R.string.review_unlike else R.string.review_like
+                        ),
+                        tint = if (liked) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                         modifier = Modifier.padding(end = 8.dp)
                     )
 

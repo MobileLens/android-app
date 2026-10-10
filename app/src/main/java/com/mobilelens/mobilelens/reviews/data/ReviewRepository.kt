@@ -4,10 +4,14 @@ import com.mobilelens.mobilelens.core.data.remote.ApiClient
 import com.mobilelens.mobilelens.core.data.remote.UploadApi
 import com.mobilelens.mobilelens.core.data.remote.dtos.StorageUploadResponse
 import com.mobilelens.mobilelens.reviews.data.remote.ReviewApi
+import com.mobilelens.mobilelens.reviews.data.remote.dtos.CreateCommentRequest
 import com.mobilelens.mobilelens.reviews.data.remote.dtos.CreateReviewRequest
+import com.mobilelens.mobilelens.reviews.data.remote.dtos.LikeResponse
+import com.mobilelens.mobilelens.reviews.data.remote.dtos.ReviewCommentDto
 import com.mobilelens.mobilelens.reviews.data.remote.dtos.ReviewDto
 import com.mobilelens.mobilelens.reviews.data.remote.dtos.ReviewMediaInput
 import com.mobilelens.mobilelens.reviews.model.Review
+import com.mobilelens.mobilelens.reviews.model.ReviewComment
 import com.mobilelens.mobilelens.reviews.model.ReviewAsset
 import com.mobilelens.mobilelens.reviews.model.ReviewAssetType
 import okhttp3.MediaType.Companion.toMediaType
@@ -38,10 +42,47 @@ class ReviewRepository(
         reviewCache.remove(id)
     }
 
-    // Served from memory when the review was already loaded as part of a thread
-    suspend fun getReview(id: String): Review {
-        reviewCache[id]?.let { return it }
-        return mapToReview(reviewApi.getReview(id)).also { reviewCache[id] = it }
+    /** The review as last loaded by any screen, to show at once while [getReview] refreshes it. */
+    fun getCachedReview(id: String): Review? = reviewCache[id]
+
+    /** Always asks the backend: likes, comments and the viewer's own like change under the cache. */
+    suspend fun getReview(id: String): Review =
+        mapToReview(reviewApi.getReview(id)).also { reviewCache[id] = it }
+
+    /** Every comment of a published review, oldest first. */
+    suspend fun getComments(reviewId: String): List<ReviewComment> {
+        val comments = mutableListOf<ReviewComment>()
+        var page = 1
+        while (true) {
+            val response = reviewApi.getComments(reviewId, page = page, limit = COMMENTS_PAGE_SIZE)
+            comments += response.data.map(::mapToComment)
+            if (response.data.size < COMMENTS_PAGE_SIZE) break
+            page++
+        }
+        reviewCache.computeIfPresent(reviewId) { _, cached -> cached.copy(commentCount = comments.size) }
+        return comments
+    }
+
+    suspend fun addComment(reviewId: String, content: String): ReviewComment {
+        val comment = mapToComment(reviewApi.createComment(reviewId, CreateCommentRequest(content.trim())))
+        reviewCache.computeIfPresent(reviewId) { _, cached -> cached.copy(commentCount = cached.commentCount + 1) }
+        return comment
+    }
+
+    suspend fun deleteComment(reviewId: String, commentId: String) {
+        reviewApi.deleteComment(commentId)
+        reviewCache.computeIfPresent(reviewId) { _, cached ->
+            cached.copy(commentCount = (cached.commentCount - 1).coerceAtLeast(0))
+        }
+    }
+
+    /** Likes or unlikes a published review and returns its new like count. */
+    suspend fun setLiked(reviewId: String, liked: Boolean): LikeResponse {
+        val response = if (liked) reviewApi.likeReview(reviewId) else reviewApi.unlikeReview(reviewId)
+        reviewCache.computeIfPresent(reviewId) { _, cached ->
+            cached.copy(likedByMe = response.liked, likeCount = response.likeCount)
+        }
+        return response
     }
 
     /**
@@ -75,6 +116,14 @@ class ReviewRepository(
         return mapToReview(reviewApi.createReview(request)).also { reviewCache[it.id] = it }
     }
 
+    private fun mapToComment(dto: ReviewCommentDto) = ReviewComment(
+        id = dto.id,
+        authorId = dto.authorId,
+        author = dto.authorName ?: dto.authorId,
+        content = dto.content,
+        createdAt = dto.createdAt,
+    )
+
     private fun mapToReview(dto: ReviewDto): Review {
         return Review(
             id = dto.id,
@@ -85,6 +134,7 @@ class ReviewRepository(
             updatedAt = dto.updatedAt,
             commentCount = dto.commentCount,
             likeCount = dto.likeCount,
+            likedByMe = dto.likedByMe,
             assets = dto.media.map { media ->
                 ReviewAsset(
                     id = media.id,
@@ -97,6 +147,8 @@ class ReviewRepository(
     }
 
     private companion object {
+        const val COMMENTS_PAGE_SIZE = 100
+
         // Shared by all instances, since every screen's ViewModel creates its own repository
         val reviewCache = ConcurrentHashMap<String, Review>()
     }

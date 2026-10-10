@@ -205,7 +205,7 @@ fun MainApp(
                 favoritePhones = { favoritePhones },
                 onToggleFavorite = { phone -> favoritesViewModel.toggleFavorite(phone) },
             )
-            reviewsRoutes(navController)
+            reviewsRoutes(navController, authViewModel)
             authRoutes(navController, authViewModel)
             settingsRoutes(navController)
         }

@@ -259,6 +259,23 @@
     <string name="review_comments">Komentarze</string>
     <string name="review_likes">Polubienia</string>
     <string name="review_share">Udostępnij</string>
+    <!-- %1$s: tytuł recenzji, %2$s: autor -->
+    <string name="review_share_text">%1$s, recenzja autorstwa %2$s w MobileLens</string>
+    <string name="review_like">Polub</string>
+    <string name="review_unlike">Cofnij polubienie</string>
+    <!-- %1$d: liczba komentarzy -->
+    <string name="review_comments_title_count">Komentarze (%1$d)</string>
+    <string name="review_no_comments">Brak komentarzy. Bądź pierwszy i podziel się opinią.</string>
+    <string name="review_comment_hint">Dodaj komentarz…</string>
+    <string name="review_comment_send">Opublikuj komentarz</string>
+    <string name="review_comment_login_prompt">Zaloguj się, aby polubić i komentować.</string>
+    <string name="review_comment_login_action">Zaloguj się</string>
+    <string name="review_delete_comment_title">Usunąć komentarz?</string>
+    <string name="review_delete_comment_message">Ten komentarz zostanie usunięty na stałe.</string>
+    <string name="error_load_comments">Nie udało się wczytać komentarzy.</string>
+    <string name="error_post_comment">Nie udało się opublikować komentarza. Spróbuj ponownie.</string>
+    <string name="error_delete_comment">Nie udało się usunąć komentarza.</string>
+    <string name="error_like_review">Nie udało się zapisać polubienia. Spróbuj ponownie.</string>
     <string name="error_load_reviews">Nie udało się wczytać recenzji.</string>
     <string name="error_load_my_cameras">Nie udało się wczytać Twoich aparatów.</string>
     <string name="error_load_review">Nie udało się wczytać tej recenzji.</string>

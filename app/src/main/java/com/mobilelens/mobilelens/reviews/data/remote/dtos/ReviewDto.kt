@@ -26,6 +26,8 @@ data class ReviewDto(
     val authorName: String? = null,
     val likeCount: Int = 0,
     val commentCount: Int = 0,
+    // False for a signed-out viewer
+    val likedByMe: Boolean = false,
     val media: List<ReviewMediaDto> = emptyList()
 )
 

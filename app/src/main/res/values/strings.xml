@@ -261,6 +261,23 @@
     <string name="review_comments">Comments</string>
     <string name="review_likes">Likes</string>
     <string name="review_share">Share</string>
+    <!-- %1$s: review title, %2$s: author -->
+    <string name="review_share_text">%1$s, a review by %2$s on MobileLens</string>
+    <string name="review_like">Like</string>
+    <string name="review_unlike">Remove like</string>
+    <!-- %1$d: number of comments -->
+    <string name="review_comments_title_count">Comments (%1$d)</string>
+    <string name="review_no_comments">No comments yet. Be the first to share your thoughts.</string>
+    <string name="review_comment_hint">Add a comment…</string>
+    <string name="review_comment_send">Post comment</string>
+    <string name="review_comment_login_prompt">Log in to like and comment.</string>
+    <string name="review_comment_login_action">Log in</string>
+    <string name="review_delete_comment_title">Delete comment?</string>
+    <string name="review_delete_comment_message">This comment will be deleted for good.</string>
+    <string name="error_load_comments">Comments could not be loaded.</string>
+    <string name="error_post_comment">Your comment could not be posted. Try again.</string>
+    <string name="error_delete_comment">The comment could not be deleted.</string>
+    <string name="error_like_review">Your like could not be saved. Try again.</string>
     <string name="error_load_reviews">Couldn\'t load reviews.</string>
     <string name="error_load_my_cameras">Couldn\'t load your cameras.</string>
     <string name="error_load_review">Couldn\'t load this review.</string>

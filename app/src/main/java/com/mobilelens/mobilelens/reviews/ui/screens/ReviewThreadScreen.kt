@@ -23,7 +23,10 @@ import com.mobilelens.mobilelens.reviews.ui.components.ReviewCard
 @Composable
 fun ReviewThreadScreen(
     thread: ReviewThread,
-    onReviewClick: (Review) -> Unit = {}
+    onReviewClick: (Review) -> Unit = {},
+    onLikeClick: (Review) -> Unit = {},
+    onCommentClick: (Review) -> Unit = {},
+    onShareClick: (Review) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -52,7 +55,11 @@ fun ReviewThreadScreen(
                     author = review.author,
                     commentCount = review.commentCount,
                     likeCount = review.likeCount,
-                    onCardClick = { onReviewClick(review) }
+                    liked = review.likedByMe,
+                    onCardClick = { onReviewClick(review) },
+                    onLikeClick = { onLikeClick(review) },
+                    onCommentClick = { onCommentClick(review) },
+                    onShareClick = { onShareClick(review) },
                 )
             }
         }
