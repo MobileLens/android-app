@@ -5,9 +5,15 @@ import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangeEmailRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangePasswordRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.LoginRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.RegisterRequest
+import com.mobilelens.mobilelens.auth.data.remote.dtos.SessionResponse
 import com.mobilelens.mobilelens.auth.data.remote.dtos.UpdateUserRequest
 import com.mobilelens.mobilelens.auth.model.User
 import com.mobilelens.mobilelens.core.data.remote.ApiClient
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
+
+/** Registration worked, but the backend wants the e-mail confirmed before it issues a session. */
+class EmailVerificationRequiredException : Exception()
 
 class AuthRepository(
     private val authApi: AuthApi = ApiClient.createService()
@@ -33,7 +39,9 @@ class AuthRepository(
                 username = username.ifBlank { "username" }
             )
         )
-        response.token?.let { ApiClient.authToken = it }
+        // No token means no session: the backend is waiting for the e-mail to be confirmed
+        val token = response.token ?: throw EmailVerificationRequiredException()
+        ApiClient.authToken = token
         val dto = response.user
         return User(
             id = dto?.id ?: "",
@@ -45,8 +53,7 @@ class AuthRepository(
 
     suspend fun getSession(): User? {
         if (ApiClient.authToken == null) return null
-        val response = authApi.getSession()
-        val dto = response.user
+        val dto = parseSession(authApi.getSession().string())?.user
         if (dto == null) {
             // Token is present but the session is gone; drop the stored bearer
             ApiClient.authToken = null
@@ -58,6 +65,14 @@ class AuthRepository(
             email = dto.email,
             role = dto.role ?: "Reviewer"
         )
+    }
+
+    // A token without a session (revoked, expired, or issued by another server) gets the literal `null`
+    private fun parseSession(body: String): SessionResponse? {
+        if (body.isBlank()) return null
+        val element = ApiClient.json.parseToJsonElement(body)
+        if (element !is JsonObject) return null
+        return ApiClient.json.decodeFromJsonElement<SessionResponse>(element)
     }
 
     suspend fun updateUserProfile(username: String? = null) {

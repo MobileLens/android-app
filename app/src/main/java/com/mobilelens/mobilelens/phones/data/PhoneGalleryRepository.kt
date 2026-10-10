@@ -1,17 +1,28 @@
 package com.mobilelens.mobilelens.phones.data
 
+import com.mobilelens.mobilelens.core.data.remote.ApiClient
+import com.mobilelens.mobilelens.phones.data.remote.PhoneApi
 import com.mobilelens.mobilelens.phones.model.GalleryPhoto
 
-/**
- * Photos taken with a phone's cameras.
- *
- * The backend keeps them in its `photo` table (one row per camera), but it has no endpoint that
- * lists them yet, and it stores their location as `minio://<bucket>/<objectKey>` rather than an HTTP
- * URL. Until both exist, every phone's gallery is empty.
- */
-class PhoneGalleryRepository {
-    // TODO: once the backend has `GET api/smartphones/{id}/photos` (verified photos, paged like
-    //  `api/smartphones`), call it through a Retrofit `PhotoApi` and map each item's public `url`
-    //  to `imageUrl`. Use that `url` rather than `storageUrl`, which is a `minio://` reference.
-    suspend fun getPhotos(phoneId: String): List<GalleryPhoto> = emptyList()
+// The backend caps a page at 50 photos
+private const val PAGE_SIZE = 50
+
+// The gallery shows everything at once, so paging stops here rather than walking a huge phone's photos
+private const val MAX_PAGES = 4
+
+/** Verified photos taken with a phone's cameras, from `GET api/smartphones/{id}/photos`. */
+class PhoneGalleryRepository(
+    private val phoneApi: PhoneApi = ApiClient.createService()
+) {
+    suspend fun getPhotos(phoneId: String): List<GalleryPhoto> {
+        val photos = mutableListOf<GalleryPhoto>()
+        for (page in 1..MAX_PAGES) {
+            val response = phoneApi.getPhotos(phoneId, page = page, limit = PAGE_SIZE)
+            response.data.mapNotNullTo(photos) { dto ->
+                dto.url?.let { GalleryPhoto(id = dto.id, imageUrl = it) }
+            }
+            if (response.data.size < PAGE_SIZE) break
+        }
+        return photos
+    }
 }

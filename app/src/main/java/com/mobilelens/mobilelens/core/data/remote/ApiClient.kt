@@ -30,7 +30,7 @@ object ApiClient {
         memoryToken = store.token
     }
 
-    private val json = Json { ignoreUnknownKeys = true }
+    internal val json = Json { ignoreUnknownKeys = true }
 
     private val okHttpClient: OkHttpClient by lazy {
         val builder = OkHttpClient.Builder()

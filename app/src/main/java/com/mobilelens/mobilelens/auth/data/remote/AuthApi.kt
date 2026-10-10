@@ -5,9 +5,9 @@ import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangeEmailRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangePasswordRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.LoginRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.RegisterRequest
-import com.mobilelens.mobilelens.auth.data.remote.dtos.SessionResponse
 import com.mobilelens.mobilelens.auth.data.remote.dtos.StatusResponse
 import com.mobilelens.mobilelens.auth.data.remote.dtos.UpdateUserRequest
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -24,10 +24,12 @@ interface AuthApi {
         @Body request: RegisterRequest
     ): AuthResponse
 
+    // The body is the literal `null` (HTTP 200) when the token has no session, which can't be
+    // decoded into SessionResponse. Read it raw and let AuthRepository decode it.
     @GET("api/auth/get-session")
     suspend fun getSession(
         @Header("Authorization") authHeader: String? = null
-    ): SessionResponse
+    ): ResponseBody
 
     @POST("api/auth/sign-out")
     suspend fun signOut(

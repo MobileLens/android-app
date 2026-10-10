@@ -1,5 +1,6 @@
 package com.mobilelens.mobilelens.phones.data
 
+import android.util.Log
 import com.mobilelens.mobilelens.core.data.remote.ApiClient
 import com.mobilelens.mobilelens.phones.data.remote.BrandApi
 import com.mobilelens.mobilelens.phones.data.remote.PhoneApi
@@ -13,10 +14,13 @@ import com.mobilelens.mobilelens.phones.model.LensType
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.model.Stabilization
 import com.mobilelens.mobilelens.phones.model.VideoResolution
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.concurrent.ConcurrentHashMap
+
+private const val TAG = "PhoneCatalogueRepository"
 
 class PhoneCatalogueRepository {
     private val phoneApi = ApiClient.createService<PhoneApi>()
@@ -40,6 +44,20 @@ class PhoneCatalogueRepository {
     suspend fun getPhoneById(id: String): Phone {
         val fullPhoneDto = phoneApi.getPhone(id)
         return mapToPhone(fullPhoneDto)
+    }
+
+    /**
+     * Reports that the details screen of [id] was opened, for the backend's "trending" sort.
+     * Best effort: the backend dedupes repeat views, and a failure isn't worth surfacing.
+     */
+    suspend fun reportView(id: String) {
+        try {
+            phoneApi.countView(id)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to report view of phone $id", e)
+        }
     }
 
     /** The catalogue phone whose model name is exactly [model] (ignoring case), if there is one. */

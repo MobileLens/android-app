@@ -36,6 +36,7 @@ class PhoneDetailsViewModel : ViewModel() {
             _uiState.value = PhoneDetailsUiState.Loading
             try {
                 _uiState.value = PhoneDetailsUiState.Success(repository.getPhoneById(id))
+                repository.reportView(id)
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to load phone $id", e)
                 _uiState.value = PhoneDetailsUiState.Error(R.string.error_load_phone)

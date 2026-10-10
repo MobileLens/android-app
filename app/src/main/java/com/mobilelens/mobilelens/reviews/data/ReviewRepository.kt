@@ -8,6 +8,8 @@ import com.mobilelens.mobilelens.reviews.data.remote.dtos.CreateReviewRequest
 import com.mobilelens.mobilelens.reviews.data.remote.dtos.ReviewDto
 import com.mobilelens.mobilelens.reviews.data.remote.dtos.ReviewMediaInput
 import com.mobilelens.mobilelens.reviews.model.Review
+import com.mobilelens.mobilelens.reviews.model.ReviewAsset
+import com.mobilelens.mobilelens.reviews.model.ReviewAssetType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -29,14 +31,20 @@ class ReviewRepository(
         return mapToReview(reviewApi.getReview(id)).also { reviewCache[id] = it }
     }
 
-    /** Uploads an image to the review media bucket; reference it in a review by its storage URL. */
+    /**
+     * Uploads an image to the review media bucket. The file stays private until its review is
+     * published; use the response's `url` for a preview and attach it to the review by `objectKey`.
+     */
     suspend fun uploadReviewImage(bytes: ByteArray, mimeType: String): StorageUploadResponse {
         // The backend picks the stored file's extension from the part's content type
         val body = bytes.toRequestBody(mimeType.toMediaType())
         return uploadApi.uploadReviewMedia(MultipartBody.Part.createFormData("file", "image", body))
     }
 
-    /** New reviews are created as pending and only show up in threads once a moderator publishes them. */
+    /**
+     * A review from a regular user is created as `pending` and only shows up in threads once a
+     * moderator publishes it; reviewers and above are published straight away. Check [Review.status].
+     */
     suspend fun createReview(
         phoneId: String,
         title: String,
@@ -58,13 +66,20 @@ class ReviewRepository(
         return Review(
             id = dto.id,
             title = dto.title,
-            author = dto.authorId,
+            author = dto.authorName ?: dto.authorId,
             content = dto.contentMarkdown,
             createdAt = dto.createdAt,
             updatedAt = dto.updatedAt,
-            commentCount = 0,
-            likeCount = 0,
-            assets = emptyList()
+            commentCount = dto.commentCount,
+            likeCount = dto.likeCount,
+            assets = dto.media.map { media ->
+                ReviewAsset(
+                    id = media.id,
+                    type = if (media.type == "video") ReviewAssetType.VIDEO else ReviewAssetType.IMAGE,
+                    storageUrl = media.url ?: media.storageUrl,
+                )
+            },
+            status = dto.status
         )
     }
 

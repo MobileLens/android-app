@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.data.BuildInfoRepository
+import com.mobilelens.mobilelens.core.data.remote.apiErrorCode
 import com.mobilelens.mobilelens.phones.data.CameraSubmitRepository
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogueRepository
 import com.mobilelens.mobilelens.phones.data.PhotoExifReader
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 import java.io.FileNotFoundException
 
 private const val TAG = "UploadDeviceViewModel"
@@ -42,6 +44,24 @@ sealed interface UploadSubmitState {
     object Submitting : UploadSubmitState
     object Succeeded : UploadSubmitState
     data class Failed(@StringRes val messageRes: Int) : UploadSubmitState
+}
+
+private enum class SubmitStage { DEVICE, CAMERAS, PHOTOS }
+
+/**
+ * Adding a device (brand + phone) to the catalogue is a moderator action on the backend, so a
+ * regular user submitting a device that isn't listed yet gets 403 FORBIDDEN in the DEVICE stage.
+ */
+@StringRes
+private fun submitErrorFor(e: Exception, stage: SubmitStage): Int {
+    if (e !is HttpException) return R.string.upload_error_submit
+    return when {
+        e.apiErrorCode == "USER_BANNED" -> R.string.upload_error_banned
+        stage == SubmitStage.DEVICE && (e.code() == 401 || e.code() == 403) ->
+            R.string.upload_error_device_not_in_catalogue
+        stage == SubmitStage.CAMERAS && e.apiErrorCode == "INVALID_FIELD" -> R.string.upload_error_invalid_camera
+        else -> R.string.upload_error_submit
+    }
 }
 
 class UploadDeviceViewModel(
@@ -117,6 +137,7 @@ class UploadDeviceViewModel(
 
         viewModelScope.launch {
             _submitState.value = UploadSubmitState.Submitting
+            var stage = SubmitStage.DEVICE
             try {
                 val phone = withContext(Dispatchers.IO) {
                     phoneRepository.findOrCreatePhoneForDevice(
@@ -125,6 +146,7 @@ class UploadDeviceViewModel(
                     )
                 }
 
+                stage = SubmitStage.CAMERAS
                 val createdIds = mutableListOf<String>()
                 for (lens in ready.lenses) {
                     val created = withContext(Dispatchers.IO) {
@@ -133,6 +155,7 @@ class UploadDeviceViewModel(
                     createdIds += created.id
                 }
 
+                stage = SubmitStage.PHOTOS
                 ready.photoUris.forEach { (index, uri) ->
                     val cameraId = createdIds.getOrNull(index) ?: return@forEach
                     withContext(Dispatchers.IO) {
@@ -157,7 +180,7 @@ class UploadDeviceViewModel(
                 _submitState.value = UploadSubmitState.Succeeded
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to upload device cameras", e)
-                _submitState.value = UploadSubmitState.Failed(R.string.upload_error_submit)
+                _submitState.value = UploadSubmitState.Failed(submitErrorFor(e, stage))
             }
         }
     }

@@ -4,7 +4,9 @@ import com.mobilelens.mobilelens.core.data.remote.dtos.OkResponse
 import com.mobilelens.mobilelens.phones.data.remote.dtos.CreatePhoneRequest
 import com.mobilelens.mobilelens.phones.data.remote.dtos.PhoneDto
 import com.mobilelens.mobilelens.phones.data.remote.dtos.PhonesResponse
+import com.mobilelens.mobilelens.phones.data.remote.dtos.PhotosResponse
 import com.mobilelens.mobilelens.phones.data.remote.dtos.UpdatePhoneRequest
+import com.mobilelens.mobilelens.phones.data.remote.dtos.ViewCountResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -27,6 +29,19 @@ interface PhoneApi {
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 20,
     ): PhonesResponse
+
+    @GET("api/smartphones/{id}/photos")
+    suspend fun getPhotos(
+        @Path("id") id: String,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 50,
+    ): PhotosResponse
+
+    // Reading a phone no longer counts as a view; the client reports it once per opened screen
+    @POST("api/smartphones/{id}/view")
+    suspend fun countView(
+        @Path("id") id: String
+    ): ViewCountResponse
 
     @GET("api/smartphones/compare")
     suspend fun comparePhones(

@@ -55,6 +55,9 @@
     <string name="upload_succeeded">Camera data uploaded.</string>
     <string name="upload_error_photo_not_from_device">That photo doesn\'t look like it was taken on this phone. Check the EXIF Make and Model.</string>
     <string name="upload_error_submit">Couldn\'t upload the cameras. If some were created already, try again later or ask a moderator.</string>
+    <string name="upload_error_device_not_in_catalogue">This device isn\'t in the catalogue yet, and only moderators can add new devices. Ask a moderator to add it, then try again.</string>
+    <string name="upload_error_invalid_camera">The server rejected the camera data read from this device.</string>
+    <string name="upload_error_banned">This account has been banned and can\'t upload.</string>
     <string name="upload_cameras_unavailable">Camera details aren\'t ready yet. Wait until this device\'s lenses have loaded.</string>
 
     <!-- Phones -->
@@ -144,6 +147,14 @@
     <string name="auth_error_invalid_credentials">Incorrect e-mail or password.</string>
     <string name="auth_error_no_connection">Couldn\'t reach the server. Check your connection.</string>
     <string name="auth_error_login">Couldn\'t log in. Try again.</string>
+    <string name="auth_error_banned">This account has been banned.</string>
+    <string name="auth_error_email_not_verified">Confirm your e-mail address first, then log in.</string>
+    <string name="auth_error_password_weak">Password must be at least 8 characters long and contain a lowercase letter, an uppercase letter, a digit and a special character.</string>
+    <string name="auth_error_passwords_differ">The passwords don\'t match.</string>
+    <string name="auth_error_register">Couldn\'t create the account. Try again.</string>
+    <string name="auth_error_register_exists">An account with this e-mail already exists.</string>
+    <string name="auth_error_register_invalid_email">Enter a valid e-mail address.</string>
+    <string name="auth_error_register_verify_email">Account created. Confirm your e-mail address, then log in.</string>
 
     <!-- User roles -->
     <string name="role_user">User</string>
@@ -206,10 +217,11 @@
     <string name="review_editor_device_not_in_catalogue">This device isn\'t in the catalogue yet, so it can\'t be reviewed.</string>
     <string name="review_editor_uploading_image">Uploading image</string>
     <string name="review_editor_published">Review sent for moderation.</string>
+    <string name="review_editor_published_live">Review published.</string>
     <string name="review_editor_discard_title">Discard review?</string>
     <string name="review_editor_discard_message">Your draft will be lost.</string>
     <string name="review_editor_discard">Discard</string>
     <string name="review_editor_keep_editing">Keep editing</string>
     <string name="error_upload_review_image">Couldn\'t upload the image.</string>
-    <string name="error_publish_review">Couldn\'t publish the review. Make sure you\'re signed in as a reviewer.</string>
+    <string name="error_publish_review">Couldn\'t publish the review. Make sure you\'re signed in.</string>
 </resources>

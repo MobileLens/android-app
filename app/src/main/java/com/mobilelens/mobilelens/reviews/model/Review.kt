@@ -10,4 +10,6 @@ data class Review(
     val commentCount: Int,
     val likeCount: Int,
     val assets: List<ReviewAsset>?,
+    // draft | pending | published | hidden
+    val status: String = "published",
 )

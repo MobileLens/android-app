@@ -8,7 +8,9 @@ data class ReviewMediaDto(
     val reviewId: String,
     val type: String,
     val storageUrl: String,
-    val displayOrder: Int
+    val displayOrder: Int,
+    // Public link when the review is published, otherwise a short-lived signed one
+    val url: String? = null
 )
 
 @Serializable
@@ -21,6 +23,9 @@ data class ReviewDto(
     val status: String,
     val createdAt: String,
     val updatedAt: String,
+    val authorName: String? = null,
+    val likeCount: Int = 0,
+    val commentCount: Int = 0,
     val media: List<ReviewMediaDto> = emptyList()
 )
 

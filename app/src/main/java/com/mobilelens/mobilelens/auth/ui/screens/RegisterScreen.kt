@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -27,12 +28,15 @@ import com.mobilelens.mobilelens.auth.ui.components.AuthTextField
 @Composable
 fun RegisterScreen(
     onRegister: (username: String, email: String, password: String) -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    errorMessage: String? = null,
+    onClearError: () -> Unit = {}
 ) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var repeatPassword by remember { mutableStateOf("") }
+    var passwordsDiffer by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -45,9 +49,13 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        // Editing any field hides the error, since it describes the previous attempt
         AuthTextField(
             value = username,
-            onValueChange = { username = it },
+            onValueChange = {
+                username = it
+                onClearError()
+            },
             label = stringResource(R.string.auth_username)
         )
 
@@ -55,7 +63,10 @@ fun RegisterScreen(
 
         AuthTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                onClearError()
+            },
             label = stringResource(R.string.auth_email)
         )
 
@@ -63,7 +74,11 @@ fun RegisterScreen(
 
         AuthTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                passwordsDiffer = false
+                onClearError()
+            },
             label = stringResource(R.string.auth_password),
             isPassword = true
         )
@@ -72,16 +87,41 @@ fun RegisterScreen(
 
         AuthTextField(
             value = repeatPassword,
-            onValueChange = { repeatPassword = it },
+            onValueChange = {
+                repeatPassword = it
+                passwordsDiffer = false
+                onClearError()
+            },
             label = stringResource(R.string.auth_repeat_password),
             isPassword = true
         )
+
+        val shownError = if (passwordsDiffer) {
+            stringResource(R.string.auth_error_passwords_differ)
+        } else {
+            errorMessage
+        }
+        if (shownError != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = shownError,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         AuthPillButton(
             text = stringResource(R.string.auth_register),
-            onClick = { onRegister(username, email, password) }
+            onClick = {
+                if (password == repeatPassword) {
+                    onRegister(username, email, password)
+                } else {
+                    passwordsDiffer = true
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -102,6 +142,18 @@ private fun RegisterScreenPreview() {
         RegisterScreen(
             onRegister = { _, _, _ -> },
             onNavigateToLogin = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RegisterScreenErrorPreview() {
+    MaterialTheme {
+        RegisterScreen(
+            onRegister = { _, _, _ -> },
+            onNavigateToLogin = {},
+            errorMessage = "Password must have at least 8 characters."
         )
     }
 }

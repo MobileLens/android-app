@@ -100,11 +100,14 @@ fun NavGraphBuilder.reviewsRoutes(navController: NavController) {
             }
         }
 
-        val publishedMessage = stringResource(R.string.review_editor_published)
+        val moderationMessage = stringResource(R.string.review_editor_published)
+        val liveMessage = stringResource(R.string.review_editor_published_live)
         LaunchedEffect(publishState) {
-            if (publishState == PublishReviewUiState.Published) {
+            val state = publishState
+            if (state is PublishReviewUiState.Published) {
                 // A toast, since the editor is gone by the time a snackbar could show
-                Toast.makeText(context, publishedMessage, Toast.LENGTH_SHORT).show()
+                val message = if (state.inModeration) moderationMessage else liveMessage
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 navController.popBackStack()
             }
         }

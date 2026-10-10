@@ -121,8 +121,8 @@ fun MainApp(
                         navigateToCatalogue()
                     },
                     onResultSelected = { phone ->
-                        // The backend searches only `modelName`, so the brand must not be in the
-                        // query, otherwise the follow-up search matches nothing.
+                        // The model name alone identifies the phone and keeps the follow-up search
+                        // narrow; the backend would also match the brand.
                         textFieldState.setTextAndPlaceCursorAtEnd(phone.deviceInfo.model)
                         selectedPhoneId = phone.id
                         navController.navigate(Screen.PhoneDetails(phone.id))

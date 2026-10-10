@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.data.BuildInfoRepository
 import com.mobilelens.mobilelens.core.data.remote.dtos.StorageUploadResponse
+import com.mobilelens.mobilelens.core.data.remote.publicMediaUrl
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogueRepository
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.reviews.data.ReviewRepository
@@ -35,8 +36,13 @@ sealed interface ReviewTargetUiState {
 sealed interface PublishReviewUiState {
     object Idle : PublishReviewUiState
     object Publishing : PublishReviewUiState
-    object Published : PublishReviewUiState
+    // inModeration: a regular user's review waits for a moderator, reviewers and above go live at once
+    data class Published(val inModeration: Boolean) : PublishReviewUiState
 }
+
+// Address the editor shows the image under: the signed link works while the file is still private
+private val StorageUploadResponse.previewUrl: String
+    get() = url ?: storageUrl
 
 class WriteReviewViewModel(
     private val reviewRepository: ReviewRepository = ReviewRepository(),
@@ -102,10 +108,7 @@ class WriteReviewViewModel(
                     reviewRepository.uploadReviewImage(bytes, mimeType)
                 }
                 uploadedImages += upload
-                // TODO: `storageUrl` is a `minio://` reference, so the image doesn't render. Once the
-                //  upload response also returns the public URL, add it to `StorageUploadResponse`,
-                //  insert that here and match on it in publish().
-                content.insertMarkdownImage(upload.storageUrl)
+                content.insertMarkdownImage(upload.previewUrl)
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to upload review image $uri", e)
                 _errorMessage.value = R.string.error_upload_review_image
@@ -119,21 +122,28 @@ class WriteReviewViewModel(
         val phone = (_target.value as? ReviewTargetUiState.Found)?.phone ?: return
         if (_publishState.value != PublishReviewUiState.Idle) return
 
-        val markdown = content.text.toString()
+        val draft = content.text.toString()
         // Images deleted from the text since uploading aren't attached to the review.
-        // TODO: match on the public URL once insertImage() inserts that instead of `storageUrl`
-        val images = uploadedImages.filter { it.storageUrl in markdown }
+        val images = uploadedImages.filter { it.previewUrl in draft }
+        // The preview links are signed and expire, so the saved text points at the permanent public
+        // URLs instead. The backend moves the files there once the review is published.
+        val markdown = images.fold(draft) { text, image ->
+            val publicUrl = publicMediaUrl(image.storageUrl)
+            if (publicUrl != null) text.replace(image.previewUrl, publicUrl) else text
+        }
 
         viewModelScope.launch {
             _publishState.value = PublishReviewUiState.Publishing
             try {
-                reviewRepository.createReview(
+                val review = reviewRepository.createReview(
                     phoneId = phone.id,
                     title = title.text.toString().trim(),
                     contentMarkdown = markdown,
                     images = images
                 )
-                _publishState.value = PublishReviewUiState.Published
+                _publishState.value = PublishReviewUiState.Published(
+                    inModeration = review.status != "published"
+                )
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to publish review for phone ${phone.id}", e)
                 _errorMessage.value = R.string.error_publish_review

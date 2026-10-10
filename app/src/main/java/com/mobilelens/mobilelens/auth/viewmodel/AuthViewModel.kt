@@ -6,8 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.auth.data.AuthRepository
+import com.mobilelens.mobilelens.auth.data.EmailVerificationRequiredException
+import com.mobilelens.mobilelens.auth.data.isStrongPassword
 import com.mobilelens.mobilelens.auth.model.User
 import com.mobilelens.mobilelens.core.data.remote.ApiClient
+import com.mobilelens.mobilelens.core.data.remote.apiErrorCode
 import com.mobilelens.mobilelens.reviews.model.Review
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,8 +27,9 @@ class AuthViewModel(
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private val _registerError = MutableStateFlow<Int?>(null)
+    // String resource of the last failed registration, shown on the register screen
+    val registerError: StateFlow<Int?> = _registerError.asStateFlow()
 
     private val _loginError = MutableStateFlow<Int?>(null)
     // String resource of the last failed login, shown on the login screen
@@ -77,19 +81,22 @@ class AuthViewModel(
         _loginError.value = null
     }
 
+    fun clearRegisterError() {
+        _registerError.value = null
+    }
+
     fun register(username: String, email: String, password: String) {
+        if (!isStrongPassword(password)) {
+            _registerError.value = R.string.auth_error_password_weak
+            return
+        }
         viewModelScope.launch {
+            _registerError.value = null
             try {
-                _errorMessage.value = null
-                val user = authRepository.register(username, email, password)
-                _currentUser.value = user
+                _currentUser.value = authRepository.register(username, email, password)
             } catch (e: Exception) {
-                _currentUser.value = User(
-                    username = username.ifBlank { "username" },
-                    email = email.ifBlank { "user@example.com" },
-                    role = "Reviewer"
-                )
-                _errorMessage.value = e.message
+                Log.w(TAG, "Registration failed", e)
+                _registerError.value = registerErrorFor(e)
             }
         }
     }
@@ -152,10 +159,27 @@ class AuthViewModel(
     }
 }
 
-// The backend answers 401 for a wrong e-mail or password and 400 for a malformed e-mail
+// The backend answers 401 for a wrong e-mail or password, 400 for a malformed e-mail and 403 for a
+// banned account (USER_BANNED) or an e-mail that still has to be confirmed (EMAIL_NOT_VERIFIED)
 @StringRes
 private fun loginErrorFor(e: Exception): Int = when {
+    e is HttpException && e.apiErrorCode == "USER_BANNED" -> R.string.auth_error_banned
+    e is HttpException && e.apiErrorCode == "EMAIL_NOT_VERIFIED" -> R.string.auth_error_email_not_verified
     e is HttpException && (e.code() == 400 || e.code() == 401) -> R.string.auth_error_invalid_credentials
     e is IOException -> R.string.auth_error_no_connection
     else -> R.string.auth_error_login
+}
+
+@StringRes
+private fun registerErrorFor(e: Exception): Int = when {
+    e is EmailVerificationRequiredException -> R.string.auth_error_register_verify_email
+    e is HttpException -> when (e.apiErrorCode) {
+        "PASSWORD_TOO_WEAK", "PASSWORD_TOO_SHORT", "PASSWORD_TOO_LONG", "PASSWORD_REQUIRED" ->
+            R.string.auth_error_password_weak
+        "USER_ALREADY_EXISTS", "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL" -> R.string.auth_error_register_exists
+        "INVALID_EMAIL" -> R.string.auth_error_register_invalid_email
+        else -> R.string.auth_error_register
+    }
+    e is IOException -> R.string.auth_error_no_connection
+    else -> R.string.auth_error_register
 }

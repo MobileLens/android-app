@@ -46,9 +46,13 @@ fun NavGraphBuilder.authRoutes(
     }
     composable<Screen.Register> {
         val currentUser by authViewModel.currentUser.collectAsState()
+        val registerError by authViewModel.registerError.collectAsState()
 
         LaunchedEffect(currentUser) {
             if (currentUser != null) navController.navigateToUserSettings()
+        }
+        DisposableEffect(Unit) {
+            onDispose { authViewModel.clearRegisterError() }
         }
         RegisterScreen(
             onRegister = { username, email, password ->
@@ -56,7 +60,9 @@ fun NavGraphBuilder.authRoutes(
             },
             onNavigateToLogin = {
                 navController.navigate(Screen.Login)
-            }
+            },
+            errorMessage = registerError?.let { stringResource(it) },
+            onClearError = { authViewModel.clearRegisterError() }
         )
     }
     composable<Screen.UserSettings> {
