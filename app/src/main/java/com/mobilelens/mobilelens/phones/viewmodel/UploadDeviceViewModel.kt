@@ -77,6 +77,12 @@ class UploadDeviceViewModel(
     private val _submitState = MutableStateFlow<UploadSubmitState>(UploadSubmitState.Idle)
     val submitState: StateFlow<UploadSubmitState> = _submitState.asStateFlow()
 
+    // What earlier attempts already sent, so a retry after a failure carries on from there: the
+    // backend takes a repeated camera as a new submission rather than merging it
+    private var submittedPhoneId: String? = null
+    private val createdCameraIds = mutableMapOf<Int, String>() // lens index -> camera id
+    private val uploadedPhotos = mutableMapOf<Int, Uri>() // lens index -> photo sent for it
+
     /** Seeds from Home's Camera2 reading so every local lens is included. */
     fun prepare(lenses: List<Lens>, deviceInfo: DeviceInfo) {
         if (_uiState.value is UploadDeviceUiState.Ready) return
@@ -140,25 +146,27 @@ class UploadDeviceViewModel(
             _submitState.value = UploadSubmitState.Submitting
             var stage = SubmitStage.DEVICE
             try {
-                val phone = withContext(Dispatchers.IO) {
+                val phoneId = submittedPhoneId ?: withContext(Dispatchers.IO) {
                     phoneRepository.findOrCreatePhoneForDevice(
                         model = buildInfoRepository.getModel(),
                         brandName = buildInfoRepository.getBrand(),
-                    )
-                }
+                    ).id
+                }.also { submittedPhoneId = it }
 
                 stage = SubmitStage.CAMERAS
-                val createdIds = mutableListOf<String>()
-                for (lens in ready.lenses) {
+                ready.lenses.forEachIndexed { index, lens ->
+                    if (index in createdCameraIds) return@forEachIndexed
                     val created = withContext(Dispatchers.IO) {
-                        submitRepository.createCamera(phone.id, lens)
+                        submitRepository.createCamera(phoneId, lens)
                     }
-                    createdIds += created.id
+                    createdCameraIds[index] = created.id
                 }
 
                 stage = SubmitStage.PHOTOS
                 ready.photoUris.forEach { (index, uri) ->
-                    val cameraId = createdIds.getOrNull(index) ?: return@forEach
+                    // A photo picked in place of one that was already sent goes up as well
+                    if (uploadedPhotos[index] == uri) return@forEach
+                    val cameraId = createdCameraIds[index] ?: return@forEach
                     withContext(Dispatchers.IO) {
                         val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
                         val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
@@ -176,6 +184,7 @@ class UploadDeviceViewModel(
                         }
                         submitRepository.uploadLensPhoto(cameraId, bytes, mimeType, exif)
                     }
+                    uploadedPhotos[index] = uri
                 }
 
                 _submitState.value = UploadSubmitState.Succeeded

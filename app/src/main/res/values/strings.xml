@@ -70,7 +70,7 @@
     <string name="upload_photo_attached">Photo attached</string>
     <string name="upload_succeeded">Camera data uploaded.</string>
     <string name="upload_error_photo_not_from_device">That photo doesn\'t look like it was taken on this phone. Check the EXIF Make and Model.</string>
-    <string name="upload_error_submit">Couldn\'t upload the cameras. If some were created already, try again later or ask a moderator.</string>
+    <string name="upload_error_submit">Couldn\'t finish the upload. Try again: anything already sent won\'t be sent twice.</string>
     <string name="upload_error_phone_limit">You\'ve added as many new phones to the catalogue as you can today. Try again tomorrow.</string>
     <string name="upload_error_invalid_camera">The server rejected the camera data read from this device.</string>
     <string name="upload_error_banned">This account has been banned and can\'t upload.</string>
