@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -33,6 +35,8 @@ import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.ui.components.CatalogueFilterChips
 import com.mobilelens.mobilelens.phones.ui.components.CatalogueSortTabs
 import com.mobilelens.mobilelens.phones.ui.screens.CatalogueScreen
+import com.mobilelens.mobilelens.phones.ui.screens.ComparePickerScreen
+import com.mobilelens.mobilelens.phones.ui.screens.CompareScreen
 import com.mobilelens.mobilelens.phones.ui.screens.FavoritesScreen
 import com.mobilelens.mobilelens.phones.ui.screens.HomeScreen
 import com.mobilelens.mobilelens.phones.ui.screens.PhoneGalleryScreen
@@ -42,6 +46,8 @@ import com.mobilelens.mobilelens.phones.viewmodel.CameraUiState
 import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
 import com.mobilelens.mobilelens.phones.viewmodel.CatalogueUiState
 import com.mobilelens.mobilelens.phones.viewmodel.CatalogueViewModel
+import com.mobilelens.mobilelens.phones.viewmodel.ComparePickerViewModel
+import com.mobilelens.mobilelens.phones.viewmodel.CompareViewModel
 import com.mobilelens.mobilelens.phones.viewmodel.PhoneDetailsUiState
 import com.mobilelens.mobilelens.phones.viewmodel.PhoneDetailsViewModel
 import com.mobilelens.mobilelens.phones.viewmodel.PhoneGalleryViewModel
@@ -50,7 +56,8 @@ import com.mobilelens.mobilelens.phones.viewmodel.UploadDeviceViewModel
 import com.mobilelens.mobilelens.phones.viewmodel.UploadSubmitState
 
 /**
- * Home, Favorites, Catalogue, PhoneDetails, PhoneGallery and UploadDeviceCameras.
+ * Home, Favorites, Catalogue, PhoneDetails, PhoneGallery, UploadDeviceCameras, ComparePicker and
+ * ComparePhones.
  *
  * State owned by MainApp is passed as getters, so it's read when a route composes rather than
  * when the graph is built.
@@ -76,6 +83,15 @@ fun NavGraphBuilder.phonesRoutes(
                 val state = cameraViewModel.uiState.value
                 if (state is CameraUiState.Success) {
                     navController.navigate(Screen.UploadDeviceCameras)
+                } else {
+                    Toast.makeText(context, camerasUnavailable, Toast.LENGTH_SHORT).show()
+                }
+            },
+            // Compares this device's own lenses, so they have to be read first
+            onCompare = {
+                val state = cameraViewModel.uiState.value
+                if (state is CameraUiState.Success) {
+                    navController.navigate(Screen.ComparePicker()) { launchSingleTop = true }
                 } else {
                     Toast.makeText(context, camerasUnavailable, Toast.LENGTH_SHORT).show()
                 }
@@ -177,6 +193,11 @@ fun NavGraphBuilder.phonesRoutes(
                                 launchSingleTop = true
                             }
                         },
+                        onCompare = dropUnlessResumed {
+                            navController.navigate(Screen.ComparePicker(firstPhoneId = phone.id)) {
+                                launchSingleTop = true
+                            }
+                        },
                     )
                 }
             }
@@ -205,6 +226,57 @@ fun NavGraphBuilder.phonesRoutes(
             uiState = galleryState,
             // Ignores repeated taps, which would otherwise pop past the previous screen
             onBackClick = dropUnlessResumed { navController.popBackStack() },
+        )
+    }
+    composable<Screen.ComparePicker> { backStackEntry ->
+        val route = backStackEntry.toRoute<Screen.ComparePicker>()
+        val pickerViewModel: ComparePickerViewModel = viewModel()
+        val uiState by pickerViewModel.uiState.collectAsState()
+        val searchState = rememberTextFieldState()
+        val query = searchState.text.toString()
+
+        LaunchedEffect(query) {
+            pickerViewModel.search(query)
+        }
+
+        ComparePickerScreen(
+            searchState = searchState,
+            uiState = uiState,
+            excludedPhoneId = route.firstPhoneId,
+            onClose = dropUnlessResumed { navController.popBackStack() },
+            onPhoneSelected = { phone ->
+                // Ignores a second tap while this sheet is already on its way out
+                if (backStackEntry.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                    // The comparison takes the picker's place, so going back leaves both
+                    navController.navigate(Screen.ComparePhones(route.firstPhoneId, phone.id)) {
+                        popUpTo<Screen.ComparePicker> { inclusive = true }
+                    }
+                }
+            },
+            onRetry = pickerViewModel::retry,
+        )
+    }
+    composable<Screen.ComparePhones> { backStackEntry ->
+        val route = backStackEntry.toRoute<Screen.ComparePhones>()
+        val compareViewModel: CompareViewModel = viewModel()
+        val uiState by compareViewModel.uiState.collectAsState()
+        val cameraState by cameraViewModel.uiState.collectAsState()
+
+        LaunchedEffect(route, cameraState) {
+            // This device's lenses may not be read yet, e.g. when the app was restored on this screen
+            if (route.firstPhoneId == null && cameraState == CameraUiState.Checking) return@LaunchedEffect
+            compareViewModel.load(
+                firstPhoneId = route.firstPhoneId,
+                secondPhoneId = route.secondPhoneId,
+                thisDevice = cameraState as? CameraUiState.Success,
+            )
+        }
+
+        CompareScreen(
+            uiState = uiState,
+            // Ignores repeated taps, which would otherwise pop past the previous screen
+            onBackClick = dropUnlessResumed { navController.popBackStack() },
+            onRetry = compareViewModel::retry,
         )
     }
     composable<Screen.UploadDeviceCameras> {

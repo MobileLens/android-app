@@ -99,6 +99,23 @@
     <string name="gallery_photo_failed">Couldn\'t load this photo.</string>
     <string name="error_load_photos">Couldn\'t load photos.</string>
 
+    <!-- Phone comparison -->
+    <string name="compare_title">Compare</string>
+    <string name="compare_picker_title">Compare with</string>
+    <string name="compare_picker_close">Close</string>
+    <string name="compare_picker_hint">Search phones</string>
+    <string name="compare_swap">Swap sides</string>
+    <string name="compare_this_device">This device</string>
+    <string name="compare_no_cameras">No camera data yet</string>
+    <!-- Read out for a "—" standing in for a lens the phone doesn't have -->
+    <string name="compare_not_available">Not available</string>
+    <!-- Read out for the value that comes out ahead. %1$s: the value, e.g. "50 MP" -->
+    <string name="compare_better_value">%1$s, better</string>
+    <!-- A phone's second or further lens of a kind, e.g. "Back telephoto 2". %1$s: lens, %2$d: its number -->
+    <string name="compare_lens_numbered">%1$s %2$d</string>
+    <string name="compare_error_this_device">This device\'s cameras couldn\'t be read, so there\'s nothing to compare.</string>
+    <string name="error_compare_phones">Couldn\'t load the phones to compare.</string>
+
     <!-- Lens facing -->
     <string name="facing_front">Front</string>
     <string name="facing_back">Back</string>

@@ -97,6 +97,23 @@
     <string name="gallery_photo_failed">Nie udało się wczytać tego zdjęcia.</string>
     <string name="error_load_photos">Nie udało się wczytać zdjęć.</string>
 
+    <!-- Phone comparison -->
+    <string name="compare_title">Porównanie</string>
+    <string name="compare_picker_title">Porównaj z</string>
+    <string name="compare_picker_close">Zamknij</string>
+    <string name="compare_picker_hint">Szukaj telefonów</string>
+    <string name="compare_swap">Zamień strony</string>
+    <string name="compare_this_device">To urządzenie</string>
+    <string name="compare_no_cameras">Brak danych o aparatach</string>
+    <!-- Read out for a "—" standing in for a lens the phone doesn't have -->
+    <string name="compare_not_available">Niedostępne</string>
+    <!-- Read out for the value that comes out ahead. %1$s: the value, e.g. "50 MP" -->
+    <string name="compare_better_value">%1$s, lepszy wynik</string>
+    <!-- A phone's second or further lens of a kind, e.g. "Tylny teleobiektyw 2". %1$s: lens, %2$d: its number -->
+    <string name="compare_lens_numbered">%1$s %2$d</string>
+    <string name="compare_error_this_device">Nie udało się odczytać aparatów tego urządzenia, więc nie ma czego porównać.</string>
+    <string name="error_compare_phones">Nie udało się wczytać telefonów do porównania.</string>
+
     <!-- Lens facing -->
     <string name="facing_front">Przedni</string>
     <string name="facing_back">Tylny</string>

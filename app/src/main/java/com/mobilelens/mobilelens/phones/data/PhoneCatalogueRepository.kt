@@ -25,6 +25,9 @@ import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "PhoneCatalogueRepository"
 
+// The most the backend returns in one page
+private const val SEARCH_LIMIT = 50
+
 class PhoneCatalogueRepository {
     private val phoneApi = ApiClient.createService<PhoneApi>()
     private val brandApi = ApiClient.createService<BrandApi>()
@@ -62,6 +65,32 @@ class PhoneCatalogueRepository {
     suspend fun getPhoneById(id: String): Phone {
         val fullPhoneDto = phoneApi.getPhone(id)
         return mapToPhone(fullPhoneDto)
+    }
+
+    /**
+     * Phones matching [query] (all of them when null), for picking one from a list. Unlike
+     * [loadPhones] they come without cameras, so the search takes a single request.
+     */
+    suspend fun searchPhones(query: String?): List<Phone> =
+        phoneApi.getPhones(query = query, limit = SEARCH_LIMIT).data.map { dto ->
+            Phone(
+                id = dto.id,
+                deviceInfo = DeviceInfo(
+                    brand = dto.brandName ?: getBrandName(dto.brandId),
+                    model = dto.modelName,
+                    releaseDate = dto.releaseDate,
+                    imageURL = dto.imageUrl,
+                ),
+                lenses = emptyList(),
+            )
+        }
+
+    /** The phones with [ids] (2 to 4), with their cameras, in the same order. Fails if one is missing. */
+    suspend fun comparePhones(ids: List<String>): List<Phone> {
+        val byId = phoneApi.comparePhones(ids.joinToString(",")).associateBy { it.id }
+        return ids.map { id ->
+            mapToPhone(byId[id] ?: throw NoSuchElementException("Phone $id not found"))
+        }
     }
 
     /**

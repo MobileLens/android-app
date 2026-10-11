@@ -38,7 +38,11 @@ fun Stabilization.labelRes(): Int = when (this) {
 
 /** Tab title, e.g. "Back wide". */
 @Composable
-fun Lens.tabLabel(): String {
+fun Lens.tabLabel(): String = lensKindLabel(facing, type)
+
+/** A kind of lens, e.g. "Back wide". */
+@Composable
+fun lensKindLabel(facing: Facing, type: LensType): String {
     val locale = LocalConfiguration.current.locales[0]
     return stringResource(
         R.string.lens_tab_label,

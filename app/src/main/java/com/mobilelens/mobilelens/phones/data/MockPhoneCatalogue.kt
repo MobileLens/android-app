@@ -93,7 +93,70 @@ val PhoneCatalogue = listOf(
                 type = LensType.WIDE,
             ),
         )
-    )
+    ),
+    Phone(
+        id = "2",
+        deviceInfo = DeviceInfo(
+            brand = "Google",
+            model = "Pixel 10 Pro",
+            releaseDate = "2025-08-28",
+            imageURL = null
+        ),
+        lenses = listOf(
+            // Main, ~24 mm equivalent
+            Lens(
+                focalLength = listOf(6.9f),
+                aperture = listOf(1.68f),
+                cropFactor = 3.6f,
+                sensorTypeDenominator = 1.31f,
+                facing = Facing.BACK,
+                pixelPitchUm = 1.2f,
+                resolution = 50f,
+                activeResolution = 12.5f,
+                afZones = 64,
+                stabilization = Stabilization.OIS,
+                videoResolutions = listOf(
+                    VideoResolution(3840, 2160, 60),
+                    VideoResolution(1920, 1080, 240),
+                ),
+                type = LensType.WIDE,
+            ),
+            // Ultra-wide, ~16 mm equivalent
+            Lens(
+                focalLength = listOf(2.0f),
+                aperture = listOf(1.7f),
+                cropFactor = 7.9f,
+                sensorTypeDenominator = 2.55f,
+                facing = Facing.BACK,
+                pixelPitchUm = 0.8f,
+                resolution = 48f,
+                activeResolution = 12f,
+                afZones = 1,
+                stabilization = Stabilization.NONE,
+                videoResolutions = listOf(
+                    VideoResolution(3840, 2160, 60),
+                ),
+                type = LensType.ULTRAWIDE,
+            ),
+            // Telephoto, ~113 mm equivalent
+            Lens(
+                focalLength = listOf(18f),
+                aperture = listOf(2.8f),
+                cropFactor = 6.3f,
+                sensorTypeDenominator = 2.55f,
+                facing = Facing.BACK,
+                pixelPitchUm = 0.7f,
+                resolution = 48f,
+                activeResolution = 12f,
+                afZones = 1,
+                stabilization = Stabilization.OIS,
+                videoResolutions = listOf(
+                    VideoResolution(3840, 2160, 60),
+                ),
+                type = LensType.TELEPHOTO,
+            ),
+        )
+    ),
 )
 
 val Phone.displayName: String

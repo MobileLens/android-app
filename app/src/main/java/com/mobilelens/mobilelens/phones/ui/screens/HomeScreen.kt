@@ -47,6 +47,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onWriteReview: () -> Unit = {},
     onUpload: () -> Unit = {},
+    onCompare: () -> Unit = {},
 ) {
     val uiState by cameraViewModel.uiState.collectAsState()
     HomeScreenContent(
@@ -55,6 +56,7 @@ fun HomeScreen(
         modifier = modifier,
         onWriteReview = onWriteReview,
         onUpload = onUpload,
+        onCompare = onCompare,
     )
 }
 
@@ -65,6 +67,7 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier,
     onWriteReview: () -> Unit = {},
     onUpload: () -> Unit = {},
+    onCompare: () -> Unit = {},
 ) {
     var showLoginRequired by rememberSaveable { mutableStateOf(false) }
 
@@ -88,7 +91,7 @@ fun HomeScreenContent(
                 FabMenuItem(Icons.Filled.Upload, R.string.action_upload) {
                     if (isLoggedIn) onUpload() else showLoginRequired = true
                 },
-                FabMenuItem(Icons.AutoMirrored.Filled.CompareArrows, R.string.action_compare) {},
+                FabMenuItem(Icons.AutoMirrored.Filled.CompareArrows, R.string.action_compare, onCompare),
             ),
             modifier = Modifier
                 .align(Alignment.BottomEnd)

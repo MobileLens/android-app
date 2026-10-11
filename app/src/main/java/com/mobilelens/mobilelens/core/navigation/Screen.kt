@@ -29,6 +29,10 @@ sealed interface Screen {
     @Serializable data class PhoneGallery(val phoneId: String, val phoneModel: String) : Screen
     /** Submit this device's Camera2 lenses (and optional full-res photos) to the catalogue phone. */
     @Serializable object UploadDeviceCameras : Screen
+    /** Search for the phone to compare with [firstPhoneId]; a null id is this device's own cameras. */
+    @Serializable data class ComparePicker(val firstPhoneId: String? = null) : Screen
+    /** Two phones side by side; a null [firstPhoneId] is this device's own cameras. */
+    @Serializable data class ComparePhones(val firstPhoneId: String?, val secondPhoneId: String) : Screen
     @Serializable object Login : Screen
     @Serializable object Register : Screen
     @Serializable object UserSettings : Screen
@@ -59,4 +63,5 @@ fun NavDestination.isTopLevel(): Boolean = TOP_LEVEL_ROUTES.any { hasRoute(it.ro
 
 /** Full-screen tasks that rise over the screen that opened them and close back down to it. */
 fun NavDestination.isSheet(): Boolean =
-    hasRoute<Screen.WriteReview>() || hasRoute<Screen.UploadDeviceCameras>()
+    hasRoute<Screen.WriteReview>() || hasRoute<Screen.UploadDeviceCameras>() ||
+            hasRoute<Screen.ComparePicker>()

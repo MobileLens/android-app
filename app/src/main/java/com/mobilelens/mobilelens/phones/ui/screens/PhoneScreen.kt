@@ -31,6 +31,7 @@ fun PhoneScreen(
     modifier: Modifier = Modifier,
     onNavigateToReviews: () -> Unit = {},
     onOpenGallery: () -> Unit = {},
+    onCompare: () -> Unit = {},
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         DeviceLensDetail(
@@ -51,7 +52,7 @@ fun PhoneScreen(
         FabMenu(
             items = listOf(
                 FabMenuItem(Icons.Filled.Star, R.string.action_reviews, onNavigateToReviews),
-                FabMenuItem(Icons.AutoMirrored.Filled.CompareArrows, R.string.action_compare) {},
+                FabMenuItem(Icons.AutoMirrored.Filled.CompareArrows, R.string.action_compare, onCompare),
             ),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
