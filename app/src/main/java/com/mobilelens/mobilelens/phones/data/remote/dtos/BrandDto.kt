@@ -8,9 +8,3 @@ data class BrandDto(
     val name: String,
     val logoUrl: String? = null
 )
-
-@Serializable
-data class CreateBrandRequest(
-    val name: String,
-    val logoUrl: String? = null
-)

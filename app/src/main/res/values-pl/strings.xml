@@ -69,7 +69,7 @@
     <string name="upload_succeeded">Przesłano dane aparatów.</string>
     <string name="upload_error_photo_not_from_device">To zdjęcie nie wygląda na zrobione tym telefonem. Sprawdź pola Make i Model w danych EXIF.</string>
     <string name="upload_error_submit">Nie udało się przesłać aparatów. Jeśli część z nich została już utworzona, spróbuj ponownie później lub poproś o pomoc moderatora.</string>
-    <string name="upload_error_device_not_in_catalogue">Tego urządzenia nie ma jeszcze w katalogu, a nowe urządzenia mogą dodawać tylko moderatorzy. Poproś moderatora o jego dodanie i spróbuj ponownie.</string>
+    <string name="upload_error_phone_limit">Na dziś osiągnięto limit dodawania nowych telefonów do katalogu. Spróbuj ponownie jutro.</string>
     <string name="upload_error_invalid_camera">Serwer odrzucił dane aparatów odczytane z tego urządzenia.</string>
     <string name="upload_error_banned">To konto zostało zablokowane i nie może przesyłać danych.</string>
     <string name="upload_cameras_unavailable">Szczegóły aparatów nie są jeszcze gotowe. Poczekaj, aż obiektywy tego urządzenia zostaną wczytane.</string>

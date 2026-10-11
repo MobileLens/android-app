@@ -49,16 +49,17 @@ sealed interface UploadSubmitState {
 private enum class SubmitStage { DEVICE, CAMERAS, PHOTOS }
 
 /**
- * Adding a device (brand + phone) to the catalogue is a moderator action on the backend, so a
- * regular user submitting a device that isn't listed yet gets 403 FORBIDDEN in the DEVICE stage.
+ * A device that isn't listed yet is added to the catalogue in the DEVICE stage. Any signed-in user
+ * may do that, but below moderator only a few phones a day (429 PHONE_LIMIT_REACHED).
  */
 @StringRes
 private fun submitErrorFor(e: Exception, stage: SubmitStage): Int {
     if (e !is HttpException) return R.string.upload_error_submit
     return when {
         e.apiErrorCode == "USER_BANNED" -> R.string.upload_error_banned
-        stage == SubmitStage.DEVICE && (e.code() == 401 || e.code() == 403) ->
-            R.string.upload_error_device_not_in_catalogue
+        // The session ended since the upload screen was opened
+        e.code() == 401 -> R.string.upload_login_required_message
+        stage == SubmitStage.DEVICE && e.apiErrorCode == "PHONE_LIMIT_REACHED" -> R.string.upload_error_phone_limit
         stage == SubmitStage.CAMERAS && e.apiErrorCode == "INVALID_FIELD" -> R.string.upload_error_invalid_camera
         else -> R.string.upload_error_submit
     }

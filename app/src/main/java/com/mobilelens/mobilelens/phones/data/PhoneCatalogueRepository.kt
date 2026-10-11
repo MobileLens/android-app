@@ -4,7 +4,6 @@ import android.util.Log
 import com.mobilelens.mobilelens.core.data.remote.ApiClient
 import com.mobilelens.mobilelens.phones.data.remote.BrandApi
 import com.mobilelens.mobilelens.phones.data.remote.PhoneApi
-import com.mobilelens.mobilelens.phones.data.remote.dtos.CreateBrandRequest
 import com.mobilelens.mobilelens.phones.data.remote.dtos.CreatePhoneRequest
 import com.mobilelens.mobilelens.phones.data.remote.dtos.PhoneDto
 import com.mobilelens.mobilelens.phones.model.Brand
@@ -116,20 +115,16 @@ class PhoneCatalogueRepository {
     }
 
     /**
-     * Catalogue entry for this device: reuse an exact model match, otherwise create the brand
-     * (if needed) and phone so Camera2 lenses can be submitted for a device that isn't listed yet.
+     * Catalogue entry for this device: reuse an exact model match, otherwise add the phone so
+     * Camera2 lenses can be submitted for a device that isn't listed yet. Any signed-in user may
+     * add one; the backend finds or creates the brand, answers with the existing phone instead of
+     * a duplicate, and keeps a regular user's new phone unverified until a moderator confirms it.
      */
     suspend fun findOrCreatePhoneForDevice(model: String, brandName: String): Phone {
         findPhoneByModel(model)?.let { return it }
 
-        val brands = brandApi.getBrands()
-        val brand = brands.firstOrNull { it.name.equals(brandName, ignoreCase = true) }
-            ?: brandApi.createBrand(CreateBrandRequest(name = brandName)).also { created ->
-                brandCache[created.id] = created.name
-            }
-
         val created = phoneApi.createPhone(
-            CreatePhoneRequest(brandId = brand.id, modelName = model)
+            CreatePhoneRequest(brandName = brandName, modelName = model)
         )
         return mapToPhone(phoneApi.getPhone(created.id))
     }
