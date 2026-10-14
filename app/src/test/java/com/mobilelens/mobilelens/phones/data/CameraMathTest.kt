@@ -83,10 +83,19 @@ class CameraMathTest {
     }
 
     @Test
+    fun isSameCameraAs_matchesCroppedReadoutOfSameSensor() {
+        // Galaxy S20 FE front camera: ID 1 reads the full sensor, ID 3 a centre crop of it
+        val full = lens(focalLength = 3.72f, aperture = 2.2f, resolution = 8f, cropFactor = 6.63f, pixelPitchUm = 1.6f)
+        val cropped = lens(focalLength = 3.72f, aperture = 2.2f, resolution = 5.2f, cropFactor = 8.19f, pixelPitchUm = 1.6f)
+
+        assertTrue(cropped.isSameCameraAs(full))
+    }
+
+    @Test
     fun isSameCameraAs_distinguishesDifferentCameras() {
         assertFalse(lens(aperture = 1.8f).isSameCameraAs(lens(aperture = 2.6f)))
         assertFalse(lens(focalLength = 4.3f).isSameCameraAs(lens(focalLength = 5.2f)))
-        assertFalse(lens(resolution = 12f).isSameCameraAs(lens(resolution = 48f)))
+        assertFalse(lens(resolution = 12f, pixelPitchUm = 1.4f).isSameCameraAs(lens(resolution = 48f, pixelPitchUm = 0.7f)))
         assertFalse(lens(facing = Facing.BACK).isSameCameraAs(lens(facing = Facing.FRONT)))
     }
 
@@ -94,14 +103,16 @@ class CameraMathTest {
         focalLength: Float = 5.4f,
         aperture: Float = 1.8f,
         resolution: Float = 12f,
+        cropFactor: Float = 4.5f,
+        pixelPitchUm: Float = 1.4f,
         facing: Facing = Facing.BACK,
     ) = Lens(
         focalLength = listOf(focalLength),
         aperture = listOf(aperture),
-        cropFactor = 4.5f,
+        cropFactor = cropFactor,
         sensorTypeDenominator = 1.7f,
         facing = facing,
-        pixelPitchUm = 1.4f,
+        pixelPitchUm = pixelPitchUm,
         resolution = resolution,
         activeResolution = resolution,
         afZones = 1,

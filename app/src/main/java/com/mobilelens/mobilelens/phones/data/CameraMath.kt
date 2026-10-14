@@ -65,20 +65,19 @@ private fun isVideoSize(width: Int, height: Int): Boolean {
 
 /**
  * Whether two readings describe the same physical camera. Some OEMs expose one sensor under
- * several camera IDs.
+ * several camera IDs, sometimes as a cropped readout (e.g. Samsung's narrower selfie framing).
+ * A crop shrinks the sensor size and resolution, but keeps the lens and the pixel pitch.
  */
 internal fun Lens.isSameCameraAs(other: Lens): Boolean =
     facing == other.facing &&
         stabilization == other.stabilization &&
-        approximatelyEqual(resolution, other.resolution) &&
-        approximatelyEqual(activeResolution, other.activeResolution) &&
-        approximatelyEqual(cropFactor, other.cropFactor) &&
+        approximatelyEqual(pixelPitchUm, other.pixelPitchUm) &&
         focalLength.approximatelyEqual(other.focalLength) &&
         aperture.approximatelyEqual(other.aperture)
 
 private fun List<Float>.approximatelyEqual(other: List<Float>): Boolean =
     size == other.size && zip(other).all { (a, b) -> approximatelyEqual(a, b) }
 
-// 2% absorbs rounding differences between IDs, while f/1.8 vs f/2.2 or 12 vs 13 MP stay distinct
+// 2% absorbs rounding differences between IDs, while f/1.8 vs f/2.2 or 1.0 vs 1.12 μm stay distinct
 private fun approximatelyEqual(a: Float, b: Float, tolerance: Float = 0.02f): Boolean =
     abs(a - b) <= tolerance * max(abs(a), abs(b))

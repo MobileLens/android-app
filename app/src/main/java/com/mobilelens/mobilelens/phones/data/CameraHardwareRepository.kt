@@ -25,8 +25,15 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
         for (cameraId in cameraIdsToRead()) {
             val lens = readLens(cameraId) ?: continue
 
-            if (lenses.any { it.isSameCameraAs(lens) }) {
-                Log.i(TAG, "Skipping duplicate camera $cameraId")
+            val duplicateIndex = lenses.indexOfFirst { it.isSameCameraAs(lens) }
+            if (duplicateIndex >= 0) {
+                // Of two readouts of one sensor, the larger one covers all of it
+                if (lens.cropFactor < lenses[duplicateIndex].cropFactor) {
+                    Log.i(TAG, "Camera $cameraId replaces its cropped duplicate")
+                    lenses[duplicateIndex] = lens
+                } else {
+                    Log.i(TAG, "Skipping duplicate camera $cameraId")
+                }
                 continue
             }
             Log.i(TAG, "Adding camera $cameraId")
