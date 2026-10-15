@@ -68,15 +68,49 @@ private fun isVideoSize(width: Int, height: Int): Boolean {
 
 /**
  * Whether two readings describe the same physical camera. Some OEMs expose one sensor under
- * several camera IDs, sometimes as a cropped readout (e.g. Samsung's narrower selfie framing).
- * A crop shrinks the sensor size and resolution, but keeps the lens and the pixel pitch.
+ * several camera IDs, sometimes as a cropped readout (e.g. Samsung's narrower selfie framing, or
+ * the Pixel 8's "2x telephoto"). A crop shrinks the sensor size, but keeps the lens and usually
+ * the pixel pitch. See [isUnbinnedCropOf] for when it doesn't.
  */
 internal fun Lens.isSameCameraAs(other: Lens): Boolean =
     facing == other.facing &&
         stabilization == other.stabilization &&
-        approximatelyEqual(pixelPitchUm, other.pixelPitchUm) &&
         focalLength.approximatelyEqual(other.focalLength) &&
-        aperture.approximatelyEqual(other.aperture)
+        aperture.approximatelyEqual(other.aperture) &&
+        (approximatelyEqual(pixelPitchUm, other.pixelPitchUm) || isUnbinnedCropOf(other) || other.isUnbinnedCropOf(this))
+
+/**
+ * Whether this reading is the middle of [full]'s sensor at native resolution, while [full] reads
+ * the whole sensor binned. The pitches then differ by the binning factor. E.g. the Pixel 8 reads its
+ * 50 MP main sensor 2x2 binned (12.5 MP, 2.4 μm) and fakes a 2x telephoto from its central
+ * 12.5 MP (1.2 μm) under another camera ID.
+ */
+private fun Lens.isUnbinnedCropOf(full: Lens): Boolean = binningOf(full) != null
+
+/** How many pixels [full] bins along each side, when this reading is its unbinned crop. */
+private fun Lens.binningOf(full: Lens): Int? {
+    val binning = full.pixelPitchUm / pixelPitchUm
+    val wholeBinning = binning.roundToInt()
+    val isUnbinnedCrop = wholeBinning in 2..4 &&
+        approximatelyEqual(binning, wholeBinning.toFloat()) &&
+        cropFactor > full.cropFactor
+    return wholeBinning.takeIf { isUnbinnedCrop }
+}
+
+/**
+ * This full-sensor reading with its sensor's native pixel pitch and resolution, taken from [crop],
+ * a duplicate of it. Sensors that report their full resolution (the *_MAXIMUM_RESOLUTION keys)
+ * already have both, but others (e.g. the Pixel 8's main camera) only describe the binned readout.
+ * Their unbinned crop shows the native pitch. Otherwise this reading is returned unchanged.
+ */
+internal fun Lens.withNativePixelsFrom(crop: Lens): Lens {
+    val binning = crop.binningOf(this) ?: return this
+    return copy(
+        pixelPitchUm = crop.pixelPitchUm,
+        // Inherits activeResolution's rounding, e.g. 50.0 MP instead of the exact 50.1 MP
+        resolution = (activeResolution * binning * binning * 10).roundToInt() / 10f,
+    )
+}
 
 /**
  * Whether the two lenses have a focal length and aperture in common, e.g. because a photo was

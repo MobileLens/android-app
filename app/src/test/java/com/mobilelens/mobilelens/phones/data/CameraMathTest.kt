@@ -93,11 +93,48 @@ class CameraMathTest {
     }
 
     @Test
+    fun isSameCameraAs_matchesUnbinnedCropOfBinnedSensor() {
+        // Pixel 8: ID 2 reads the 50 MP main sensor 2x2 binned, ID 4 is its central 12.5 MP as a "2x telephoto"
+        val binned = lens(focalLength = 6.9f, aperture = 1.68f, resolution = 12.5f, cropFactor = 3.53f, pixelPitchUm = 2.4f)
+        val cropped = lens(focalLength = 6.9f, aperture = 1.68f, resolution = 12.5f, cropFactor = 7.06f, pixelPitchUm = 1.2f)
+
+        assertTrue(cropped.isSameCameraAs(binned))
+        assertTrue(binned.isSameCameraAs(cropped))
+    }
+
+    @Test
+    fun withNativePixelsFrom_takesNativePitchFromUnbinnedCrop() {
+        // Pixel 8 main camera, reported only as its 2x2 binned 12.5 MP readout
+        val binned = lens(focalLength = 6.9f, aperture = 1.68f, resolution = 12.5f, cropFactor = 3.53f, pixelPitchUm = 2.4f)
+        val cropped = lens(focalLength = 6.9f, aperture = 1.68f, resolution = 12.5f, cropFactor = 7.06f, pixelPitchUm = 1.2f)
+
+        val native = binned.withNativePixelsFrom(cropped)
+
+        assertEquals(1.2f, native.pixelPitchUm, 0.0001f)
+        assertEquals(50f, native.resolution, 0.0001f)
+        assertEquals(12.5f, native.activeResolution, 0.0001f)
+        assertEquals(binned.cropFactor, native.cropFactor, 0.0001f)
+        // The crop doesn't take anything from the binned readout
+        assertEquals(cropped, cropped.withNativePixelsFrom(binned))
+    }
+
+    @Test
+    fun withNativePixelsFrom_keepsReadingWhenCropHasSamePitch() {
+        // Galaxy S20 FE front camera: the crop shows nothing the full readout doesn't
+        val full = lens(focalLength = 3.72f, aperture = 2.2f, resolution = 8f, cropFactor = 6.63f, pixelPitchUm = 1.6f)
+        val cropped = lens(focalLength = 3.72f, aperture = 2.2f, resolution = 5.2f, cropFactor = 8.19f, pixelPitchUm = 1.6f)
+
+        assertEquals(full, full.withNativePixelsFrom(cropped))
+    }
+
+    @Test
     fun isSameCameraAs_distinguishesDifferentCameras() {
         assertFalse(lens(aperture = 1.8f).isSameCameraAs(lens(aperture = 2.6f)))
         assertFalse(lens(focalLength = 4.3f).isSameCameraAs(lens(focalLength = 5.2f)))
         assertFalse(lens(resolution = 12f, pixelPitchUm = 1.4f).isSameCameraAs(lens(resolution = 48f, pixelPitchUm = 0.7f)))
         assertFalse(lens(facing = Facing.BACK).isSameCameraAs(lens(facing = Facing.FRONT)))
+        // Finer pixels on a smaller sensor, but not by a whole binning factor
+        assertFalse(lens(cropFactor = 4.5f, pixelPitchUm = 1.4f).isSameCameraAs(lens(cropFactor = 6f, pixelPitchUm = 1.0f)))
     }
 
     @Test

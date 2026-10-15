@@ -27,12 +27,15 @@ class CameraHardwareRepository(private val cameraManager: CameraManager) {
 
             val duplicateIndex = lenses.indexOfFirst { it.isSameCameraAs(lens) }
             if (duplicateIndex >= 0) {
-                // Of two readouts of one sensor, the larger one covers all of it
-                if (lens.cropFactor < lenses[duplicateIndex].cropFactor) {
+                val duplicate = lenses[duplicateIndex]
+                // Of two readouts of one sensor, the larger one covers all of it, though a crop
+                // may show its native pixels
+                lenses[duplicateIndex] = if (lens.cropFactor < duplicate.cropFactor) {
                     Log.i(TAG, "Camera $cameraId replaces its cropped duplicate")
-                    lenses[duplicateIndex] = lens
+                    lens.withNativePixelsFrom(duplicate)
                 } else {
                     Log.i(TAG, "Skipping duplicate camera $cameraId")
+                    duplicate.withNativePixelsFrom(lens)
                 }
                 continue
             }
