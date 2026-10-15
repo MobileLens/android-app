@@ -12,6 +12,7 @@ data class PhotoExif(
     val widthPx: Int,
     val heightPx: Int,
     val focalLengthMm: Double?,
+    val focalLength35mm: Int?,
     val aperture: Double?,
     val iso: Int?,
     val shutterSpeed: String?,

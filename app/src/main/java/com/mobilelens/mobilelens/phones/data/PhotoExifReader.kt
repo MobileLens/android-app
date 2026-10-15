@@ -19,6 +19,8 @@ class PhotoExifReader {
             heightPx = height,
             focalLengthMm = exif.getAttributeDouble(ExifInterface.TAG_FOCAL_LENGTH, Double.NaN)
                 .takeUnless { it.isNaN() },
+            focalLength35mm = exif.getAttributeInt(ExifInterface.TAG_FOCAL_LENGTH_IN_35MM_FILM, 0)
+                .takeIf { it > 0 },
             aperture = exif.getAttributeDouble(ExifInterface.TAG_F_NUMBER, Double.NaN)
                 .takeUnless { it.isNaN() },
             iso = exif.getAttributeInt(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY, -1)

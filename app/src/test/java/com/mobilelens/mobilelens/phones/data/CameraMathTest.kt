@@ -7,6 +7,7 @@ import com.mobilelens.mobilelens.phones.model.Stabilization
 import com.mobilelens.mobilelens.phones.model.VideoResolution
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -98,6 +99,52 @@ class CameraMathTest {
         assertFalse(lens(resolution = 12f, pixelPitchUm = 1.4f).isSameCameraAs(lens(resolution = 48f, pixelPitchUm = 0.7f)))
         assertFalse(lens(facing = Facing.BACK).isSameCameraAs(lens(facing = Facing.FRONT)))
     }
+
+    @Test
+    fun lensFromPhotoExif_sizesSensorFrom35mmEquivalent() {
+        // Galaxy S20 FE telephoto, which Camera2 hides: 3.264 x 2.448 mm, 1.0 μm pixels
+        val lens = lensFromPhotoExif(exif(focalLengthMm = 7.12, focalLength35mm = 76, aperture = 2.4))!!
+
+        assertEquals(listOf(7.12f), lens.focalLength)
+        assertEquals(listOf(2.4f), lens.aperture)
+        assertEquals(76f / 7.12f, lens.cropFactor, 0.001f)
+        assertEquals(1.0f, lens.pixelPitchUm, 0.01f)
+        assertEquals(8.0f, lens.resolution, 0.0001f)
+        assertEquals(LensType.TELEPHOTO, lens.type)
+    }
+
+    @Test
+    fun lensFromPhotoExif_needsFocalLengthsAndAperture() {
+        assertNull(lensFromPhotoExif(exif(focalLength35mm = null)))
+        assertNull(lensFromPhotoExif(exif(focalLengthMm = null)))
+        assertNull(lensFromPhotoExif(exif(aperture = null)))
+        // FocalLength holding the 35 mm equivalent too leaves no sensor size to work out
+        assertNull(lensFromPhotoExif(exif(focalLengthMm = 26.0, focalLength35mm = 26)))
+    }
+
+    @Test
+    fun sharesOpticsWith_toleratesExifRounding() {
+        val ultrawide = lens(focalLength = 1.74f, aperture = 2.2f)
+
+        assertTrue(lens(focalLength = 1.7f, aperture = 2.2f, facing = Facing.FRONT).sharesOpticsWith(ultrawide))
+        assertFalse(lens(focalLength = 7.12f, aperture = 2.4f).sharesOpticsWith(ultrawide))
+    }
+
+    private fun exif(
+        focalLengthMm: Double? = 7.12,
+        focalLength35mm: Int? = 76,
+        aperture: Double? = 2.4,
+    ) = PhotoExif(
+        make = "samsung",
+        model = "SM-G780G",
+        widthPx = 3264,
+        heightPx = 2448,
+        focalLengthMm = focalLengthMm,
+        focalLength35mm = focalLength35mm,
+        aperture = aperture,
+        iso = 50,
+        shutterSpeed = "1/100",
+    )
 
     private fun lens(
         focalLength: Float = 5.4f,

@@ -302,6 +302,13 @@ fun NavGraphBuilder.phonesRoutes(
                 uploadViewModel.setPhoto(index, uri, context.contentResolver)
             }
         }
+        val pickPhotoCamera = rememberLauncherForActivityResult(
+            ActivityResultContracts.PickVisualMedia()
+        ) { uri ->
+            if (uri != null) {
+                uploadViewModel.readPhotoCamera(uri, context.contentResolver)
+            }
+        }
 
         val photoError = (uiState as? UploadDeviceUiState.Ready)
             ?.photoErrorRes
@@ -345,6 +352,14 @@ fun NavGraphBuilder.phonesRoutes(
             onRemovePhoto = { index ->
                 uploadViewModel.setPhoto(index, null, context.contentResolver)
             },
+            onAddPhotoCamera = {
+                pickPhotoCamera.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            },
+            onConfirmPhotoCamera = uploadViewModel::confirmPhotoCamera,
+            onDismissPhotoCamera = uploadViewModel::dismissPhotoCamera,
+            onRemovePhotoCamera = uploadViewModel::removePhotoCamera,
         )
     }
 }

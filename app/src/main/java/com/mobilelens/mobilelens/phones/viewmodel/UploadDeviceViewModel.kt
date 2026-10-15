@@ -12,20 +12,38 @@ import com.mobilelens.mobilelens.core.data.BuildInfoRepository
 import com.mobilelens.mobilelens.core.data.remote.apiErrorCode
 import com.mobilelens.mobilelens.phones.data.CameraSubmitRepository
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogueRepository
+import com.mobilelens.mobilelens.phones.data.PhotoExif
 import com.mobilelens.mobilelens.phones.data.PhotoExifReader
 import com.mobilelens.mobilelens.phones.data.exifMatchesDevice
+import com.mobilelens.mobilelens.phones.data.lensFromPhotoExif
+import com.mobilelens.mobilelens.phones.data.sharesOpticsWith
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
+import com.mobilelens.mobilelens.phones.model.Facing
 import com.mobilelens.mobilelens.phones.model.Lens
+import com.mobilelens.mobilelens.phones.model.LensType
+import com.mobilelens.mobilelens.phones.model.Stabilization
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.FileNotFoundException
 
 private const val TAG = "UploadDeviceViewModel"
+
+/**
+ * A camera Camera2 doesn't expose, described by the EXIF of a stock-camera photo taken with it.
+ * Only the lens is sent, like a detected one: the photo stays on the phone.
+ */
+data class PhotoCamera(
+    val id: Int,
+    val lens: Lens,
+    /** Already created on the backend, where removing it here would no longer withdraw it. */
+    val submitted: Boolean = false,
+)
 
 sealed interface UploadDeviceUiState {
     object Loading : UploadDeviceUiState
@@ -34,6 +52,10 @@ sealed interface UploadDeviceUiState {
         val lenses: List<Lens>,
         /** Optional full-res stock photo URI per lens index. */
         val photoUris: Map<Int, Uri> = emptyMap(),
+        /** Cameras added from photos, sent along with [lenses]. */
+        val photoCameras: List<PhotoCamera> = emptyList(),
+        /** Read from a photo, waiting for the user to fill in what EXIF doesn't record. */
+        val pendingPhotoCamera: PhotoCamera? = null,
         @StringRes val photoErrorRes: Int? = null,
     ) : UploadDeviceUiState
     data class Error(@StringRes val messageRes: Int) : UploadDeviceUiState
@@ -82,6 +104,9 @@ class UploadDeviceViewModel(
     private var submittedPhoneId: String? = null
     private val createdCameraIds = mutableMapOf<Int, String>() // lens index -> camera id
     private val uploadedPhotos = mutableMapOf<Int, Uri>() // lens index -> photo sent for it
+    private val createdPhotoCameraIds = mutableMapOf<Int, String>() // photo camera id -> camera id
+
+    private var nextPhotoCameraId = 0
 
     /** Seeds from Home's Camera2 reading so every local lens is included. */
     fun prepare(lenses: List<Lens>, deviceInfo: DeviceInfo) {
@@ -104,21 +129,7 @@ class UploadDeviceViewModel(
         }
 
         viewModelScope.launch {
-            val matches = withContext(Dispatchers.IO) {
-                try {
-                    val exif = photoExifReader.read(contentResolver, uri)
-                    exifMatchesDevice(
-                        exifMake = exif.make,
-                        exifModel = exif.model,
-                        manufacturer = buildInfoRepository.getBrand(),
-                        brand = Build.BRAND,
-                        model = buildInfoRepository.getModel(),
-                    )
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to read EXIF for $uri", e)
-                    false
-                }
-            }
+            val matches = readExif(uri, contentResolver)?.let(::matchesThisDevice) == true
             val current = _uiState.value as? UploadDeviceUiState.Ready ?: return@launch
             _uiState.value = if (matches) {
                 current.copy(
@@ -129,6 +140,50 @@ class UploadDeviceViewModel(
                 current.copy(photoErrorRes = R.string.upload_error_photo_not_from_device)
             }
         }
+    }
+
+    /** Reads a camera Camera2 missed from a stock-camera photo, then waits for [confirmPhotoCamera]. */
+    fun readPhotoCamera(uri: Uri, contentResolver: ContentResolver) {
+        viewModelScope.launch {
+            val exif = readExif(uri, contentResolver)
+            val current = _uiState.value as? UploadDeviceUiState.Ready ?: return@launch
+            val lens = exif?.let(::lensFromPhotoExif)
+            val listed = current.lenses + current.photoCameras.map { it.lens }
+            _uiState.value = when {
+                exif == null || !matchesThisDevice(exif) ->
+                    current.copy(photoErrorRes = R.string.upload_error_photo_not_from_device)
+                lens == null -> current.copy(photoErrorRes = R.string.upload_error_photo_no_optics)
+                listed.any { it.sharesOpticsWith(lens) } ->
+                    current.copy(photoErrorRes = R.string.upload_error_camera_already_listed)
+                else -> current.copy(
+                    pendingPhotoCamera = PhotoCamera(id = nextPhotoCameraId++, lens = lens),
+                    photoErrorRes = null,
+                )
+            }
+        }
+    }
+
+    fun confirmPhotoCamera(type: LensType, facing: Facing, stabilization: Stabilization) {
+        val ready = _uiState.value as? UploadDeviceUiState.Ready ?: return
+        val pending = ready.pendingPhotoCamera ?: return
+        val confirmed = pending.copy(
+            lens = pending.lens.copy(type = type, facing = facing, stabilization = stabilization)
+        )
+        _uiState.value = ready.copy(
+            photoCameras = ready.photoCameras + confirmed,
+            pendingPhotoCamera = null,
+        )
+    }
+
+    fun dismissPhotoCamera() {
+        val ready = _uiState.value as? UploadDeviceUiState.Ready ?: return
+        _uiState.value = ready.copy(pendingPhotoCamera = null)
+    }
+
+    fun removePhotoCamera(id: Int) {
+        val ready = _uiState.value as? UploadDeviceUiState.Ready ?: return
+        if (id in createdPhotoCameraIds) return
+        _uiState.value = ready.copy(photoCameras = ready.photoCameras.filterNot { it.id == id })
     }
 
     fun clearPhotoError() {
@@ -161,29 +216,21 @@ class UploadDeviceViewModel(
                     }
                     createdCameraIds[index] = created.id
                 }
+                ready.photoCameras.forEach { photoCamera ->
+                    if (photoCamera.id in createdPhotoCameraIds) return@forEach
+                    val created = withContext(Dispatchers.IO) {
+                        submitRepository.createCamera(phoneId, photoCamera.lens)
+                    }
+                    createdPhotoCameraIds[photoCamera.id] = created.id
+                    markSubmitted(photoCamera.id)
+                }
 
                 stage = SubmitStage.PHOTOS
                 ready.photoUris.forEach { (index, uri) ->
                     // A photo picked in place of one that was already sent goes up as well
                     if (uploadedPhotos[index] == uri) return@forEach
                     val cameraId = createdCameraIds[index] ?: return@forEach
-                    withContext(Dispatchers.IO) {
-                        val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
-                        val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                            ?: throw FileNotFoundException("Couldn't open $uri")
-                        val exif = photoExifReader.read(contentResolver, uri)
-                        if (!exifMatchesDevice(
-                                exifMake = exif.make,
-                                exifModel = exif.model,
-                                manufacturer = buildInfoRepository.getBrand(),
-                                brand = Build.BRAND,
-                                model = buildInfoRepository.getModel(),
-                            )
-                        ) {
-                            throw IllegalStateException("EXIF no longer matches this device")
-                        }
-                        submitRepository.uploadLensPhoto(cameraId, bytes, mimeType, exif)
-                    }
+                    uploadPhoto(cameraId, uri, contentResolver)
                     uploadedPhotos[index] = uri
                 }
 
@@ -198,6 +245,46 @@ class UploadDeviceViewModel(
     fun submitMessageShown() {
         if (_submitState.value is UploadSubmitState.Failed) {
             _submitState.value = UploadSubmitState.Idle
+        }
+    }
+
+    private suspend fun readExif(uri: Uri, contentResolver: ContentResolver): PhotoExif? =
+        withContext(Dispatchers.IO) {
+            try {
+                photoExifReader.read(contentResolver, uri)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to read EXIF for $uri", e)
+                null
+            }
+        }
+
+    private fun matchesThisDevice(exif: PhotoExif): Boolean = exifMatchesDevice(
+        exifMake = exif.make,
+        exifModel = exif.model,
+        manufacturer = buildInfoRepository.getBrand(),
+        brand = Build.BRAND,
+        model = buildInfoRepository.getModel(),
+    )
+
+    private suspend fun uploadPhoto(cameraId: String, uri: Uri, contentResolver: ContentResolver) {
+        withContext(Dispatchers.IO) {
+            val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
+            val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                ?: throw FileNotFoundException("Couldn't open $uri")
+            val exif = photoExifReader.read(contentResolver, uri)
+            check(matchesThisDevice(exif)) { "EXIF no longer matches this device" }
+            submitRepository.uploadLensPhoto(cameraId, bytes, mimeType, exif)
+        }
+    }
+
+    private fun markSubmitted(photoCameraId: Int) {
+        _uiState.update { state ->
+            if (state !is UploadDeviceUiState.Ready) return@update state
+            state.copy(
+                photoCameras = state.photoCameras.map {
+                    if (it.id == photoCameraId) it.copy(submitted = true) else it
+                }
+            )
         }
     }
 }

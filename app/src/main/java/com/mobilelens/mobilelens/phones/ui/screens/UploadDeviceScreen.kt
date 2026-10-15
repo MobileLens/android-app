@@ -19,13 +19,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -62,9 +67,14 @@ import com.mobilelens.mobilelens.core.ui.theme.fadeThroughIn
 import com.mobilelens.mobilelens.core.ui.theme.fadeThroughOut
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
+import com.mobilelens.mobilelens.phones.model.Facing
 import com.mobilelens.mobilelens.phones.model.Lens
+import com.mobilelens.mobilelens.phones.model.LensType
+import com.mobilelens.mobilelens.phones.model.Stabilization
 import com.mobilelens.mobilelens.phones.ui.components.LensSpecs
+import com.mobilelens.mobilelens.phones.ui.components.PhotoCameraDialog
 import com.mobilelens.mobilelens.phones.ui.tabLabel
+import com.mobilelens.mobilelens.phones.viewmodel.PhotoCamera
 import com.mobilelens.mobilelens.phones.viewmodel.UploadDeviceUiState
 import com.mobilelens.mobilelens.phones.viewmodel.UploadSubmitState
 
@@ -77,6 +87,10 @@ fun UploadDeviceScreen(
     onSubmit: () -> Unit,
     onAddPhoto: (lensIndex: Int) -> Unit,
     onRemovePhoto: (lensIndex: Int) -> Unit,
+    onAddPhotoCamera: () -> Unit,
+    onConfirmPhotoCamera: (LensType, Facing, Stabilization) -> Unit,
+    onDismissPhotoCamera: () -> Unit,
+    onRemovePhotoCamera: (id: Int) -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
@@ -132,12 +146,23 @@ fun UploadDeviceScreen(
                         deviceInfo = state.deviceInfo,
                         lenses = state.lenses,
                         photoUris = state.photoUris,
+                        photoCameras = state.photoCameras,
                         onAddPhoto = onAddPhoto,
                         onRemovePhoto = onRemovePhoto,
+                        onAddPhotoCamera = onAddPhotoCamera,
+                        onRemovePhotoCamera = onRemovePhotoCamera,
                         enabled = !isSubmitting,
                     )
                 }
             }
+        }
+
+        (uiState as? UploadDeviceUiState.Ready)?.pendingPhotoCamera?.let { pending ->
+            PhotoCameraDialog(
+                lens = pending.lens,
+                onConfirm = onConfirmPhotoCamera,
+                onDismiss = onDismissPhotoCamera,
+            )
         }
 
         SnackbarHost(
@@ -152,12 +177,16 @@ private fun UploadReadyContent(
     deviceInfo: DeviceInfo,
     lenses: List<Lens>,
     photoUris: Map<Int, Uri>,
+    photoCameras: List<PhotoCamera>,
     onAddPhoto: (lensIndex: Int) -> Unit,
     onRemovePhoto: (lensIndex: Int) -> Unit,
+    onAddPhotoCamera: () -> Unit,
+    onRemovePhotoCamera: (id: Int) -> Unit,
     enabled: Boolean,
 ) {
     // Indices of lens rows whose specs are expanded (list so rememberSaveable can restore it)
     var expandedIndices by rememberSaveable { mutableStateOf(emptyList<Int>()) }
+    var expandedPhotoCameraIds by rememberSaveable { mutableStateOf(emptyList<Int>()) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -210,6 +239,56 @@ private fun UploadReadyContent(
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
+                text = stringResource(R.string.upload_photo_cameras_heading),
+                modifier = Modifier.padding(horizontal = 16.dp),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResource(R.string.upload_photo_cameras_supporting),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        items(photoCameras) { photoCamera ->
+            val expanded = photoCamera.id in expandedPhotoCameraIds
+            UploadLensRow(
+                lens = photoCamera.lens,
+                expanded = expanded,
+                onToggle = {
+                    expandedPhotoCameraIds = if (expanded) {
+                        expandedPhotoCameraIds - photoCamera.id
+                    } else {
+                        expandedPhotoCameraIds + photoCamera.id
+                    }
+                },
+                supportingText = stringResource(R.string.upload_photo_camera_caption),
+                onRemove = if (photoCamera.submitted) null else ({ onRemovePhotoCamera(photoCamera.id) }),
+                enabled = enabled,
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        }
+
+        item {
+            OutlinedButton(
+                onClick = onAddPhotoCamera,
+                enabled = enabled,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.AddAPhoto,
+                    contentDescription = null,
+                    modifier = Modifier.size(ButtonDefaults.IconSize),
+                )
+                Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
+                Text(stringResource(R.string.upload_add_photo_camera))
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
                 text = stringResource(R.string.upload_photos_heading),
                 modifier = Modifier.padding(horizontal = 16.dp),
                 style = MaterialTheme.typography.titleMedium,
@@ -239,6 +318,9 @@ private fun UploadLensRow(
     lens: Lens,
     expanded: Boolean,
     onToggle: () -> Unit,
+    supportingText: String? = null,
+    onRemove: (() -> Unit)? = null,
+    enabled: Boolean = true,
 ) {
     val toggleDescription = stringResource(
         if (expanded) R.string.upload_collapse_lens else R.string.upload_expand_lens
@@ -257,13 +339,25 @@ private fun UploadLensRow(
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = lens.tabLabel(),
+            Column(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp),
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            ) {
+                Text(text = lens.tabLabel(), style = MaterialTheme.typography.bodyLarge)
+                if (supportingText != null) {
+                    Text(
+                        text = supportingText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            if (onRemove != null) {
+                TextButton(onClick = onRemove, enabled = enabled) {
+                    Text(stringResource(R.string.upload_remove_photo_camera))
+                }
+            }
             IconButton(
                 onClick = onToggle,
                 modifier = Modifier.semantics { contentDescription = toggleDescription },
@@ -337,13 +431,20 @@ private fun UploadDeviceScreenPreview() {
         UploadDeviceScreen(
             uiState = UploadDeviceUiState.Ready(
                 deviceInfo = PhoneCatalogue[0].deviceInfo,
-                lenses = PhoneCatalogue[0].lenses,
+                lenses = PhoneCatalogue[0].lenses.dropLast(1),
+                photoCameras = listOf(
+                    PhotoCamera(id = 0, lens = PhoneCatalogue[0].lenses.last())
+                ),
             ),
             submitState = UploadSubmitState.Idle,
             onClose = {},
             onSubmit = {},
             onAddPhoto = {},
             onRemovePhoto = {},
+            onAddPhotoCamera = {},
+            onConfirmPhotoCamera = { _, _, _ -> },
+            onDismissPhotoCamera = {},
+            onRemovePhotoCamera = {},
         )
     }
 }

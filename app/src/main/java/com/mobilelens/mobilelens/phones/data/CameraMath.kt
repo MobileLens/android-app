@@ -1,14 +1,17 @@
 package com.mobilelens.mobilelens.phones.data
 
+import com.mobilelens.mobilelens.phones.model.Facing
 import com.mobilelens.mobilelens.phones.model.Lens
 import com.mobilelens.mobilelens.phones.model.LensType
+import com.mobilelens.mobilelens.phones.model.Stabilization
 import com.mobilelens.mobilelens.phones.model.VideoResolution
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-// Calculations behind CameraHardwareRepository, kept free of Android types so they can be unit tested
+// Calculations behind CameraHardwareRepository and lenses read from photos, kept free of Android
+// types so they can be unit tested
 
 // Diagonal of a full-frame 36 x 24 mm sensor
 private val FULL_FRAME_DIAGONAL_MM = hypot(36f, 24f)
@@ -74,6 +77,54 @@ internal fun Lens.isSameCameraAs(other: Lens): Boolean =
         approximatelyEqual(pixelPitchUm, other.pixelPitchUm) &&
         focalLength.approximatelyEqual(other.focalLength) &&
         aperture.approximatelyEqual(other.aperture)
+
+/**
+ * Whether the two lenses have a focal length and aperture in common, e.g. because a photo was
+ * taken with a camera that's already listed. Facing isn't compared, since EXIF doesn't record it.
+ */
+internal fun Lens.sharesOpticsWith(other: Lens): Boolean =
+    focalLength.any { a -> other.focalLength.any { b -> approximatelyEqual(a, b, EXIF_TOLERANCE) } } &&
+        aperture.any { a -> other.aperture.any { b -> approximatelyEqual(a, b, EXIF_TOLERANCE) } }
+
+// EXIF can round more coarsely than Camera2, e.g. 1.74 mm written as 1.7 mm
+private const val EXIF_TOLERANCE = 0.05f
+
+/**
+ * The lens a stock-camera photo was taken with, for cameras Camera2 doesn't expose. Null when
+ * EXIF lacks the focal length, its 35 mm equivalent or the aperture.
+ *
+ * The sensor is sized from the 35 mm equivalent, so it's the area the photo covers: digital zoom
+ * or a non-native aspect ratio make it come out smaller. EXIF doesn't record the facing or
+ * stabilization, so those are placeholders for the user to correct.
+ */
+internal fun lensFromPhotoExif(exif: PhotoExif): Lens? {
+    val focalLength = exif.focalLengthMm?.toFloat()?.takeIf { it > 0f } ?: return null
+    val focalLength35mm = exif.focalLength35mm?.toFloat() ?: return null
+    val aperture = exif.aperture?.toFloat()?.takeIf { it > 0f } ?: return null
+    // Some OEMs write the 35 mm equivalent into FocalLength too, which leaves no sensor size
+    if (focalLength35mm <= focalLength) return null
+
+    val sensorDiagonalMm = FULL_FRAME_DIAGONAL_MM * focalLength / focalLength35mm
+    val pixelDiagonal = hypot(exif.widthPx.toFloat(), exif.heightPx.toFloat())
+    val sensorWidthMm = sensorDiagonalMm * exif.widthPx / pixelDiagonal
+    val sensorHeightMm = sensorDiagonalMm * exif.heightPx / pixelDiagonal
+    val resolution = megapixels(exif.widthPx, exif.heightPx)
+
+    return Lens(
+        focalLength = listOf(focalLength),
+        aperture = listOf(aperture),
+        cropFactor = cropFactor(sensorWidthMm, sensorHeightMm),
+        sensorTypeDenominator = sensorTypeDenominator(sensorWidthMm, sensorHeightMm),
+        facing = Facing.BACK,
+        pixelPitchUm = pixelPitchUm(sensorWidthMm, exif.widthPx),
+        resolution = resolution,
+        activeResolution = resolution,
+        afZones = 1,
+        stabilization = Stabilization.NONE,
+        videoResolutions = emptyList(),
+        type = lensTypeFor(focalLength35mm),
+    )
+}
 
 private fun List<Float>.approximatelyEqual(other: List<Float>): Boolean =
     size == other.size && zip(other).all { (a, b) -> approximatelyEqual(a, b) }

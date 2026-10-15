@@ -60,6 +60,17 @@
     <string name="upload_lenses_supporting">Przesyłane są wszystkie aparaty tego telefonu. Częściowe przesyłanie nie jest dozwolone. Rozwiń obiektyw, aby sprawdzić parametry, które zostaną wysłane. Jeśli tego modelu nie ma jeszcze w katalogu, zostanie utworzony.</string>
     <string name="upload_expand_lens">Pokaż parametry obiektywu</string>
     <string name="upload_collapse_lens">Ukryj parametry obiektywu</string>
+    <string name="upload_photo_cameras_heading">Niewykryte aparaty</string>
+    <string name="upload_photo_cameras_supporting">Niektóre telefony ukrywają aparaty przed aplikacjami, np. teleobiektyw w wielu telefonach Samsunga. Dodaj brakujący aparat zdjęciem zrobionym nim w fabrycznej aplikacji aparatu, przy jego natywnym zoomie (np. 3x) i domyślnych proporcjach obrazu. Jego parametry zostaną wyliczone z danych EXIF zdjęcia i tylko one zostaną wysłane, bez samego zdjęcia.</string>
+    <string name="upload_add_photo_camera">Dodaj aparat ze zdjęcia</string>
+    <string name="upload_photo_camera_caption">Z danych EXIF zdjęcia</string>
+    <string name="upload_remove_photo_camera">Usuń</string>
+    <string name="upload_photo_camera_summary">%1$s (ekwiwalent %2$s) · %3$s · %4$s</string>
+    <string name="upload_photo_camera_check">Dane EXIF tego nie zapisują, więc sprawdź poniższe ustawienia przed dodaniem aparatu.</string>
+    <string name="upload_photo_camera_type">Rodzaj obiektywu</string>
+    <string name="upload_photo_camera_facing">Położenie</string>
+    <string name="upload_photo_camera_stabilization">Stabilizacja</string>
+    <string name="upload_photo_camera_confirm">Dodaj aparat</string>
     <string name="upload_photos_heading">Zdjęcia w pełnej rozdzielczości</string>
     <string name="upload_photos_supporting">Opcjonalnie. Dodaj zdjęcia zrobione fabryczną aplikacją aparatu, abyśmy mogli potwierdzić rzeczywistą liczbę pikseli. Zdjęcia muszą być zrobione tym telefonem. Same zdjęcia nie zostaną przesłane, odczytane zostaną tylko dane EXIF.</string>
     <string name="upload_add_photo">Dodaj zdjęcie</string>
@@ -68,6 +79,8 @@
     <string name="upload_photo_attached">Dołączono zdjęcie</string>
     <string name="upload_succeeded">Przesłano dane aparatów.</string>
     <string name="upload_error_photo_not_from_device">To zdjęcie nie wygląda na zrobione tym telefonem. Sprawdź pola Make i Model w danych EXIF.</string>
+    <string name="upload_error_photo_no_optics">Dane EXIF tego zdjęcia nie zawierają ogniskowej, jej ekwiwalentu 35 mm i przysłony, więc nie da się opisać aparatu.</string>
+    <string name="upload_error_camera_already_listed">To zdjęcie zrobiono aparatem, który jest już na liście. Przy słabym świetle niektóre telefony przybliżają obraz głównym aparatem, więc spróbuj ponownie przy dobrym świetle.</string>
     <string name="upload_error_submit">Nie udało się dokończyć przesyłania. Spróbuj ponownie – to, co już zostało wysłane, nie zostanie wysłane drugi raz.</string>
     <string name="upload_error_phone_limit">Na dziś osiągnięto limit dodawania nowych telefonów do katalogu. Spróbuj ponownie jutro.</string>
     <string name="upload_error_invalid_camera">Serwer odrzucił dane aparatów odczytane z tego urządzenia.</string>
