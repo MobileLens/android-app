@@ -1,6 +1,5 @@
 package com.mobilelens.mobilelens.phones.ui.components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,8 +8,8 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,14 +21,7 @@ fun PhoneListItem(
     phone: Phone,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isSelected: Boolean = false,
 ) {
-    // Fades to a see-through copy of itself rather than to transparent black
-    val selectedColor = MaterialTheme.colorScheme.secondaryContainer
-    val containerColor by animateColorAsState(
-        targetValue = if (isSelected) selectedColor else selectedColor.copy(alpha = 0f),
-        label = "PhoneListItemContainer",
-    )
     ListItem(
         headlineContent = { Text(phone.deviceInfo.model) },
         supportingContent = {
@@ -40,7 +32,8 @@ fun PhoneListItem(
         leadingContent = {
             DeviceImageOrPlaceholder(phone.deviceInfo)
         },
-        colors = ListItemDefaults.colors(containerColor = containerColor),
+        // See-through, so the row takes the colour of whatever it sits on
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)

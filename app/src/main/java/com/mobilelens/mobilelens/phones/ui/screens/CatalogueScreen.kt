@@ -24,7 +24,9 @@ import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.Phone
-import com.mobilelens.mobilelens.phones.ui.components.PhoneListItem
+import com.mobilelens.mobilelens.phones.ui.components.PhoneCard
+import com.mobilelens.mobilelens.phones.ui.components.PhoneCardListArrangement
+import com.mobilelens.mobilelens.phones.ui.components.PhoneCardListContentPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,20 +55,23 @@ fun CatalogueScreen(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
+            contentPadding = PhoneCardListContentPadding,
+            verticalArrangement = PhoneCardListArrangement,
         ) {
             if (phones.isEmpty()) {
                 item {
+                    // The list's margins already take 16dp horizontally and 8dp vertically of the 24dp
                     Text(
                         text = stringResource(R.string.no_phones_found),
                         modifier = Modifier
                             .animateItem()
-                            .padding(24.dp),
+                            .padding(horizontal = 8.dp, vertical = 16.dp),
                     )
                 }
             } else {
                 itemsIndexed(phones, key = { _, phone -> phone.id }) { _, phone ->
                     // New results fade in and the ones that stay glide to their new place
-                    PhoneListItem(
+                    PhoneCard(
                         phone = phone,
                         onClick = { onPhoneClick(phone) },
                         isSelected = phone.id == selectedPhoneId,

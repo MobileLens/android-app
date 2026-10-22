@@ -27,7 +27,9 @@ import com.mobilelens.mobilelens.core.ui.theme.fadeThroughIn
 import com.mobilelens.mobilelens.core.ui.theme.fadeThroughOut
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.Phone
-import com.mobilelens.mobilelens.phones.ui.components.PhoneListItem
+import com.mobilelens.mobilelens.phones.ui.components.PhoneCard
+import com.mobilelens.mobilelens.phones.ui.components.PhoneCardListArrangement
+import com.mobilelens.mobilelens.phones.ui.components.PhoneCardListContentPadding
 
 @Composable
 fun FavoritesScreen(
@@ -70,9 +72,11 @@ fun FavoritesScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+                contentPadding = PhoneCardListContentPadding,
+                verticalArrangement = PhoneCardListArrangement,
             ) {
                 items(phones, key = { it.id }) { phone ->
-                    PhoneListItem(
+                    PhoneCard(
                         phone = phone,
                         onClick = { onPhoneClick(phone) },
                         modifier = Modifier.animateItem(),
