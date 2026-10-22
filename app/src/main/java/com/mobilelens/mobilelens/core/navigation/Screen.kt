@@ -7,7 +7,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavDestination
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.mobilelens.mobilelens.R
 import kotlinx.serialization.Serializable
 
@@ -60,6 +62,22 @@ fun NavDestination.isAccountScreen(): Boolean =
 
 /** The bottom bar's tabs. */
 fun NavDestination.isTopLevel(): Boolean = TOP_LEVEL_ROUTES.any { hasRoute(it.route::class) }
+
+/**
+ * Shows the tab at [route]. If it's already on the back stack (the user is on it, or on a screen
+ * opened from it) everything above it is dropped, so the tab shows its root again. Otherwise the
+ * tab is switched to, restoring its saved state.
+ */
+fun NavController.navigateToTopLevel(route: Screen) {
+    if (popBackStack(route, inclusive = false)) return
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
 
 /** Full-screen tasks that rise over the screen that opened them and close back down to it. */
 fun NavDestination.isSheet(): Boolean =

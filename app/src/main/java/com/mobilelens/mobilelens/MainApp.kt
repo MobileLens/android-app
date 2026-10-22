@@ -29,7 +29,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -38,6 +37,7 @@ import com.mobilelens.mobilelens.auth.viewmodel.AuthViewModel
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.navigation.TOP_LEVEL_ROUTES
 import com.mobilelens.mobilelens.core.navigation.isAccountScreen
+import com.mobilelens.mobilelens.core.navigation.navigateToTopLevel
 import com.mobilelens.mobilelens.core.navigation.rememberNavTransitions
 import com.mobilelens.mobilelens.core.ui.BottomNavigationBar
 import com.mobilelens.mobilelens.core.ui.SearchAppBar
@@ -101,13 +101,7 @@ fun MainApp(
     val isCompare = currentDestination?.hasRoute<Screen.ComparePhones>() == true
 
     fun navigateToCatalogue() {
-        navController.navigate(Screen.Catalogue) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
+        navController.navigateToTopLevel(Screen.Catalogue)
     }
 
     fun handleAccountClick() {

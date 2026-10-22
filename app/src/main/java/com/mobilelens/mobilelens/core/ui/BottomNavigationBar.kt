@@ -11,13 +11,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.navigation.TOP_LEVEL_ROUTES
 import com.mobilelens.mobilelens.core.navigation.isAccountScreen
+import com.mobilelens.mobilelens.core.navigation.navigateToTopLevel
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
@@ -41,18 +40,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                         if (!navController.popBackStack()) break
                     }
 
-                    val startDestinationId = navController.graph.findStartDestination().id
-                    if (topLevelRoute.route == Screen.Home) {
-                        navController.popBackStack(startDestinationId, inclusive = false)
-                    } else {
-                        navController.navigate(topLevelRoute.route) {
-                            popUpTo(startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
+                    navController.navigateToTopLevel(topLevelRoute.route)
                 }
             )
         }
