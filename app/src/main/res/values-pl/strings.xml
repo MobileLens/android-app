@@ -48,45 +48,52 @@
     <!-- Shown when a signed-out user picks an action that needs an account -->
     <string name="login_required_title">Wymagane logowanie</string>
     <string name="login_required_ok">OK</string>
-    <string name="review_login_required_message">Aby napisać recenzję, musisz się zalogować.</string>
+    <string name="review_login_required_message">Zaloguj się, aby napisać recenzję.</string>
 
-    <!-- Device camera upload (Home) -->
-    <string name="upload_login_required_message">Aby przesłać dane aparatów z tego telefonu, musisz się zalogować.</string>
-    <string name="upload_screen_title">Prześlij aparaty</string>
-    <string name="upload_screen_close">Zamknij przesyłanie</string>
-    <string name="upload_submit">Prześlij</string>
-    <string name="upload_submitting">Przesyłanie</string>
+    <!-- Upload screen (Home): a Specs tab and a Photos tab -->
+    <string name="upload_login_required_message">Zaloguj się, aby przesyłać z tego telefonu.</string>
+    <string name="upload_screen_title">Prześlij</string>
+    <string name="upload_screen_close">Zamknij</string>
+    <string name="upload_submit">Wyślij</string>
+    <string name="upload_submitting">Wysyłanie</string>
+    <string name="upload_tab_specs">Parametry</string>
+    <string name="upload_tab_photos">Zdjęcia</string>
+    <string name="upload_sent">Wysłano</string>
     <!-- %1$s: brand and model of this device -->
-    <string name="upload_device_label">Przesyłanie aparatów z urządzenia %1$s</string>
-    <string name="upload_lenses_heading">Wszystkie obiektywy</string>
-    <string name="upload_lenses_supporting">Przesyłane są wszystkie aparaty tego telefonu. Częściowe przesyłanie nie jest dozwolone. Rozwiń obiektyw, aby sprawdzić parametry, które zostaną wysłane. Jeśli tego modelu nie ma jeszcze w katalogu, zostanie utworzony.</string>
-    <string name="upload_expand_lens">Pokaż parametry obiektywu</string>
-    <string name="upload_collapse_lens">Ukryj parametry obiektywu</string>
-    <string name="upload_photo_cameras_heading">Niewykryte aparaty</string>
-    <string name="upload_photo_cameras_supporting">Niektóre telefony ukrywają aparaty przed aplikacjami, np. teleobiektyw w wielu telefonach Samsunga. Dodaj brakujący aparat zdjęciem zrobionym nim w fabrycznej aplikacji aparatu, przy jego natywnym zoomie (np. 3x) i domyślnych proporcjach obrazu. Jego parametry zostaną wyliczone z danych EXIF zdjęcia i tylko one zostaną wysłane, bez samego zdjęcia.</string>
-    <string name="upload_add_photo_camera">Dodaj aparat ze zdjęcia</string>
-    <string name="upload_photo_camera_caption">Z danych EXIF zdjęcia</string>
+    <string name="upload_device_label">Urządzenie: %1$s</string>
+    <string name="upload_lenses_heading">Wykryte obiektywy</string>
+    <string name="upload_lenses_supporting">Wszystkie obiektywy są wysyłane razem. Dotknij obiektywu, aby sprawdzić jego parametry.</string>
+    <string name="upload_expand_lens">Pokaż parametry</string>
+    <string name="upload_collapse_lens">Ukryj parametry</string>
+    <string name="upload_photo_cameras_heading">Brakujące obiektywy</string>
+    <string name="upload_photo_cameras_supporting">Niektóre telefony ukrywają obiektywy przed aplikacjami. Dodaj brakujący ze zdjęcia zrobionego nim przy natywnym zoomie, np. 3x. Wysyłane są tylko jego parametry.</string>
+    <string name="upload_add_photo_camera">Dodaj ze zdjęcia</string>
+    <string name="upload_photo_camera_title">Dodaj obiektyw</string>
+    <string name="upload_photo_camera_caption">Ze zdjęcia</string>
     <string name="upload_remove_photo_camera">Usuń</string>
     <string name="upload_photo_camera_summary">%1$s (ekwiwalent %2$s) · %3$s · %4$s</string>
-    <string name="upload_photo_camera_check">Dane EXIF tego nie zapisują, więc sprawdź poniższe ustawienia przed dodaniem aparatu.</string>
-    <string name="upload_photo_camera_type">Rodzaj obiektywu</string>
+    <string name="upload_photo_camera_check">Zdjęcia tego nie zapisują, więc sprawdź te ustawienia.</string>
+    <string name="upload_photo_camera_type">Rodzaj</string>
     <string name="upload_photo_camera_facing">Położenie</string>
     <string name="upload_photo_camera_stabilization">Stabilizacja</string>
-    <string name="upload_photo_camera_confirm">Dodaj aparat</string>
-    <string name="upload_photos_heading">Zdjęcia w pełnej rozdzielczości</string>
-    <string name="upload_photos_supporting">Opcjonalnie. Dodaj zdjęcia zrobione fabryczną aplikacją aparatu, abyśmy mogli potwierdzić rzeczywistą liczbę pikseli. Zdjęcia muszą być zrobione tym telefonem. Same zdjęcia nie zostaną przesłane, odczytane zostaną tylko dane EXIF.</string>
-    <string name="upload_add_photo">Dodaj zdjęcie</string>
-    <string name="upload_change_photo">Zmień zdjęcie</string>
-    <string name="upload_remove_photo">Usuń zdjęcie</string>
-    <string name="upload_photo_attached">Dołączono zdjęcie</string>
-    <string name="upload_succeeded">Przesłano dane aparatów.</string>
-    <string name="upload_error_photo_not_from_device">To zdjęcie nie wygląda na zrobione tym telefonem. Sprawdź pola Make i Model w danych EXIF.</string>
-    <string name="upload_error_photo_no_optics">Dane EXIF tego zdjęcia nie zawierają ogniskowej, jej ekwiwalentu 35 mm i przysłony, więc nie da się opisać aparatu.</string>
-    <string name="upload_error_camera_already_listed">To zdjęcie zrobiono aparatem, który jest już na liście. Przy słabym świetle niektóre telefony przybliżają obraz głównym aparatem, więc spróbuj ponownie przy dobrym świetle.</string>
-    <string name="upload_error_submit">Nie udało się dokończyć przesyłania. Spróbuj ponownie – to, co już zostało wysłane, nie zostanie wysłane drugi raz.</string>
-    <string name="upload_error_phone_limit">Na dziś osiągnięto limit dodawania nowych telefonów do katalogu. Spróbuj ponownie jutro.</string>
-    <string name="upload_error_invalid_camera">Serwer odrzucił dane aparatów odczytane z tego urządzenia.</string>
-    <string name="upload_error_banned">To konto zostało zablokowane i nie może przesyłać danych.</string>
+    <string name="upload_photo_camera_confirm">Dodaj</string>
+    <string name="upload_specs_sent">Parametry wysłane do weryfikacji.</string>
+    <string name="upload_photos_intro">Dodaj zdjęcia zrobione tym telefonem. Po weryfikacji pojawią się w jego galerii.</string>
+    <string name="upload_photos_add">Dodaj zdjęcia</string>
+    <string name="upload_photos_remove">Usuń zdjęcie</string>
+    <string name="upload_camera_in_review">W weryfikacji</string>
+    <string name="upload_photos_no_cameras">Ten telefon nie ma jeszcze obiektywów w katalogu. Najpierw wyślij jego parametry.</string>
+    <string name="upload_photos_go_to_specs">Przejdź do parametrów</string>
+    <string name="upload_photos_sent">Zdjęcia wysłane do weryfikacji.</string>
+    <string name="upload_error_load_cameras">Nie udało się wczytać obiektywów telefonu.</string>
+    <string name="upload_error_photo_not_from_device">To zdjęcie nie zostało zrobione tym telefonem.</string>
+    <string name="upload_error_photos_skipped">Pominięto zdjęcia zrobione innym telefonem.</string>
+    <string name="upload_error_photo_no_optics">W tym zdjęciu brakuje danych obiektywu.</string>
+    <string name="upload_error_camera_already_listed">Ten obiektyw jest już na liście. Jeśli użyto innego, zrób zdjęcie ponownie przy dobrym świetle.</string>
+    <string name="upload_error_submit">Nie udało się wysłać. Spróbuj ponownie – nic nie zostanie wysłane dwa razy.</string>
+    <string name="upload_error_phone_limit">Osiągnięto dzisiejszy limit nowych telefonów. Spróbuj jutro.</string>
+    <string name="upload_error_invalid_camera">Serwer odrzucił te parametry.</string>
+    <string name="upload_error_banned">To konto jest zablokowane.</string>
     <string name="upload_cameras_unavailable">Szczegóły aparatów nie są jeszcze gotowe. Poczekaj, aż obiektywy tego urządzenia zostaną wczytane.</string>
 
     <!-- Phones -->

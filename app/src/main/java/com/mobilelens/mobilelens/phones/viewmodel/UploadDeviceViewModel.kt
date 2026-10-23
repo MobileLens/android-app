@@ -21,10 +21,13 @@ import com.mobilelens.mobilelens.phones.data.lensFromPhotoExif
 import com.mobilelens.mobilelens.phones.data.sharesOpticsWith
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
 import com.mobilelens.mobilelens.phones.model.Facing
+import com.mobilelens.mobilelens.phones.model.GalleryCamera
 import com.mobilelens.mobilelens.phones.model.Lens
 import com.mobilelens.mobilelens.phones.model.LensType
 import com.mobilelens.mobilelens.phones.model.Stabilization
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,27 +50,39 @@ data class PhotoCamera(
     val submitted: Boolean = false,
 )
 
+/** The Specs tab: this device's lenses, to send to its catalogue phone. */
 sealed interface UploadDeviceUiState {
     object Loading : UploadDeviceUiState
     data class Ready(
         val deviceInfo: DeviceInfo,
         val lenses: List<Lens>,
-        /** Optional full-res stock photo URI per lens index. */
-        val photoUris: Map<Int, Uri> = emptyMap(),
+        /** Indices of [lenses] already sent, which sending again skips. */
+        val sentLensIndices: Set<Int> = emptySet(),
         /** Cameras added from photos, sent along with [lenses]. */
         val photoCameras: List<PhotoCamera> = emptyList(),
         /** Read from a photo, waiting for the user to fill in what EXIF doesn't record. */
         val pendingPhotoCamera: PhotoCamera? = null,
-        @StringRes val photoErrorRes: Int? = null,
-    ) : UploadDeviceUiState
+    ) : UploadDeviceUiState {
+        /** Whether a lens or a camera from a photo is still to be sent. */
+        val hasUnsentSpecs: Boolean
+            get() = lenses.indices.any { it !in sentLensIndices } || photoCameras.any { !it.submitted }
+    }
     data class Error(@StringRes val messageRes: Int) : UploadDeviceUiState
 }
 
-sealed interface UploadSubmitState {
-    object Idle : UploadSubmitState
-    object Submitting : UploadSubmitState
-    object Succeeded : UploadSubmitState
-    data class Failed(@StringRes val messageRes: Int) : UploadSubmitState
+/** The Photos tab: the cameras of this device's catalogue phone, with photos picked for them. */
+sealed interface UploadGalleryUiState {
+    object Loading : UploadGalleryUiState
+    data class Ready(
+        /** Empty while the phone isn't in the catalogue, or has no cameras there yet. */
+        val cameras: List<GalleryCamera>,
+        /** Photos picked for each camera, by its id, waiting to be sent. */
+        val photos: Map<String, List<Uri>> = emptyMap(),
+    ) : UploadGalleryUiState {
+        val hasPhotos: Boolean
+            get() = photos.values.any { it.isNotEmpty() }
+    }
+    data class Error(@StringRes val messageRes: Int) : UploadGalleryUiState
 }
 
 private enum class SubmitStage { DEVICE, CAMERAS, PHOTOS }
@@ -100,17 +115,29 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
     private val _uiState = MutableStateFlow<UploadDeviceUiState>(UploadDeviceUiState.Loading)
     val uiState: StateFlow<UploadDeviceUiState> = _uiState.asStateFlow()
 
-    private val _submitState = MutableStateFlow<UploadSubmitState>(UploadSubmitState.Idle)
-    val submitState: StateFlow<UploadSubmitState> = _submitState.asStateFlow()
+    private val _gallery = MutableStateFlow<UploadGalleryUiState>(UploadGalleryUiState.Loading)
+    val gallery: StateFlow<UploadGalleryUiState> = _gallery.asStateFlow()
 
-    // What earlier attempts already sent, so a retry after a failure carries on from there: the
-    // backend takes a repeated camera as a new submission rather than merging it
+    // Specs or photos on their way to the server; only one send runs at a time
+    private val _isSubmitting = MutableStateFlow(false)
+    val isSubmitting: StateFlow<Boolean> = _isSubmitting.asStateFlow()
+
+    // Outcome of a send or of reading a picked photo, shown once in a snackbar; cleared with messageShown()
+    private val _message = MutableStateFlow<Int?>(null)
+    val message: StateFlow<Int?> = _message.asStateFlow()
+
+    // What earlier sends already sent, so sending again carries on from there: the backend takes
+    // a repeated camera as a new submission rather than merging it
     private var submittedPhoneId: String? = null
-    private val createdCameraIds = mutableMapOf<Int, String>() // lens index -> camera id
-    private val uploadedPhotos = mutableMapOf<Int, Uri>() // lens index -> photo sent for it
-    private val createdPhotoCameraIds = mutableMapOf<Int, String>() // photo camera id -> camera id
+    private val sentLensIndices = mutableSetOf<Int>()
+    private val sentPhotoCameraIds = mutableSetOf<Int>()
 
     private var nextPhotoCameraId = 0
+    private var galleryJob: Job? = null
+
+    init {
+        loadGallery()
+    }
 
     /** Seeds from Home's Camera2 reading so every local lens is included. */
     fun prepare(lenses: List<Lens>, deviceInfo: DeviceInfo) {
@@ -122,30 +149,6 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun setPhoto(lensIndex: Int, uri: Uri?, contentResolver: ContentResolver) {
-        val ready = _uiState.value as? UploadDeviceUiState.Ready ?: return
-        if (uri == null) {
-            _uiState.value = ready.copy(
-                photoUris = ready.photoUris - lensIndex,
-                photoErrorRes = null,
-            )
-            return
-        }
-
-        viewModelScope.launch {
-            val matches = readExif(uri, contentResolver)?.let(::matchesThisDevice) == true
-            val current = _uiState.value as? UploadDeviceUiState.Ready ?: return@launch
-            _uiState.value = if (matches) {
-                current.copy(
-                    photoUris = current.photoUris + (lensIndex to uri),
-                    photoErrorRes = null,
-                )
-            } else {
-                current.copy(photoErrorRes = R.string.upload_error_photo_not_from_device)
-            }
-        }
-    }
-
     /** Reads a camera Camera2 missed from a stock-camera photo, then waits for [confirmPhotoCamera]. */
     fun readPhotoCamera(uri: Uri, contentResolver: ContentResolver) {
         viewModelScope.launch {
@@ -153,15 +156,14 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
             val current = _uiState.value as? UploadDeviceUiState.Ready ?: return@launch
             val lens = exif?.let(::lensFromPhotoExif)
             val listed = current.lenses + current.photoCameras.map { it.lens }
-            _uiState.value = when {
+            when {
                 exif == null || !matchesThisDevice(exif) ->
-                    current.copy(photoErrorRes = R.string.upload_error_photo_not_from_device)
-                lens == null -> current.copy(photoErrorRes = R.string.upload_error_photo_no_optics)
+                    _message.value = R.string.upload_error_photo_not_from_device
+                lens == null -> _message.value = R.string.upload_error_photo_no_optics
                 listed.any { it.sharesOpticsWith(lens) } ->
-                    current.copy(photoErrorRes = R.string.upload_error_camera_already_listed)
-                else -> current.copy(
+                    _message.value = R.string.upload_error_camera_already_listed
+                else -> _uiState.value = current.copy(
                     pendingPhotoCamera = PhotoCamera(id = nextPhotoCameraId++, lens = lens),
-                    photoErrorRes = null,
                 )
             }
         }
@@ -186,23 +188,17 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
 
     fun removePhotoCamera(id: Int) {
         val ready = _uiState.value as? UploadDeviceUiState.Ready ?: return
-        if (id in createdPhotoCameraIds) return
+        if (id in sentPhotoCameraIds) return
         _uiState.value = ready.copy(photoCameras = ready.photoCameras.filterNot { it.id == id })
     }
 
-    fun clearPhotoError() {
+    /** Sends the lenses, and the cameras added from photos, that haven't been sent yet. */
+    fun sendSpecs() {
         val ready = _uiState.value as? UploadDeviceUiState.Ready ?: return
-        if (ready.photoErrorRes != null) {
-            _uiState.value = ready.copy(photoErrorRes = null)
-        }
-    }
-
-    fun submit(contentResolver: ContentResolver) {
-        val ready = _uiState.value as? UploadDeviceUiState.Ready ?: return
-        if (_submitState.value == UploadSubmitState.Submitting) return
+        if (_isSubmitting.value) return
 
         viewModelScope.launch {
-            _submitState.value = UploadSubmitState.Submitting
+            _isSubmitting.value = true
             var stage = SubmitStage.DEVICE
             try {
                 val phoneId = submittedPhoneId ?: withContext(Dispatchers.IO) {
@@ -215,42 +211,119 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
 
                 stage = SubmitStage.CAMERAS
                 ready.lenses.forEachIndexed { index, lens ->
-                    if (index in createdCameraIds) return@forEachIndexed
-                    val created = withContext(Dispatchers.IO) {
-                        submitRepository.createCamera(phoneId, lens)
+                    if (index in sentLensIndices) return@forEachIndexed
+                    withContext(Dispatchers.IO) { submitRepository.createCamera(phoneId, lens) }
+                    sentLensIndices += index
+                    _uiState.update { state ->
+                        if (state !is UploadDeviceUiState.Ready) return@update state
+                        state.copy(sentLensIndices = sentLensIndices.toSet())
                     }
-                    createdCameraIds[index] = created.id
                 }
                 ready.photoCameras.forEach { photoCamera ->
-                    if (photoCamera.id in createdPhotoCameraIds) return@forEach
-                    val created = withContext(Dispatchers.IO) {
-                        submitRepository.createCamera(phoneId, photoCamera.lens)
-                    }
-                    createdPhotoCameraIds[photoCamera.id] = created.id
-                    markSubmitted(photoCamera.id)
+                    if (photoCamera.id in sentPhotoCameraIds) return@forEach
+                    withContext(Dispatchers.IO) { submitRepository.createCamera(phoneId, photoCamera.lens) }
+                    sentPhotoCameraIds += photoCamera.id
+                    markPhotoCameraSent(photoCamera.id)
                 }
 
-                stage = SubmitStage.PHOTOS
-                ready.photoUris.forEach { (index, uri) ->
-                    // A photo picked in place of one that was already sent goes up as well
-                    if (uploadedPhotos[index] == uri) return@forEach
-                    val cameraId = createdCameraIds[index] ?: return@forEach
-                    uploadPhoto(cameraId, uri, contentResolver)
-                    uploadedPhotos[index] = uri
-                }
-
-                _submitState.value = UploadSubmitState.Succeeded
+                _message.value = R.string.upload_specs_sent
+                // The new cameras can take photos straight away, while they're in review
+                loadGallery()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to upload device cameras", e)
-                _submitState.value = UploadSubmitState.Failed(submitErrorFor(e, stage))
+                Log.w(TAG, "Failed to send the device's camera specs", e)
+                _message.value = submitErrorFor(e, stage)
+            } finally {
+                _isSubmitting.value = false
             }
         }
     }
 
-    fun submitMessageShown() {
-        if (_submitState.value is UploadSubmitState.Failed) {
-            _submitState.value = UploadSubmitState.Idle
+    /** Lists the cameras of this device's catalogue phone, which gallery photos are uploaded for. */
+    fun loadGallery() {
+        galleryJob?.cancel()
+        galleryJob = viewModelScope.launch {
+            if (_gallery.value !is UploadGalleryUiState.Ready) {
+                _gallery.value = UploadGalleryUiState.Loading
+            }
+            try {
+                val phoneId = submittedPhoneId
+                    ?: phoneRepository.findPhoneForDevice(buildInfoRepository.getModel(), deviceMatchStore)?.id
+                val cameras = phoneId?.let { submitRepository.getGalleryCameras(it) }.orEmpty()
+                _gallery.update { state ->
+                    // Photos already picked stay with their cameras
+                    val picked = (state as? UploadGalleryUiState.Ready)?.photos.orEmpty()
+                    UploadGalleryUiState.Ready(
+                        cameras = cameras,
+                        photos = picked.filterKeys { id -> cameras.any { it.id == id } },
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to load the cameras to upload photos for", e)
+                // A refresh that fails keeps the cameras already showing
+                if (_gallery.value !is UploadGalleryUiState.Ready) {
+                    _gallery.value = UploadGalleryUiState.Error(R.string.upload_error_load_cameras)
+                }
+            }
         }
+    }
+
+    /** Adds photos taken with the camera [cameraId]; ones not taken on this phone are left out. */
+    fun addGalleryPhotos(cameraId: String, uris: List<Uri>, contentResolver: ContentResolver) {
+        if (uris.isEmpty()) return
+        viewModelScope.launch {
+            val fromThisPhone = uris.filter { uri ->
+                readExif(uri, contentResolver)?.let(::matchesThisDevice) == true
+            }
+            if (fromThisPhone.size < uris.size) {
+                _message.value = R.string.upload_error_photos_skipped
+            }
+            if (fromThisPhone.isEmpty()) return@launch
+            _gallery.update { state ->
+                if (state !is UploadGalleryUiState.Ready) return@update state
+                val picked = (state.photos[cameraId].orEmpty() + fromThisPhone).distinct()
+                state.copy(photos = state.photos + (cameraId to picked))
+            }
+        }
+    }
+
+    fun removeGalleryPhoto(cameraId: String, uri: Uri) {
+        if (_isSubmitting.value) return
+        dropGalleryPhoto(cameraId, uri)
+    }
+
+    /** Uploads the picked photos. Each one shows in the phone's gallery once it's been reviewed. */
+    fun sendPhotos(contentResolver: ContentResolver) {
+        val gallery = _gallery.value as? UploadGalleryUiState.Ready ?: return
+        if (_isSubmitting.value || !gallery.hasPhotos) return
+
+        viewModelScope.launch {
+            _isSubmitting.value = true
+            try {
+                gallery.photos.forEach { (cameraId, uris) ->
+                    uris.forEach { uri ->
+                        uploadPhoto(cameraId, uri, contentResolver)
+                        // Off the list once sent, so sending again after a failure only sends the rest
+                        dropGalleryPhoto(cameraId, uri)
+                    }
+                }
+                _message.value = R.string.upload_photos_sent
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to upload gallery photos", e)
+                _message.value = submitErrorFor(e, SubmitStage.PHOTOS)
+            } finally {
+                _isSubmitting.value = false
+            }
+        }
+    }
+
+    fun messageShown() {
+        _message.value = null
     }
 
     private suspend fun readExif(uri: Uri, contentResolver: ContentResolver): PhotoExif? =
@@ -282,7 +355,14 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    private fun markSubmitted(photoCameraId: Int) {
+    private fun dropGalleryPhoto(cameraId: String, uri: Uri) {
+        _gallery.update { state ->
+            if (state !is UploadGalleryUiState.Ready) return@update state
+            state.copy(photos = state.photos + (cameraId to (state.photos[cameraId].orEmpty() - uri)))
+        }
+    }
+
+    private fun markPhotoCameraSent(photoCameraId: Int) {
         _uiState.update { state ->
             if (state !is UploadDeviceUiState.Ready) return@update state
             state.copy(

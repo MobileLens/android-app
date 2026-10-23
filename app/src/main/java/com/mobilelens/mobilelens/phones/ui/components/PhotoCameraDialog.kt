@@ -50,7 +50,7 @@ fun PhotoCameraDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.upload_add_photo_camera)) },
+        title = { Text(stringResource(R.string.upload_photo_camera_title)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),

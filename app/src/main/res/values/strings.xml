@@ -50,46 +50,53 @@
     <!-- Shown when a signed-out user picks an action that needs an account -->
     <string name="login_required_title">Sign in required</string>
     <string name="login_required_ok">OK</string>
-    <string name="review_login_required_message">You need to be logged in to write a review.</string>
+    <string name="review_login_required_message">Log in to write a review.</string>
 
-    <!-- Device camera upload (Home) -->
-    <string name="upload_login_required_message">You need to be logged in to upload camera data from this phone.</string>
-    <string name="upload_screen_title">Upload cameras</string>
-    <string name="upload_screen_close">Close upload</string>
-    <string name="upload_submit">Upload</string>
-    <string name="upload_submitting">Uploading</string>
+    <!-- Upload screen (Home): a Specs tab and a Photos tab -->
+    <string name="upload_login_required_message">Log in to upload from this phone.</string>
+    <string name="upload_screen_title">Upload</string>
+    <string name="upload_screen_close">Close</string>
+    <string name="upload_submit">Send</string>
+    <string name="upload_submitting">Sending</string>
+    <string name="upload_tab_specs">Specs</string>
+    <string name="upload_tab_photos">Photos</string>
+    <string name="upload_sent">Sent</string>
     <!-- %1$s: brand and model of this device -->
-    <string name="upload_device_label">Uploading cameras from %1$s</string>
-    <string name="upload_lenses_heading">All lenses</string>
-    <string name="upload_lenses_supporting">Every camera on this phone is included. Partial uploads aren\'t allowed. Expand a lens to review the specs that will be sent. If this model isn\'t in the catalogue yet, it will be created.</string>
-    <string name="upload_expand_lens">Show lens specs</string>
-    <string name="upload_collapse_lens">Hide lens specs</string>
-    <string name="upload_photo_cameras_heading">Undetected cameras</string>
-    <string name="upload_photo_cameras_supporting">Some phones hide cameras from apps, like the telephoto on many Samsung phones. Add a missing one with a photo taken with it in the OEM camera app, at its native zoom (for example 3x) and default aspect ratio. Its specs are worked out from the photo\'s EXIF data, and only the specs are sent, not the photo.</string>
-    <string name="upload_add_photo_camera">Add camera from photo</string>
-    <string name="upload_photo_camera_caption">From photo EXIF</string>
+    <string name="upload_device_label">Device: %1$s</string>
+    <string name="upload_lenses_heading">Detected lenses</string>
+    <string name="upload_lenses_supporting">All lenses are sent together. Tap one to check its specs.</string>
+    <string name="upload_expand_lens">Show specs</string>
+    <string name="upload_collapse_lens">Hide specs</string>
+    <string name="upload_photo_cameras_heading">Missing lenses</string>
+    <string name="upload_photo_cameras_supporting">Some phones hide lenses from apps. Add one from a photo taken with it at its native zoom, like 3x. Only its specs are sent.</string>
+    <string name="upload_add_photo_camera">Add from photo</string>
+    <string name="upload_photo_camera_title">Add lens</string>
+    <string name="upload_photo_camera_caption">From a photo</string>
     <string name="upload_remove_photo_camera">Remove</string>
     <!-- %1$s: focal length, %2$s: its 35mm equivalent, %3$s: aperture, %4$s: resolution -->
     <string name="upload_photo_camera_summary">%1$s (%2$s equivalent) · %3$s · %4$s</string>
-    <string name="upload_photo_camera_check">EXIF data doesn\'t record these, so check them before adding the camera.</string>
-    <string name="upload_photo_camera_type">Lens type</string>
+    <string name="upload_photo_camera_check">Photos don\'t record these, so check them.</string>
+    <string name="upload_photo_camera_type">Type</string>
     <string name="upload_photo_camera_facing">Facing</string>
     <string name="upload_photo_camera_stabilization">Stabilization</string>
-    <string name="upload_photo_camera_confirm">Add camera</string>
-    <string name="upload_photos_heading">Full-resolution photos</string>
-    <string name="upload_photos_supporting">Optional. Add photos taken with OEM camera app so we can confirm the true pixel count. Photos must be taken on this phone. The photos will not be uploaded, only the EXIF data will be extracted.</string>
-    <string name="upload_add_photo">Add photo</string>
-    <string name="upload_change_photo">Change photo</string>
-    <string name="upload_remove_photo">Remove photo</string>
-    <string name="upload_photo_attached">Photo attached</string>
-    <string name="upload_succeeded">Camera data uploaded.</string>
-    <string name="upload_error_photo_not_from_device">That photo doesn\'t look like it was taken on this phone. Check the EXIF Make and Model.</string>
-    <string name="upload_error_photo_no_optics">That photo\'s EXIF data doesn\'t include the focal length, its 35mm equivalent and the aperture, so the camera can\'t be described.</string>
-    <string name="upload_error_camera_already_listed">That photo was taken with a camera that\'s already listed. In low light some phones zoom with the main camera instead, so try again in good light.</string>
-    <string name="upload_error_submit">Couldn\'t finish the upload. Try again: anything already sent won\'t be sent twice.</string>
-    <string name="upload_error_phone_limit">You\'ve added as many new phones to the catalogue as you can today. Try again tomorrow.</string>
-    <string name="upload_error_invalid_camera">The server rejected the camera data read from this device.</string>
-    <string name="upload_error_banned">This account has been banned and can\'t upload.</string>
+    <string name="upload_photo_camera_confirm">Add</string>
+    <string name="upload_specs_sent">Specs sent for review.</string>
+    <string name="upload_photos_intro">Add photos taken on this phone. They appear in its gallery once reviewed.</string>
+    <string name="upload_photos_add">Add photos</string>
+    <string name="upload_photos_remove">Remove photo</string>
+    <string name="upload_camera_in_review">In review</string>
+    <string name="upload_photos_no_cameras">This phone has no lenses in the catalogue yet. Send its specs first.</string>
+    <string name="upload_photos_go_to_specs">Go to specs</string>
+    <string name="upload_photos_sent">Photos sent for review.</string>
+    <string name="upload_error_load_cameras">Couldn\'t load this phone\'s lenses.</string>
+    <string name="upload_error_photo_not_from_device">That photo wasn\'t taken on this phone.</string>
+    <string name="upload_error_photos_skipped">Skipped photos not taken on this phone.</string>
+    <string name="upload_error_photo_no_optics">That photo is missing its lens data.</string>
+    <string name="upload_error_camera_already_listed">That lens is already listed. If you used another one, retake the photo in good light.</string>
+    <string name="upload_error_submit">Couldn\'t send. Try again; nothing is sent twice.</string>
+    <string name="upload_error_phone_limit">You\'ve hit today\'s limit for new phones. Try again tomorrow.</string>
+    <string name="upload_error_invalid_camera">The server rejected these specs.</string>
+    <string name="upload_error_banned">This account is banned.</string>
     <string name="upload_cameras_unavailable">Camera details aren\'t ready yet. Wait until this device\'s lenses have loaded.</string>
 
     <!-- Phones -->

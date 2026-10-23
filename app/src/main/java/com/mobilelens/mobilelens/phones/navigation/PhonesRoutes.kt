@@ -12,7 +12,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -52,9 +52,7 @@ import com.mobilelens.mobilelens.phones.viewmodel.CompareViewModel
 import com.mobilelens.mobilelens.phones.viewmodel.PhoneDetailsUiState
 import com.mobilelens.mobilelens.phones.viewmodel.PhoneDetailsViewModel
 import com.mobilelens.mobilelens.phones.viewmodel.PhoneGalleryViewModel
-import com.mobilelens.mobilelens.phones.viewmodel.UploadDeviceUiState
 import com.mobilelens.mobilelens.phones.viewmodel.UploadDeviceViewModel
-import com.mobilelens.mobilelens.phones.viewmodel.UploadSubmitState
 
 /**
  * Home, Favorites, Catalogue, PhoneDetails, PhoneGallery, UploadDeviceCameras, ComparePicker and
@@ -290,10 +288,12 @@ fun NavGraphBuilder.phonesRoutes(
         val context = LocalContext.current
         val uploadViewModel: UploadDeviceViewModel = viewModel()
         val uiState by uploadViewModel.uiState.collectAsState()
-        val submitState by uploadViewModel.submitState.collectAsState()
+        val gallery by uploadViewModel.gallery.collectAsState()
+        val isSubmitting by uploadViewModel.isSubmitting.collectAsState()
+        val messageRes by uploadViewModel.message.collectAsState()
         val snackbarHostState = remember { SnackbarHostState() }
         // Saved, since the activity can be recreated while the photo picker is open (e.g. a rotation)
-        var pickingForLens by rememberSaveable { mutableIntStateOf(-1) }
+        var pickingForCamera by rememberSaveable { mutableStateOf<String?>(null) }
 
         val cameraState by cameraViewModel.uiState.collectAsState()
         LaunchedEffect(cameraState) {
@@ -301,13 +301,13 @@ fun NavGraphBuilder.phonesRoutes(
             uploadViewModel.prepare(success.lenses, success.deviceInfo)
         }
 
-        val pickImage = rememberLauncherForActivityResult(
-            ActivityResultContracts.PickVisualMedia()
-        ) { uri ->
-            val index = pickingForLens
-            pickingForLens = -1
-            if (index >= 0) {
-                uploadViewModel.setPhoto(index, uri, context.contentResolver)
+        val pickGalleryPhotos = rememberLauncherForActivityResult(
+            ActivityResultContracts.PickMultipleVisualMedia()
+        ) { uris ->
+            val cameraId = pickingForCamera
+            pickingForCamera = null
+            if (cameraId != null) {
+                uploadViewModel.addGalleryPhotos(cameraId, uris, context.contentResolver)
             }
         }
         val pickPhotoCamera = rememberLauncherForActivityResult(
@@ -318,48 +318,23 @@ fun NavGraphBuilder.phonesRoutes(
             }
         }
 
-        val photoError = (uiState as? UploadDeviceUiState.Ready)
-            ?.photoErrorRes
-            ?.let { stringResource(it) }
-        LaunchedEffect(photoError) {
-            if (photoError != null) {
-                snackbarHostState.showSnackbar(photoError)
-                uploadViewModel.clearPhotoError()
-            }
-        }
-
-        val submitFailed = (submitState as? UploadSubmitState.Failed)?.messageRes
-            ?.let { stringResource(it) }
-        LaunchedEffect(submitFailed) {
-            if (submitFailed != null) {
-                snackbarHostState.showSnackbar(submitFailed)
-                uploadViewModel.submitMessageShown()
-            }
-        }
-
-        val succeededMessage = stringResource(R.string.upload_succeeded)
-        LaunchedEffect(submitState) {
-            if (submitState == UploadSubmitState.Succeeded) {
-                Toast.makeText(context, succeededMessage, Toast.LENGTH_SHORT).show()
-                navController.popBackStack()
+        // Sends stay on this screen, so the other tab can be used next
+        val message = messageRes?.let { stringResource(it) }
+        LaunchedEffect(message) {
+            if (message != null) {
+                snackbarHostState.showSnackbar(message)
+                uploadViewModel.messageShown()
             }
         }
 
         UploadDeviceScreen(
             uiState = uiState,
-            submitState = submitState,
+            gallery = gallery,
+            isSubmitting = isSubmitting,
             snackbarHostState = snackbarHostState,
             onClose = dropUnlessResumed { navController.popBackStack() },
-            onSubmit = { uploadViewModel.submit(context.contentResolver) },
-            onAddPhoto = { index ->
-                pickingForLens = index
-                pickImage.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
-            },
-            onRemovePhoto = { index ->
-                uploadViewModel.setPhoto(index, null, context.contentResolver)
-            },
+            onSendSpecs = uploadViewModel::sendSpecs,
+            onSendPhotos = { uploadViewModel.sendPhotos(context.contentResolver) },
             onAddPhotoCamera = {
                 pickPhotoCamera.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -368,6 +343,14 @@ fun NavGraphBuilder.phonesRoutes(
             onConfirmPhotoCamera = uploadViewModel::confirmPhotoCamera,
             onDismissPhotoCamera = uploadViewModel::dismissPhotoCamera,
             onRemovePhotoCamera = uploadViewModel::removePhotoCamera,
+            onAddGalleryPhotos = { cameraId ->
+                pickingForCamera = cameraId
+                pickGalleryPhotos.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            },
+            onRemoveGalleryPhoto = uploadViewModel::removeGalleryPhoto,
+            onRetryGallery = uploadViewModel::loadGallery,
         )
     }
 }
