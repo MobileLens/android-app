@@ -8,6 +8,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
@@ -73,7 +74,8 @@ import com.mobilelens.mobilelens.reviews.viewmodel.ReviewTargetUiState
 
 /**
  * Markdown editor for a new review: title and content fields with a formatting toolbar, and a
- * rendered preview tab. Closing with unsaved text asks for confirmation first.
+ * rendered preview tab. Closing with unsaved text asks for confirmation first. [onChoosePhone],
+ * when given, lets the user pick the phone being reviewed themselves.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,6 +89,7 @@ fun WriteReviewScreen(
     onPublish: () -> Unit,
     onInsertImage: () -> Unit,
     modifier: Modifier = Modifier,
+    onChoosePhone: (() -> Unit)? = null,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     var showPreview by rememberSaveable { mutableStateOf(false) }
@@ -155,6 +158,7 @@ fun WriteReviewScreen(
 
             ReviewTarget(
                 target = target,
+                onChoosePhone = onChoosePhone,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
             )
 
@@ -231,6 +235,7 @@ fun WriteReviewScreen(
 @Composable
 private fun ReviewTarget(
     target: ReviewTargetUiState,
+    onChoosePhone: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     UiStateCrossfade(state = target, modifier = modifier) { shownTarget ->
@@ -243,11 +248,27 @@ private fun ReviewTarget(
             is ReviewTargetUiState.Error ->
                 stringResource(shownTarget.messageRes) to MaterialTheme.colorScheme.error
         }
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge,
-            color = color,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge,
+                color = color,
+                modifier = Modifier.weight(1f),
+            )
+            if (onChoosePhone != null && shownTarget !is ReviewTargetUiState.Loading) {
+                TextButton(onClick = onChoosePhone) {
+                    Text(
+                        stringResource(
+                            if (shownTarget is ReviewTargetUiState.Found) {
+                                R.string.review_editor_change_phone
+                            } else {
+                                R.string.review_editor_choose_phone
+                            }
+                        )
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -395,6 +416,7 @@ private fun WriteReviewScreenEmptyPreview() {
             onClose = {},
             onPublish = {},
             onInsertImage = {},
+            onChoosePhone = {},
         )
     }
 }

@@ -330,7 +330,10 @@
     <!-- %1$s: phone brand and model -->
     <string name="review_editor_reviewing">Recenzja: %1$s</string>
     <string name="review_editor_finding_phone">Wyszukiwanie telefonu…</string>
-    <string name="review_editor_device_not_in_catalogue">Tego urządzenia nie ma jeszcze w katalogu, więc nie można go zrecenzować.</string>
+    <string name="review_editor_device_not_in_catalogue">Nie udało się dopasować tego urządzenia do telefonu z katalogu.</string>
+    <string name="review_editor_choose_phone">Wybierz telefon</string>
+    <string name="review_editor_change_phone">Zmień</string>
+    <string name="review_picker_title">Jaki to telefon?</string>
     <string name="review_editor_uploading_image">Przesyłanie obrazu</string>
     <string name="review_editor_published">Recenzja została wysłana do moderacji.</string>
     <string name="review_editor_published_live">Recenzja została opublikowana.</string>

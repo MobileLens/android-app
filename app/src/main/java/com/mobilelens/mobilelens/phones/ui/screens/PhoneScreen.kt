@@ -56,8 +56,7 @@ fun PhoneScreen(
             ),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            itemSpacing = 8.dp,
+                .padding(vertical = 16.dp),
         )
     }
 }

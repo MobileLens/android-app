@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -13,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -25,6 +27,8 @@ import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
 import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
+import com.mobilelens.mobilelens.phones.ui.screens.ComparePickerScreen
+import com.mobilelens.mobilelens.phones.viewmodel.ComparePickerViewModel
 import com.mobilelens.mobilelens.reviews.ui.screens.ReviewScreen
 import com.mobilelens.mobilelens.reviews.ui.screens.ReviewThreadScreen
 import com.mobilelens.mobilelens.reviews.ui.screens.WriteReviewScreen
@@ -35,7 +39,10 @@ import com.mobilelens.mobilelens.reviews.viewmodel.ReviewThreadUiState
 import com.mobilelens.mobilelens.reviews.viewmodel.ReviewViewModel
 import com.mobilelens.mobilelens.reviews.viewmodel.WriteReviewViewModel
 
-/** ReviewThread, ReviewDetails and WriteReview. */
+// Saved state key the review phone picker hands the picked phone's id back under
+private const val PICKED_PHONE_ID = "picked_phone_id"
+
+/** ReviewThread, ReviewDetails, WriteReview and ReviewPhonePicker. */
 fun NavGraphBuilder.reviewsRoutes(
     navController: NavController,
     authViewModel: AuthViewModel,
@@ -195,6 +202,16 @@ fun NavGraphBuilder.reviewsRoutes(
             writeReviewViewModel.loadTarget(route.phoneId)
         }
 
+        val pickedPhoneId by backStackEntry.savedStateHandle
+            .getStateFlow<String?>(PICKED_PHONE_ID, null)
+            .collectAsState()
+        LaunchedEffect(pickedPhoneId) {
+            pickedPhoneId?.let { phoneId ->
+                writeReviewViewModel.choosePhone(phoneId)
+                backStackEntry.savedStateHandle[PICKED_PHONE_ID] = null
+            }
+        }
+
         val errorMessage = errorMessageRes?.let { stringResource(it) }
         LaunchedEffect(errorMessage) {
             if (errorMessage != null) {
@@ -226,6 +243,12 @@ fun NavGraphBuilder.reviewsRoutes(
             // Ignores repeated taps, which would otherwise pop past the previous screen
             onClose = dropUnlessResumed { navController.popBackStack() },
             onPublish = writeReviewViewModel::publish,
+            // Only this device's match can be wrong; a phone opened from the catalogue is the one meant
+            onChoosePhone = if (route.phoneId == null) {
+                dropUnlessResumed { navController.navigate(Screen.ReviewPhonePicker) }
+            } else {
+                null
+            },
             onInsertImage = {
                 if (!isUploadingImage) {
                     pickImage.launch(
@@ -233,6 +256,32 @@ fun NavGraphBuilder.reviewsRoutes(
                     )
                 }
             },
+        )
+    }
+    composable<Screen.ReviewPhonePicker> { backStackEntry ->
+        val pickerViewModel: ComparePickerViewModel = viewModel()
+        val uiState by pickerViewModel.uiState.collectAsState()
+        val searchState = rememberTextFieldState()
+        val query = searchState.text.toString()
+
+        LaunchedEffect(query) {
+            pickerViewModel.search(query)
+        }
+
+        ComparePickerScreen(
+            searchState = searchState,
+            uiState = uiState,
+            excludedPhoneId = null,
+            titleRes = R.string.review_picker_title,
+            onClose = dropUnlessResumed { navController.popBackStack() },
+            onPhoneSelected = { phone ->
+                // Ignores a second tap while this sheet is already on its way out
+                if (backStackEntry.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                    navController.previousBackStackEntry?.savedStateHandle?.set(PICKED_PHONE_ID, phone.id)
+                    navController.popBackStack()
+                }
+            },
+            onRetry = pickerViewModel::retry,
         )
     }
 }

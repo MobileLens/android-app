@@ -26,6 +26,8 @@ sealed interface Screen {
     ) : Screen
     /** Review editor; a null [phoneId] reviews this device. */
     @Serializable data class WriteReview(val phoneId: String? = null) : Screen
+    /** Search for the catalogue phone this device is, when the review editor couldn't match it. */
+    @Serializable object ReviewPhonePicker : Screen
     @Serializable data class PhoneDetails(val phoneId: String) : Screen
     /** All photos of a phone. [phoneModel] is only for the title, so the phone isn't fetched again. */
     @Serializable data class PhoneGallery(val phoneId: String, val phoneModel: String) : Screen
@@ -82,4 +84,4 @@ fun NavController.navigateToTopLevel(route: Screen) {
 /** Full-screen tasks that rise over the screen that opened them and close back down to it. */
 fun NavDestination.isSheet(): Boolean =
     hasRoute<Screen.WriteReview>() || hasRoute<Screen.UploadDeviceCameras>() ||
-            hasRoute<Screen.ComparePicker>()
+            hasRoute<Screen.ComparePicker>() || hasRoute<Screen.ReviewPhonePicker>()

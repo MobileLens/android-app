@@ -104,8 +104,9 @@ fun MainApp(
     val isGallery = currentDestination?.hasRoute<Screen.PhoneGallery>() == true
     // Device camera upload has its own top bar
     val isUploadDevice = currentDestination?.hasRoute<Screen.UploadDeviceCameras>() == true
-    // The compare search has its own search field, and needs the room the bottom bar takes for the keyboard
-    val isComparePicker = currentDestination?.hasRoute<Screen.ComparePicker>() == true
+    // The phone searches have their own search field, and need the room the bottom bar takes for the keyboard
+    val isPhonePicker = currentDestination?.hasRoute<Screen.ComparePicker>() == true ||
+            currentDestination?.hasRoute<Screen.ReviewPhonePicker>() == true
     // The comparison has its own top bar
     val isCompare = currentDestination?.hasRoute<Screen.ComparePhones>() == true
 
@@ -126,8 +127,8 @@ fun MainApp(
     }
 
     val showTopBar = !isAuthOrSettingsScreen && !isReviewEditor && !isGallery && !isUploadDevice &&
-            !isComparePicker && !isCompare
-    val showBottomBar = !isReviewEditor && !isComparePicker
+            !isPhonePicker && !isCompare
+    val showBottomBar = !isReviewEditor && !isPhonePicker
     val navTransitions = rememberNavTransitions()
     // Scaffold pads the content by the system bars when a bar slot is empty, but by the bar's
     // height otherwise. The slots keep at least the system bars' height while a bar animates away,

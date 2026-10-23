@@ -28,7 +28,7 @@ sealed interface ComparePickerUiState {
     data class Error(@StringRes val messageRes: Int) : ComparePickerUiState
 }
 
-// Scoped to a single ComparePicker back stack entry
+// Scoped to a single ComparePicker or ReviewPhonePicker back stack entry
 class ComparePickerViewModel : ViewModel() {
     private val repository = PhoneCatalogueRepository()
 

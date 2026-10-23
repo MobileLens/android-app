@@ -1,5 +1,6 @@
 package com.mobilelens.mobilelens.phones.ui.screens
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -57,9 +58,9 @@ import com.mobilelens.mobilelens.phones.ui.components.SearchResultsList
 import com.mobilelens.mobilelens.phones.viewmodel.ComparePickerUiState
 
 /**
- * Search for the phone to compare with. Lists every phone until something is typed, leaving out
- * [excludedPhoneId], the phone being compared. A sheet, so it draws its own opaque background and
- * top bar.
+ * Search for a catalogue phone: the one to compare with, or (with [titleRes] changed) the one to
+ * review. Lists every phone until something is typed, leaving out [excludedPhoneId], the phone
+ * being compared. A sheet, so it draws its own opaque background and top bar.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,6 +72,7 @@ fun ComparePickerScreen(
     onPhoneSelected: (Phone) -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    @StringRes titleRes: Int = R.string.compare_picker_title,
 ) {
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
@@ -90,7 +92,7 @@ fun ComparePickerScreen(
             .background(MaterialTheme.colorScheme.surface)
     ) {
         TopAppBar(
-            title = { Text(stringResource(R.string.compare_picker_title)) },
+            title = { Text(stringResource(titleRes)) },
             navigationIcon = {
                 IconButton(onClick = onClose) {
                     Icon(

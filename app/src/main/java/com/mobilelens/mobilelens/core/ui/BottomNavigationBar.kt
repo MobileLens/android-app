@@ -2,8 +2,8 @@ package com.mobilelens.mobilelens.core.ui
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,12 +23,12 @@ fun BottomNavigationBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    NavigationBar {
+    ShortNavigationBar {
         TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
             val isSelected = currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true
             val label = stringResource(topLevelRoute.labelRes)
 
-            NavigationBarItem(
+            ShortNavigationBarItem(
                 // The label is already read by accessibility services, so the icon needs no description
                 icon = { Icon(topLevelRoute.icon, contentDescription = null) },
                 label = { Text(label) },

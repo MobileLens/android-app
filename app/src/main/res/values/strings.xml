@@ -333,7 +333,10 @@
     <!-- %1$s: phone brand and model -->
     <string name="review_editor_reviewing">Reviewing %1$s</string>
     <string name="review_editor_finding_phone">Looking up the phone…</string>
-    <string name="review_editor_device_not_in_catalogue">This device isn\'t in the catalogue yet, so it can\'t be reviewed.</string>
+    <string name="review_editor_device_not_in_catalogue">Couldn\'t match this device to a catalogue phone.</string>
+    <string name="review_editor_choose_phone">Choose phone</string>
+    <string name="review_editor_change_phone">Change</string>
+    <string name="review_picker_title">Which phone is this?</string>
     <string name="review_editor_uploading_image">Uploading image</string>
     <string name="review_editor_published">Review sent for moderation.</string>
     <string name="review_editor_published_live">Review published.</string>

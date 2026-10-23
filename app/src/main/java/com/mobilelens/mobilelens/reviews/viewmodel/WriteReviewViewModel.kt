@@ -1,20 +1,23 @@
 package com.mobilelens.mobilelens.reviews.viewmodel
 
+import android.app.Application
 import android.content.ContentResolver
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.data.BuildInfoRepository
 import com.mobilelens.mobilelens.core.data.remote.dtos.StorageUploadResponse
 import com.mobilelens.mobilelens.core.data.remote.publicMediaUrl
+import com.mobilelens.mobilelens.phones.data.DeviceMatchStore
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogueRepository
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.reviews.data.ReviewRepository
 import com.mobilelens.mobilelens.reviews.ui.insertMarkdownImage
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 import java.io.FileNotFoundException
 
 private const val TAG = "WriteReviewViewModel"
@@ -44,11 +48,12 @@ sealed interface PublishReviewUiState {
 private val StorageUploadResponse.previewUrl: String
     get() = url ?: storageUrl
 
-class WriteReviewViewModel(
-    private val reviewRepository: ReviewRepository = ReviewRepository(),
-    private val phoneRepository: PhoneCatalogueRepository = PhoneCatalogueRepository(),
-    private val buildInfoRepository: BuildInfoRepository = BuildInfoRepository()
-) : ViewModel() {
+class WriteReviewViewModel(application: Application) : AndroidViewModel(application) {
+    private val reviewRepository = ReviewRepository()
+    private val phoneRepository = PhoneCatalogueRepository()
+    private val buildInfoRepository = BuildInfoRepository()
+    private val deviceMatchStore = DeviceMatchStore.getInstance(application)
+
     // Held here rather than in composition so the draft survives configuration changes
     val title = TextFieldState()
     val content = TextFieldState()
@@ -69,29 +74,68 @@ class WriteReviewViewModel(
     private val uploadedImages = mutableListOf<StorageUploadResponse>()
     private var loadTargetJob: Job? = null
 
-    /** [phoneId] is a catalogue phone, or null for this device, matched to the catalogue by model. */
+    /**
+     * [phoneId] is a catalogue phone, or null for this device: the phone the user picked for it
+     * earlier, otherwise the catalogue phone whose model name is Build.MODEL.
+     */
     fun loadTarget(phoneId: String?) {
-        // Composition re-runs this after configuration changes; keep what is already loaded
-        if (loadTargetJob?.isActive == true || _target.value is ReviewTargetUiState.Found) return
+        // Composition re-runs this after configuration changes and on returning from the picker;
+        // after the first load the target only changes through choosePhone
+        if (loadTargetJob != null) return
 
+        lookUpTarget {
+            if (phoneId != null) {
+                phoneRepository.getPhoneById(phoneId)
+            } else {
+                findPhoneForDevice()
+            }
+        }
+    }
+
+    /** Reviews [phoneId] instead, picked by the user for this device, and remembers the choice. */
+    fun choosePhone(phoneId: String) {
+        if ((_target.value as? ReviewTargetUiState.Found)?.phone?.id == phoneId) return
+
+        lookUpTarget {
+            phoneRepository.getPhoneById(phoneId).also {
+                deviceMatchStore.setPhoneId(buildInfoRepository.getModel(), phoneId)
+            }
+        }
+    }
+
+    private fun lookUpTarget(findPhone: suspend () -> Phone?) {
+        // Only the newest lookup may update the target
+        loadTargetJob?.cancel()
         loadTargetJob = viewModelScope.launch {
             _target.value = ReviewTargetUiState.Loading
             _target.value = try {
-                val phone = if (phoneId != null) {
-                    phoneRepository.getPhoneById(phoneId)
-                } else {
-                    phoneRepository.findPhoneByModel(buildInfoRepository.getModel())
-                }
+                val phone = findPhone()
                 if (phone != null) {
                     ReviewTargetUiState.Found(phone)
                 } else {
                     ReviewTargetUiState.Error(R.string.review_editor_device_not_in_catalogue)
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to load phone ${phoneId ?: "for this device"}", e)
+                Log.w(TAG, "Failed to load the phone to review", e)
                 ReviewTargetUiState.Error(R.string.error_load_phone)
             }
         }
+    }
+
+    private suspend fun findPhoneForDevice(): Phone? {
+        val model = buildInfoRepository.getModel()
+        deviceMatchStore.getPhoneId(model)?.let { pickedId ->
+            try {
+                return phoneRepository.getPhoneById(pickedId)
+            } catch (e: HttpException) {
+                if (e.code() != 404) throw e
+                // The picked phone was removed from the catalogue; match by model again
+                deviceMatchStore.clear()
+            }
+        }
+        return phoneRepository.findPhoneByModel(model)
     }
 
     /** Uploads the picked image and inserts it into the content at the cursor. */
