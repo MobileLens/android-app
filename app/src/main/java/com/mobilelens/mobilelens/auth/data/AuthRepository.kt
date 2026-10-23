@@ -6,6 +6,7 @@ import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangeEmailRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangePasswordRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.LoginRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.RegisterRequest
+import com.mobilelens.mobilelens.auth.data.remote.dtos.RequestPasswordResetRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.SessionResponse
 import com.mobilelens.mobilelens.auth.data.remote.dtos.UpdateUserRequest
 import com.mobilelens.mobilelens.auth.model.User
@@ -94,6 +95,11 @@ class AuthRepository(
             )
         )
         response.token?.let { ApiClient.authToken = it }
+    }
+
+    /** Has the backend e-mail a password reset link, if an account uses [email]. */
+    suspend fun requestPasswordReset(email: String) {
+        authApi.requestPasswordReset(RequestPasswordResetRequest(email = email))
     }
 
     suspend fun deleteAccount() {

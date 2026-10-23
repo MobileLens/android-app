@@ -5,6 +5,7 @@ import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangeEmailRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.ChangePasswordRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.LoginRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.RegisterRequest
+import com.mobilelens.mobilelens.auth.data.remote.dtos.RequestPasswordResetRequest
 import com.mobilelens.mobilelens.auth.data.remote.dtos.StatusResponse
 import com.mobilelens.mobilelens.auth.data.remote.dtos.UpdateUserRequest
 import okhttp3.ResponseBody
@@ -53,4 +54,10 @@ interface AuthApi {
         @Body request: ChangePasswordRequest,
         @Header("Authorization") authHeader: String? = null
     ): AuthResponse
+
+    // Answers 200 whether or not an account has the address, so it can't be used to probe for one
+    @POST("api/auth/request-password-reset")
+    suspend fun requestPasswordReset(
+        @Body request: RequestPasswordResetRequest
+    ): StatusResponse
 }

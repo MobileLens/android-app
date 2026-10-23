@@ -228,7 +228,7 @@ fun DeleteReviewDialog(
 }
 
 @Composable
-private fun AccountDialog(
+internal fun AccountDialog(
     icon: ImageVector,
     title: String,
     confirmLabel: String,
@@ -273,7 +273,7 @@ private fun AccountDialog(
 }
 
 @Composable
-private fun DialogSupportingText(text: String) {
+internal fun DialogSupportingText(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyMedium,

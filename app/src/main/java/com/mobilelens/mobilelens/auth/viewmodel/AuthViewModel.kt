@@ -29,6 +29,15 @@ sealed interface AccountEditState {
     data class Saved(@StringRes val messageRes: Int) : AccountEditState
 }
 
+/** Progress of a password reset requested from the login screen. */
+sealed interface PasswordResetState {
+    object Idle : PasswordResetState
+    object Sending : PasswordResetState
+    data class Failed(@StringRes val messageRes: Int) : PasswordResetState
+    /** The backend took the request; a link is on its way if the address has an account. */
+    object Sent : PasswordResetState
+}
+
 class AuthViewModel(
     private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
@@ -45,6 +54,9 @@ class AuthViewModel(
 
     private val _accountEdit = MutableStateFlow<AccountEditState>(AccountEditState.Idle)
     val accountEdit: StateFlow<AccountEditState> = _accountEdit.asStateFlow()
+
+    private val _passwordReset = MutableStateFlow<PasswordResetState>(PasswordResetState.Idle)
+    val passwordReset: StateFlow<PasswordResetState> = _passwordReset.asStateFlow()
 
     val isLoggedIn: Boolean
         get() = _currentUser.value != null
@@ -103,6 +115,25 @@ class AuthViewModel(
                 _registerError.value = registerErrorFor(e)
             }
         }
+    }
+
+    fun requestPasswordReset(email: String) {
+        if (_passwordReset.value == PasswordResetState.Sending) return
+        _passwordReset.value = PasswordResetState.Sending
+        viewModelScope.launch {
+            _passwordReset.value = try {
+                authRepository.requestPasswordReset(email)
+                PasswordResetState.Sent
+            } catch (e: Exception) {
+                Log.w(TAG, "Password reset request failed", e)
+                PasswordResetState.Failed(passwordResetErrorFor(e))
+            }
+        }
+    }
+
+    /** Forgets the last reset request, once its dialog has closed or a field was edited. */
+    fun clearPasswordReset() {
+        _passwordReset.value = PasswordResetState.Idle
     }
 
     fun updateUsername(newUsername: String) =
@@ -202,6 +233,14 @@ private fun registerErrorFor(e: Exception): Int = when {
     }
     e is IOException -> R.string.auth_error_no_connection
     else -> R.string.auth_error_register
+}
+
+@StringRes
+private fun passwordResetErrorFor(e: Exception): Int = when {
+    e is HttpException && e.code() == 400 -> R.string.auth_error_register_invalid_email
+    e is HttpException && e.code() == 429 -> R.string.auth_error_reset_too_many
+    e is IOException -> R.string.auth_error_no_connection
+    else -> R.string.auth_error_reset
 }
 
 @StringRes

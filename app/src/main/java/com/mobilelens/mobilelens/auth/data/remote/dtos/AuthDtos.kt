@@ -35,6 +35,11 @@ data class ChangePasswordRequest(
 )
 
 @Serializable
+data class RequestPasswordResetRequest(
+    val email: String
+)
+
+@Serializable
 data class UserDto(
     val id: String = "",
     val email: String = "",

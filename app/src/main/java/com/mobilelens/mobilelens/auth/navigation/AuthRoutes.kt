@@ -19,6 +19,7 @@ import com.mobilelens.mobilelens.auth.ui.screens.RegisterScreen
 import com.mobilelens.mobilelens.auth.ui.screens.UserSettingsScreen
 import com.mobilelens.mobilelens.auth.viewmodel.AccountEditState
 import com.mobilelens.mobilelens.auth.viewmodel.AuthViewModel
+import com.mobilelens.mobilelens.auth.viewmodel.PasswordResetState
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.phones.viewmodel.MyCamerasViewModel
 import com.mobilelens.mobilelens.reviews.viewmodel.MyReviewsViewModel
@@ -34,13 +35,17 @@ fun NavGraphBuilder.authRoutes(
     composable<Screen.Login> {
         val currentUser by authViewModel.currentUser.collectAsState()
         val loginError by authViewModel.loginError.collectAsState()
+        val passwordReset by authViewModel.passwordReset.collectAsState()
 
         LaunchedEffect(currentUser) {
             if (currentUser != null) navController.navigateToUserSettings()
         }
         // AuthViewModel outlives this screen, so drop the error rather than show it on the next visit
         DisposableEffect(Unit) {
-            onDispose { authViewModel.clearLoginError() }
+            onDispose {
+                authViewModel.clearLoginError()
+                authViewModel.clearPasswordReset()
+            }
         }
         LoginScreen(
             onLogin = { email, password ->
@@ -50,7 +55,12 @@ fun NavGraphBuilder.authRoutes(
                 navController.navigate(Screen.Register)
             },
             errorMessage = loginError?.let { stringResource(it) },
-            onClearError = { authViewModel.clearLoginError() }
+            onClearError = { authViewModel.clearLoginError() },
+            onRequestPasswordReset = authViewModel::requestPasswordReset,
+            resetSending = passwordReset == PasswordResetState.Sending,
+            resetSent = passwordReset == PasswordResetState.Sent,
+            resetErrorMessage = (passwordReset as? PasswordResetState.Failed)?.let { stringResource(it.messageRes) },
+            onClearPasswordReset = { authViewModel.clearPasswordReset() },
         )
     }
     composable<Screen.Register> {

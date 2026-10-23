@@ -206,6 +206,17 @@
     <string name="auth_error_register_exists">Konto z tym adresem e-mail już istnieje.</string>
     <string name="auth_error_register_invalid_email">Podaj prawidłowy adres e-mail.</string>
     <string name="auth_error_register_verify_email">Konto zostało utworzone. Potwierdź adres e-mail, a potem się zaloguj.</string>
+    <string name="auth_no_account">Nie masz konta?</string>
+    <string name="auth_show_password">Pokaż hasło</string>
+    <string name="auth_hide_password">Ukryj hasło</string>
+    <string name="auth_reset_title">Zresetuj hasło</string>
+    <string name="auth_reset_supporting">Podaj e-mail swojego konta, a wyślemy Ci link do ustawienia nowego hasła.</string>
+    <string name="auth_reset_send">Wyślij link</string>
+    <string name="auth_reset_sent_title">Sprawdź skrzynkę</string>
+    <string name="auth_reset_sent_message">Jeśli konto używa adresu %1$s, wysłaliśmy na niego link do zresetowania hasła.</string>
+    <string name="auth_reset_done">OK</string>
+    <string name="auth_error_reset">Nie udało się wysłać linku. Spróbuj ponownie.</string>
+    <string name="auth_error_reset_too_many">Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.</string>
 
     <!-- User roles -->
     <string name="role_user">Użytkownik</string>

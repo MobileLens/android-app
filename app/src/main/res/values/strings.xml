@@ -207,6 +207,17 @@
     <string name="auth_error_register_exists">An account with this e-mail already exists.</string>
     <string name="auth_error_register_invalid_email">Enter a valid e-mail address.</string>
     <string name="auth_error_register_verify_email">Account created. Confirm your e-mail address, then log in.</string>
+    <string name="auth_no_account">Don\'t have an account?</string>
+    <string name="auth_show_password">Show password</string>
+    <string name="auth_hide_password">Hide password</string>
+    <string name="auth_reset_title">Reset password</string>
+    <string name="auth_reset_supporting">Enter your account\'s e-mail and we\'ll send you a link to set a new password.</string>
+    <string name="auth_reset_send">Send link</string>
+    <string name="auth_reset_sent_title">Check your inbox</string>
+    <string name="auth_reset_sent_message">If an account uses %1$s, we\'ve sent it a link to reset the password.</string>
+    <string name="auth_reset_done">OK</string>
+    <string name="auth_error_reset">Couldn\'t send the reset link. Try again.</string>
+    <string name="auth_error_reset_too_many">Too many attempts. Wait a moment and try again.</string>
 
     <!-- User roles -->
     <string name="role_user">User</string>
