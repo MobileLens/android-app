@@ -8,9 +8,11 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.performSelect
 import com.mobilelens.mobilelens.phones.model.CatalogueSort
 
 @StringRes
@@ -27,6 +29,7 @@ fun CatalogueSortTabs(
     onSelect: (CatalogueSort) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val haptic = LocalHapticFeedback.current
     PrimaryTabRow(
         selectedTabIndex = CatalogueSort.entries.indexOf(selected),
         modifier = modifier,
@@ -34,7 +37,10 @@ fun CatalogueSortTabs(
         CatalogueSort.entries.forEach { sort ->
             Tab(
                 selected = sort == selected,
-                onClick = { onSelect(sort) },
+                onClick = {
+                    if (sort != selected) haptic.performSelect()
+                    onSelect(sort)
+                },
                 text = { Text(stringResource(sort.labelRes())) },
             )
         }

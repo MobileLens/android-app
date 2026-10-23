@@ -18,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -31,6 +32,8 @@ import com.mobilelens.mobilelens.core.navigation.screen
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
 import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
+import com.mobilelens.mobilelens.core.ui.performOutcome
+import com.mobilelens.mobilelens.core.ui.performReject
 import com.mobilelens.mobilelens.phones.data.JPEG_MIME_TYPE
 import com.mobilelens.mobilelens.phones.model.CatalogueSort
 import com.mobilelens.mobilelens.phones.model.Phone
@@ -74,6 +77,7 @@ fun NavGraphBuilder.phonesRoutes(
 ) {
     screen<Screen.Home>(navController) {
         val context = LocalContext.current
+        val haptic = LocalHapticFeedback.current
         val camerasUnavailable = stringResource(R.string.upload_cameras_unavailable)
         HomeScreen(
             cameraViewModel = cameraViewModel,
@@ -84,6 +88,7 @@ fun NavGraphBuilder.phonesRoutes(
                 if (state is CameraUiState.Success) {
                     navController.navigate(Screen.UploadDeviceCameras)
                 } else {
+                    haptic.performReject()
                     Toast.makeText(context, camerasUnavailable, Toast.LENGTH_SHORT).show()
                 }
             },
@@ -93,6 +98,7 @@ fun NavGraphBuilder.phonesRoutes(
                 if (state is CameraUiState.Success) {
                     navController.navigate(Screen.ComparePicker()) { launchSingleTop = true }
                 } else {
+                    haptic.performReject()
                     Toast.makeText(context, camerasUnavailable, Toast.LENGTH_SHORT).show()
                 }
             },
@@ -108,6 +114,7 @@ fun NavGraphBuilder.phonesRoutes(
     }
     screen<Screen.Catalogue>(navController) {
         val context = LocalContext.current
+        val haptic = LocalHapticFeedback.current
         val catalogueState by catalogueViewModel.catalogueState.collectAsState()
         val sort by catalogueViewModel.sort.collectAsState()
         val filters by catalogueViewModel.filters.collectAsState()
@@ -118,6 +125,7 @@ fun NavGraphBuilder.phonesRoutes(
         val errorMessage = errorMessageRes?.let { stringResource(it) }
         LaunchedEffect(errorMessage) {
             if (errorMessage != null) {
+                haptic.performReject()
                 Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                 catalogueViewModel.errorMessageShown()
             }
@@ -291,7 +299,7 @@ fun NavGraphBuilder.phonesRoutes(
         val uiState by uploadViewModel.uiState.collectAsState()
         val gallery by uploadViewModel.gallery.collectAsState()
         val isSubmitting by uploadViewModel.isSubmitting.collectAsState()
-        val messageRes by uploadViewModel.message.collectAsState()
+        val userMessage by uploadViewModel.message.collectAsState()
         val snackbarHostState = remember { SnackbarHostState() }
         // Saved, since the activity can be recreated while the photo picker is open (e.g. a rotation)
         var pickingForCamera by rememberSaveable { mutableStateOf<String?>(null) }
@@ -320,10 +328,13 @@ fun NavGraphBuilder.phonesRoutes(
         }
 
         // Sends stay on this screen, so the other tab can be used next
-        val message = messageRes?.let { stringResource(it) }
+        val haptic = LocalHapticFeedback.current
+        val message = userMessage
+        val messageText = message?.let { stringResource(it.textRes) }
         LaunchedEffect(message) {
-            if (message != null) {
-                snackbarHostState.showSnackbar(message)
+            if (message != null && messageText != null) {
+                haptic.performOutcome(message)
+                snackbarHostState.showSnackbar(messageText)
                 uploadViewModel.messageShown()
             }
         }

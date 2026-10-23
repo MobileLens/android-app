@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
@@ -27,6 +28,9 @@ import com.mobilelens.mobilelens.core.navigation.screen
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
 import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
+import com.mobilelens.mobilelens.core.ui.performConfirm
+import com.mobilelens.mobilelens.core.ui.performReject
+import com.mobilelens.mobilelens.core.ui.performToggle
 import com.mobilelens.mobilelens.phones.ui.screens.ComparePickerScreen
 import com.mobilelens.mobilelens.phones.viewmodel.ComparePickerViewModel
 import com.mobilelens.mobilelens.reviews.ui.screens.ReviewScreen
@@ -55,6 +59,7 @@ fun NavGraphBuilder.reviewsRoutes(
         val currentUser by authViewModel.currentUser.collectAsState()
         val context = LocalContext.current
         val resources = LocalResources.current
+        val haptic = LocalHapticFeedback.current
         val shareChooserTitle = stringResource(R.string.review_share)
 
         // Also runs on the way back from a review, refreshing the list in place
@@ -66,6 +71,7 @@ fun NavGraphBuilder.reviewsRoutes(
         val likeMessage = likeMessageRes?.let { stringResource(it) }
         LaunchedEffect(likeMessage) {
             if (likeMessage != null) {
+                haptic.performReject()
                 Toast.makeText(context, likeMessage, Toast.LENGTH_SHORT).show()
                 reviewViewModel.messageShown()
             }
@@ -90,6 +96,7 @@ fun NavGraphBuilder.reviewsRoutes(
                         // A signed-out viewer can't like, so the heart sends them to log in
                         onLikeClick = { review ->
                             if (currentUser != null) {
+                                haptic.performToggle(!review.likedByMe)
                                 reviewViewModel.toggleThreadLike(review.id)
                             } else {
                                 navController.navigateToLoginAndBack()
@@ -122,6 +129,7 @@ fun NavGraphBuilder.reviewsRoutes(
         val commentMessageRes by commentsViewModel.message.collectAsState()
         val currentUser by authViewModel.currentUser.collectAsState()
         val snackbarHostState = remember { SnackbarHostState() }
+        val haptic = LocalHapticFeedback.current
 
         LaunchedEffect(route.reviewId) {
             reviewViewModel.loadReview(route.reviewId)
@@ -131,6 +139,7 @@ fun NavGraphBuilder.reviewsRoutes(
         val likeMessage = likeMessageRes?.let { stringResource(it) }
         LaunchedEffect(likeMessage) {
             if (likeMessage != null) {
+                haptic.performReject()
                 snackbarHostState.showSnackbar(likeMessage)
                 reviewViewModel.messageShown()
             }
@@ -138,6 +147,7 @@ fun NavGraphBuilder.reviewsRoutes(
         val commentMessage = commentMessageRes?.let { stringResource(it) }
         LaunchedEffect(commentMessage) {
             if (commentMessage != null) {
+                haptic.performReject()
                 snackbarHostState.showSnackbar(commentMessage)
                 commentsViewModel.messageShown()
             }
@@ -163,6 +173,7 @@ fun NavGraphBuilder.reviewsRoutes(
                         // A signed-out viewer can't like, so the heart sends them to log in
                         onToggleLike = {
                             if (user != null) {
+                                haptic.performToggle(!state.review.likedByMe)
                                 reviewViewModel.toggleLike()
                             } else {
                                 navController.navigateToLoginAndBack()
@@ -190,6 +201,7 @@ fun NavGraphBuilder.reviewsRoutes(
         val errorMessageRes by writeReviewViewModel.errorMessage.collectAsState()
 
         val context = LocalContext.current
+        val haptic = LocalHapticFeedback.current
         val snackbarHostState = remember { SnackbarHostState() }
         val pickImage = rememberLauncherForActivityResult(
             ActivityResultContracts.PickVisualMedia()
@@ -216,6 +228,7 @@ fun NavGraphBuilder.reviewsRoutes(
         val errorMessage = errorMessageRes?.let { stringResource(it) }
         LaunchedEffect(errorMessage) {
             if (errorMessage != null) {
+                haptic.performReject()
                 // Cleared only afterwards: clearing changes this effect's key, which would cancel it
                 snackbarHostState.showSnackbar(errorMessage)
                 writeReviewViewModel.errorMessageShown()
@@ -229,6 +242,7 @@ fun NavGraphBuilder.reviewsRoutes(
             if (state is PublishReviewUiState.Published) {
                 // A toast, since the editor is gone by the time a snackbar could show
                 val message = if (state.inModeration) moderationMessage else liveMessage
+                haptic.performConfirm()
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 navController.popBackStack()
             }

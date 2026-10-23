@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -54,6 +55,7 @@ import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
 import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
 import com.mobilelens.mobilelens.core.ui.localizedDate
+import com.mobilelens.mobilelens.core.ui.performSelect
 import com.mobilelens.mobilelens.core.ui.theme.rememberSlideDistance
 import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXIn
 import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXOut
@@ -63,8 +65,8 @@ import com.mobilelens.mobilelens.phones.data.pairLenses
 import com.mobilelens.mobilelens.phones.ui.components.CompareLensSpecs
 import com.mobilelens.mobilelens.phones.ui.components.DeviceImageOrPlaceholder
 import com.mobilelens.mobilelens.phones.ui.lensKindLabel
-import com.mobilelens.mobilelens.phones.viewmodel.ComparedPhone
 import com.mobilelens.mobilelens.phones.viewmodel.CompareUiState
+import com.mobilelens.mobilelens.phones.viewmodel.ComparedPhone
 
 /**
  * Two phones side by side, with a floating toolbar to swap them or pick another right-hand phone.
@@ -140,6 +142,7 @@ fun CompareContent(
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, (pairs.size - 1).coerceAtLeast(0))
     val slideDistance = rememberSlideDistance()
+    val haptic = LocalHapticFeedback.current
 
     Box(
         modifier = modifier
@@ -161,7 +164,10 @@ fun CompareContent(
                     pairs.forEachIndexed { index, pair ->
                         Tab(
                             selected = safeTabIndex == index,
-                            onClick = { selectedTabIndex = index },
+                            onClick = {
+                                if (index != safeTabIndex) haptic.performSelect()
+                                selectedTabIndex = index
+                            },
                             text = { Text(pair.tabLabel()) },
                         )
                     }

@@ -7,6 +7,7 @@ import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -22,6 +23,7 @@ import com.mobilelens.mobilelens.core.navigation.navigateToTopLevel
 fun BottomNavigationBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val haptic = LocalHapticFeedback.current
 
     ShortNavigationBar {
         TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
@@ -34,6 +36,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                 label = { Text(label) },
                 selected = isSelected,
                 onClick = {
+                    haptic.performSelect()
                     // Account screens sit on top of the tab that opened them. Drop them first,
                     // otherwise they'd be saved with that tab and come back when it's selected.
                     while (navController.currentDestination?.isAccountScreen() == true) {

@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.UserMessage
 import com.mobilelens.mobilelens.reviews.data.ReviewRepository
 import com.mobilelens.mobilelens.reviews.model.Review
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,8 +34,8 @@ class MyReviewsViewModel(
     val reviews: StateFlow<MyReviewsUiState> = _reviews.asStateFlow()
 
     // Outcome of a deletion, shown once in a snackbar; cleared with messageShown()
-    private val _message = MutableStateFlow<Int?>(null)
-    val message: StateFlow<Int?> = _message.asStateFlow()
+    private val _message = MutableStateFlow<UserMessage?>(null)
+    val message: StateFlow<UserMessage?> = _message.asStateFlow()
 
     /** Loads the list, or refreshes it in place when it's already showing. */
     fun loadReviews() {
@@ -77,7 +78,11 @@ class MyReviewsViewModel(
                     deletingIds = current.deletingIds - reviewId,
                 )
             }
-            _message.value = if (deleted) R.string.settings_review_deleted else R.string.settings_error_delete_review
+            _message.value = if (deleted) {
+                UserMessage(R.string.settings_review_deleted, isError = false)
+            } else {
+                UserMessage(R.string.settings_error_delete_review, isError = true)
+            }
         }
     }
 

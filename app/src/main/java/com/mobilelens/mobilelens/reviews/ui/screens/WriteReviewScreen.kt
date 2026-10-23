@@ -51,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -62,6 +63,7 @@ import com.halilibo.richtext.ui.material3.RichText
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.ui.LoadingButtonContent
 import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
+import com.mobilelens.mobilelens.core.ui.performSelect
 import com.mobilelens.mobilelens.core.ui.theme.rememberSlideDistance
 import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXIn
 import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXOut
@@ -96,6 +98,7 @@ fun WriteReviewScreen(
     var showPreview by rememberSaveable { mutableStateOf(false) }
     var showDiscardDialog by rememberSaveable { mutableStateOf(false) }
     val slideDistance = rememberSlideDistance()
+    val haptic = LocalHapticFeedback.current
 
     val hasDraft by remember(title, content) {
         derivedStateOf { title.text.isNotBlank() || content.text.isNotBlank() }
@@ -167,12 +170,18 @@ fun WriteReviewScreen(
             PrimaryTabRow(selectedTabIndex = if (showPreview) 1 else 0) {
                 Tab(
                     selected = !showPreview,
-                    onClick = { showPreview = false },
+                    onClick = {
+                        if (showPreview) haptic.performSelect()
+                        showPreview = false
+                    },
                     text = { Text(stringResource(R.string.review_editor_tab_write)) },
                 )
                 Tab(
                     selected = showPreview,
-                    onClick = { showPreview = true },
+                    onClick = {
+                        if (!showPreview) haptic.performSelect()
+                        showPreview = true
+                    },
                     text = { Text(stringResource(R.string.review_editor_tab_preview)) },
                 )
             }

@@ -16,10 +16,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.performSelect
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.Facing
 import com.mobilelens.mobilelens.phones.model.Lens
@@ -116,13 +118,17 @@ private fun <T> ChoiceChips(
     optionLabel: @Composable (T) -> String,
     onSelect: (T) -> Unit,
 ) {
+    val haptic = LocalHapticFeedback.current
     Column {
         Text(text = title, style = MaterialTheme.typography.labelLarge)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             options.forEach { option ->
                 FilterChip(
                     selected = option == selected,
-                    onClick = { onSelect(option) },
+                    onClick = {
+                        if (option != selected) haptic.performSelect()
+                        onSelect(option)
+                    },
                     label = { Text(optionLabel(option)) },
                 )
             }

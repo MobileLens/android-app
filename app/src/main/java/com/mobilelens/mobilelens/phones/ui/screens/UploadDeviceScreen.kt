@@ -62,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -74,6 +75,7 @@ import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingButtonContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
 import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
+import com.mobilelens.mobilelens.core.ui.performSelect
 import com.mobilelens.mobilelens.core.ui.theme.Motion
 import com.mobilelens.mobilelens.core.ui.theme.rememberSlideDistance
 import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXIn
@@ -125,6 +127,7 @@ fun UploadDeviceScreen(
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(UploadTab.Specs) }
     val slideDistance = rememberSlideDistance()
+    val haptic = LocalHapticFeedback.current
 
     // Like the close button, back does nothing while sending: leaving would stop the send partway,
     // and sending again from a new screen would submit the same cameras twice
@@ -186,7 +189,10 @@ fun UploadDeviceScreen(
                 UploadTab.entries.forEach { tab ->
                     Tab(
                         selected = tab == selectedTab,
-                        onClick = { selectedTab = tab },
+                        onClick = {
+                            if (tab != selectedTab) haptic.performSelect()
+                            selectedTab = tab
+                        },
                         text = { Text(stringResource(tab.labelRes)) },
                     )
                 }

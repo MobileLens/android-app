@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -46,6 +47,7 @@ import com.mobilelens.mobilelens.core.navigation.navigateToTopLevel
 import com.mobilelens.mobilelens.core.navigation.rememberNavTransitions
 import com.mobilelens.mobilelens.core.ui.BottomNavigationBar
 import com.mobilelens.mobilelens.core.ui.SearchAppBar
+import com.mobilelens.mobilelens.core.ui.performReject
 import com.mobilelens.mobilelens.core.ui.theme.Motion
 import com.mobilelens.mobilelens.favorites.viewmodel.FavoritesViewModel
 import com.mobilelens.mobilelens.phones.navigation.phonesRoutes
@@ -88,10 +90,12 @@ fun MainApp(
 
     // Favorites are toggled and loaded from several screens, so a failure gets a toast
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     val favoritesErrorRes by favoritesViewModel.uiError.collectAsState()
     val favoritesError = favoritesErrorRes?.let { stringResource(it) }
     LaunchedEffect(favoritesError) {
         if (favoritesError != null) {
+            haptic.performReject()
             Toast.makeText(context, favoritesError, Toast.LENGTH_SHORT).show()
             favoritesViewModel.clearError()
         }

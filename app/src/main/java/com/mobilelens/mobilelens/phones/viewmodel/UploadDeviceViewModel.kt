@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.data.BuildInfoRepository
 import com.mobilelens.mobilelens.core.data.remote.apiErrorCode
+import com.mobilelens.mobilelens.core.ui.UserMessage
 import com.mobilelens.mobilelens.phones.data.CameraSubmitRepository
 import com.mobilelens.mobilelens.phones.data.DeviceMatchStore
 import com.mobilelens.mobilelens.phones.data.JPEG_MIME_TYPE
@@ -28,6 +29,7 @@ import com.mobilelens.mobilelens.phones.model.GalleryCamera
 import com.mobilelens.mobilelens.phones.model.Lens
 import com.mobilelens.mobilelens.phones.model.LensType
 import com.mobilelens.mobilelens.phones.model.Stabilization
+import java.io.FileNotFoundException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -38,7 +40,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
-import java.io.FileNotFoundException
 
 private const val TAG = "UploadDeviceViewModel"
 
@@ -126,8 +127,8 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
     val isSubmitting: StateFlow<Boolean> = _isSubmitting.asStateFlow()
 
     // Outcome of a send or of reading a picked photo, shown once in a snackbar; cleared with messageShown()
-    private val _message = MutableStateFlow<Int?>(null)
-    val message: StateFlow<Int?> = _message.asStateFlow()
+    private val _message = MutableStateFlow<UserMessage?>(null)
+    val message: StateFlow<UserMessage?> = _message.asStateFlow()
 
     // What earlier sends already sent, so sending again carries on from there: the backend takes
     // a repeated camera as a new submission rather than merging it
@@ -161,10 +162,10 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
             val listed = current.lenses + current.photoCameras.map { it.lens }
             when {
                 exif == null || !matchesThisDevice(exif) ->
-                    _message.value = R.string.upload_error_photo_not_from_device
-                lens == null -> _message.value = R.string.upload_error_photo_no_optics
+                    _message.value = UserMessage(R.string.upload_error_photo_not_from_device, isError = true)
+                lens == null -> _message.value = UserMessage(R.string.upload_error_photo_no_optics, isError = true)
                 listed.any { it.sharesOpticsWith(lens) } ->
-                    _message.value = R.string.upload_error_camera_already_listed
+                    _message.value = UserMessage(R.string.upload_error_camera_already_listed, isError = true)
                 else -> _uiState.value = current.copy(
                     pendingPhotoCamera = PhotoCamera(id = nextPhotoCameraId++, lens = lens),
                 )
@@ -229,14 +230,14 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
                     markPhotoCameraSent(photoCamera.id)
                 }
 
-                _message.value = R.string.upload_specs_sent
+                _message.value = UserMessage(R.string.upload_specs_sent, isError = false)
                 // The new cameras can take photos straight away, while they're in review
                 loadGallery()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to send the device's camera specs", e)
-                _message.value = submitErrorFor(e, stage)
+                _message.value = UserMessage(submitErrorFor(e, stage), isError = true)
             } finally {
                 _isSubmitting.value = false
             }
@@ -285,7 +286,7 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
         if (uris.isEmpty()) return
         viewModelScope.launch {
             val problems = uris.associateWith { galleryPhotoProblem(it, camera, contentResolver) }
-            problems.values.firstOrNull { it != null }?.let { _message.value = it }
+            problems.values.firstOrNull { it != null }?.let { _message.value = UserMessage(it, isError = true) }
             val accepted = problems.filterValues { it == null }.keys
             if (accepted.isEmpty()) return@launch
             _gallery.update { state ->
@@ -317,12 +318,12 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
                         dropGalleryPhoto(cameraId, uri)
                     }
                 }
-                _message.value = R.string.upload_photos_sent
+                _message.value = UserMessage(R.string.upload_photos_sent, isError = false)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to upload gallery photos", e)
-                _message.value = submitErrorFor(e, SubmitStage.PHOTOS)
+                _message.value = UserMessage(submitErrorFor(e, SubmitStage.PHOTOS), isError = true)
             } finally {
                 _isSubmitting.value = false
             }

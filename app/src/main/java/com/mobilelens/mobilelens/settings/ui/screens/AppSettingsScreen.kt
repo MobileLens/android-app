@@ -36,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -44,13 +45,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.performSelect
+import com.mobilelens.mobilelens.core.ui.performToggle
 import com.mobilelens.mobilelens.settings.model.AppSettings
 import com.mobilelens.mobilelens.settings.model.ThemeMode
 import com.mobilelens.mobilelens.settings.ui.components.LanguageDialog
 import com.mobilelens.mobilelens.settings.ui.components.SettingsGroup
 import com.mobilelens.mobilelens.settings.ui.components.SettingsSectionHeader
-import com.mobilelens.mobilelens.settings.ui.components.settingsItemColors
 import com.mobilelens.mobilelens.settings.ui.components.languageName
+import com.mobilelens.mobilelens.settings.ui.components.settingsItemColors
 
 /**
  * App preferences: theme, Material You colors and language. Has its own top bar, so MainApp hides
@@ -72,6 +75,7 @@ fun AppSettingsScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
 
     Column(
         modifier = modifier
@@ -117,7 +121,10 @@ fun AppSettingsScreen(
 
                 SegmentedListItem(
                     checked = settings.dynamicColor,
-                    onCheckedChange = onDynamicColorChange,
+                    onCheckedChange = { enabled ->
+                        haptic.performToggle(enabled)
+                        onDynamicColorChange(enabled)
+                    },
                     content = { Text(stringResource(R.string.app_settings_dynamic_color)) },
                     supportingContent = { Text(stringResource(R.string.app_settings_dynamic_color_supporting)) },
                     leadingContent = { Icon(Icons.Outlined.Palette, contentDescription = null) },
@@ -163,7 +170,10 @@ fun AppSettingsScreen(
             selected = language,
             onSelect = { tag ->
                 showLanguageDialog = false
-                if (tag != language) onLanguageChange(tag)
+                if (tag != language) {
+                    haptic.performSelect()
+                    onLanguageChange(tag)
+                }
             },
             onDismiss = { showLanguageDialog = false },
         )
@@ -177,6 +187,7 @@ private fun ThemeModeSelector(
     modifier: Modifier = Modifier,
 ) {
     val modes = ThemeMode.entries
+    val haptic = LocalHapticFeedback.current
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
@@ -184,7 +195,10 @@ private fun ThemeModeSelector(
         modes.forEachIndexed { index, mode ->
             ToggleButton(
                 checked = mode == selected,
-                onCheckedChange = { onSelect(mode) },
+                onCheckedChange = {
+                    if (mode != selected) haptic.performSelect()
+                    onSelect(mode)
+                },
                 modifier = Modifier
                     .weight(1f)
                     .semantics { role = Role.RadioButton },

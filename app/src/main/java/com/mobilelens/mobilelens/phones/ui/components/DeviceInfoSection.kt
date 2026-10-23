@@ -28,12 +28,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.ui.localizedDate
+import com.mobilelens.mobilelens.core.ui.performToggle
 import com.mobilelens.mobilelens.core.ui.theme.Motion
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogue
 import com.mobilelens.mobilelens.phones.model.DeviceInfo
@@ -94,7 +96,14 @@ fun DeviceInfoSection(
             }
 
             if (onFavoriteClick != null) {
-                IconButton(onClick = onFavoriteClick, shapes = IconButtonDefaults.shapes()) {
+                val haptic = LocalHapticFeedback.current
+                IconButton(
+                    onClick = {
+                        haptic.performToggle(!isFavorite)
+                        onFavoriteClick()
+                    },
+                    shapes = IconButtonDefaults.shapes(),
+                ) {
                     AnimatedContent(
                         targetState = isFavorite,
                         transitionSpec = {

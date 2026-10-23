@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,6 +23,9 @@ import com.mobilelens.mobilelens.auth.viewmodel.AuthViewModel
 import com.mobilelens.mobilelens.auth.viewmodel.PasswordResetState
 import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.navigation.screen
+import com.mobilelens.mobilelens.core.ui.performConfirm
+import com.mobilelens.mobilelens.core.ui.performOutcome
+import com.mobilelens.mobilelens.core.ui.performReject
 import com.mobilelens.mobilelens.phones.viewmodel.MyCamerasViewModel
 import com.mobilelens.mobilelens.reviews.viewmodel.MyReviewsViewModel
 
@@ -39,9 +43,23 @@ fun NavGraphBuilder.authRoutes(
         val currentUser by authViewModel.currentUser.collectAsState()
         val loginError by authViewModel.loginError.collectAsState()
         val passwordReset by authViewModel.passwordReset.collectAsState()
+        val haptic = LocalHapticFeedback.current
 
         LaunchedEffect(currentUser) {
-            if (currentUser != null) navController.leaveAuthScreens(route.returnToPrevious)
+            if (currentUser != null) {
+                haptic.performConfirm()
+                navController.leaveAuthScreens(route.returnToPrevious)
+            }
+        }
+        LaunchedEffect(loginError) {
+            if (loginError != null) haptic.performReject()
+        }
+        LaunchedEffect(passwordReset) {
+            when (passwordReset) {
+                PasswordResetState.Sent -> haptic.performConfirm()
+                is PasswordResetState.Failed -> haptic.performReject()
+                else -> Unit
+            }
         }
         // AuthViewModel outlives this screen, so drop the error rather than show it on the next visit
         DisposableEffect(Unit) {
@@ -70,9 +88,16 @@ fun NavGraphBuilder.authRoutes(
         val route = backStackEntry.toRoute<Screen.Register>()
         val currentUser by authViewModel.currentUser.collectAsState()
         val registerError by authViewModel.registerError.collectAsState()
+        val haptic = LocalHapticFeedback.current
 
         LaunchedEffect(currentUser) {
-            if (currentUser != null) navController.leaveAuthScreens(route.returnToPrevious)
+            if (currentUser != null) {
+                haptic.performConfirm()
+                navController.leaveAuthScreens(route.returnToPrevious)
+            }
+        }
+        LaunchedEffect(registerError) {
+            if (registerError != null) haptic.performReject()
         }
         DisposableEffect(Unit) {
             onDispose { authViewModel.clearRegisterError() }
@@ -94,11 +119,17 @@ fun NavGraphBuilder.authRoutes(
         val accountEdit by authViewModel.accountEdit.collectAsState()
         val user = currentUser
         val context = LocalContext.current
+        val haptic = LocalHapticFeedback.current
         val snackbarHostState = remember { SnackbarHostState() }
 
+        // A failed change stays in its dialog, which shows why
+        LaunchedEffect(accountEdit) {
+            if (accountEdit is AccountEditState.Failed) haptic.performReject()
+        }
         val savedMessage = (accountEdit as? AccountEditState.Saved)?.let { stringResource(it.messageRes) }
         LaunchedEffect(savedMessage) {
             if (savedMessage != null) {
+                haptic.performConfirm()
                 // A deleted account leaves this screen at once, so it gets a toast rather than a snackbar
                 if (authViewModel.currentUser.value == null) {
                     Toast.makeText(context, savedMessage, Toast.LENGTH_SHORT).show()
@@ -117,7 +148,7 @@ fun NavGraphBuilder.authRoutes(
         if (user != null) {
             val myReviewsViewModel: MyReviewsViewModel = viewModel()
             val reviewsState by myReviewsViewModel.reviews.collectAsState()
-            val reviewMessageRes by myReviewsViewModel.message.collectAsState()
+            val reviewMessage by myReviewsViewModel.message.collectAsState()
             val myCamerasViewModel: MyCamerasViewModel = viewModel()
             val camerasState by myCamerasViewModel.cameras.collectAsState()
 
@@ -126,10 +157,12 @@ fun NavGraphBuilder.authRoutes(
                 myReviewsViewModel.loadReviews()
                 myCamerasViewModel.loadCameras()
             }
-            val reviewMessage = reviewMessageRes?.let { stringResource(it) }
-            LaunchedEffect(reviewMessage) {
-                if (reviewMessage != null) {
-                    snackbarHostState.showSnackbar(reviewMessage)
+            val message = reviewMessage
+            val messageText = message?.let { stringResource(it.textRes) }
+            LaunchedEffect(message) {
+                if (message != null && messageText != null) {
+                    haptic.performOutcome(message)
+                    snackbarHostState.showSnackbar(messageText)
                     myReviewsViewModel.messageShown()
                 }
             }

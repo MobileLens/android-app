@@ -26,10 +26,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
+import com.mobilelens.mobilelens.core.ui.performSelect
+import com.mobilelens.mobilelens.core.ui.performToggle
 import com.mobilelens.mobilelens.phones.model.Brand
 import com.mobilelens.mobilelens.phones.model.CatalogueFilters
 import com.mobilelens.mobilelens.phones.model.LensType
@@ -47,6 +50,7 @@ fun CatalogueFilterChips(
     onFiltersChange: (CatalogueFilters) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val haptic = LocalHapticFeedback.current
     Row(
         modifier = modifier
             .horizontalScroll(rememberScrollState())
@@ -56,7 +60,10 @@ fun CatalogueFilterChips(
     ) {
         if (filters.isActive) {
             AssistChip(
-                onClick = { onFiltersChange(CatalogueFilters()) },
+                onClick = {
+                    haptic.performToggle(false)
+                    onFiltersChange(CatalogueFilters())
+                },
                 label = { Text(stringResource(R.string.filter_clear)) },
                 leadingIcon = {
                     Icon(
@@ -109,9 +116,13 @@ private fun ToggleFilterChip(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val haptic = LocalHapticFeedback.current
     FilterChip(
         selected = selected,
-        onClick = onClick,
+        onClick = {
+            haptic.performToggle(!selected)
+            onClick()
+        },
         label = { Text(label) },
         leadingIcon = if (selected) {
             {
@@ -137,6 +148,12 @@ private fun <T> DropdownFilterChip(
     onSelect: (T?) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+    fun choose(option: T?) {
+        expanded = false
+        if (option != selected) haptic.performSelect()
+        onSelect(option)
+    }
 
     Box {
         FilterChip(
@@ -154,18 +171,12 @@ private fun <T> DropdownFilterChip(
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.filter_any)) },
-                onClick = {
-                    expanded = false
-                    onSelect(null)
-                },
+                onClick = { choose(null) },
             )
             options.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(optionLabel(option)) },
-                    onClick = {
-                        expanded = false
-                        onSelect(option)
-                    },
+                    onClick = { choose(option) },
                 )
             }
         }

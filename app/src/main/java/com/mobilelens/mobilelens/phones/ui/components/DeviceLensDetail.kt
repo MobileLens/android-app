@@ -15,8 +15,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mobilelens.mobilelens.core.ui.performSelect
 import com.mobilelens.mobilelens.core.ui.theme.rememberSlideDistance
 import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXIn
 import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXOut
@@ -39,6 +41,7 @@ fun DeviceLensDetail(
     val scrollState = rememberScrollState()
     val safeTabIndex = selectedTabIndex.coerceIn(0, (lenses.size - 1).coerceAtLeast(0))
     val slideDistance = rememberSlideDistance()
+    val haptic = LocalHapticFeedback.current
 
     Column(
         modifier = modifier
@@ -59,7 +62,10 @@ fun DeviceLensDetail(
                 lenses.forEachIndexed { index, _ ->
                     Tab(
                         selected = safeTabIndex == index,
-                        onClick = { selectedTabIndex = index },
+                        onClick = {
+                            if (index != safeTabIndex) haptic.performSelect()
+                            selectedTabIndex = index
+                        },
                         text = { Text(lenses[index].tabLabel()) }
                     )
                 }

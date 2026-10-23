@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -50,6 +51,7 @@ fun FabMenu(
     modifier: Modifier = Modifier,
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
     BackHandler(expanded) { expanded = false }
 
     val menuDescription = stringResource(
@@ -61,7 +63,10 @@ fun FabMenu(
             ToggleFloatingActionButton(
                 modifier = Modifier.semantics { contentDescription = menuDescription },
                 checked = expanded,
-                onCheckedChange = { expanded = !expanded },
+                onCheckedChange = {
+                    haptic.performToggle(!expanded)
+                    expanded = !expanded
+                },
             ) {
                 // Past halfway the icon is already the ×, so it swaps while it morphs
                 val imageVector by remember {
