@@ -16,6 +16,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -89,6 +91,13 @@ fun MainApp(
 
     val isAuthOrSettingsScreen = currentDestination?.isAccountScreen() == true
 
+    val searchBarScrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
+    // Every screen starts with the search bar shown, wherever the last one left it
+    LaunchedEffect(currentDestination?.id) {
+        searchBarScrollBehavior.scrollState.scrollOffset = 0f
+        searchBarScrollBehavior.scrollState.contentOffset = 0f
+    }
+
     // The review editor has its own top bar and needs the room the bottom bar takes
     val isReviewEditor = currentDestination?.hasRoute<Screen.WriteReview>() == true
     // The gallery has its own top bar
@@ -126,6 +135,7 @@ fun MainApp(
     val systemBarsPadding = WindowInsets.systemBars.asPaddingValues()
 
     Scaffold(
+        modifier = Modifier.nestedScroll(searchBarScrollBehavior.nestedScrollConnection),
         bottomBar = {
             Box(
                 modifier = Modifier.defaultMinSize(minHeight = systemBarsPadding.calculateBottomPadding()),
@@ -174,7 +184,8 @@ fun MainApp(
                         onClear = { selectedPhoneId = null },
                         onAccountClick = { handleAccountClick() },
                         onSettingsClick = { handleSettingsClick() },
-                        accountInitial = currentUser?.username?.take(1)?.uppercase()
+                        accountInitial = currentUser?.username?.take(1)?.uppercase(),
+                        scrollBehavior = searchBarScrollBehavior,
                     )
                 }
             }

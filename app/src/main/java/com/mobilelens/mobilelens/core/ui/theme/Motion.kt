@@ -4,6 +4,8 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -35,6 +37,10 @@ object Motion {
 
     /** How far content travels when it slides between screens or tabs. */
     val SlideDistance = 30.dp
+
+    // Material 3 Expressive spatial springs: a slight overshoot for things that move or change shape
+    fun <T> fastSpatialSpring(): FiniteAnimationSpec<T> = spring(dampingRatio = 0.6f, stiffness = 800f)
+    fun <T> defaultSpatialSpring(): FiniteAnimationSpec<T> = spring(dampingRatio = 0.8f, stiffness = 380f)
 }
 
 // Fade through and shared axis share one split: the old content is gone after the first 90 ms and

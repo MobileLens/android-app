@@ -1,14 +1,24 @@
 package com.mobilelens.mobilelens.core.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
@@ -17,16 +27,20 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExpandedDockedSearchBar
-import androidx.compose.material3.ExpandedFullScreenSearchBar
+import androidx.compose.material3.ExpandedFullScreenContainedSearchBar
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.SearchBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarScrollBehavior
 import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
@@ -38,28 +52,35 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.ui.theme.MobileLensTheme
+import com.mobilelens.mobilelens.core.ui.theme.Motion
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.ui.components.SearchResultsList
 import kotlinx.coroutines.launch
 
 private val DockedSearchBreakpoint = 600.dp
 
-// Equal side margins keep the pill centered. The cap stops it stretching on wide screens.
-private val SearchBarSideMargin = 32.dp
-private val SearchBarMaxWidth = 340.dp
+// Added to AppBarWithSearch's own 8dp around the pill, for 16dp side margins in all
+private val AppBarPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
 
 // Leading and trailing slots match, so a centered hint stays in the middle of the pill.
 private val SearchBarIconSlot = 48.dp
+
+// The back button and the avatar mirror each other at the two ends of the pill
+private val PillButtonSize = 40.dp
+private val PillButtonPressedCorner = 12.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,6 +97,8 @@ fun SearchAppBar(
     onSettingsClick: () -> Unit = {},
     // Initial of the logged-in user; a generic person icon is shown when null
     accountInitial: String? = null,
+    // Hides the bar as the content scrolls up and brings it back on the way down
+    scrollBehavior: SearchBarScrollBehavior? = null,
 ) {
     val searchBarState = rememberSearchBarState()
     val coroutineScope = rememberCoroutineScope()
@@ -90,6 +113,8 @@ fun SearchAppBar(
         SearchBarDefaults.InputField(
             textFieldState = textFieldState,
             searchBarState = searchBarState,
+            // AppBarWithSearch sizes the pill to its content, so a short query would shrink it
+            modifier = Modifier.fillMaxWidth(),
             onSearch = { query ->
                 onSearch(query)
                 collapseSearch()
@@ -102,34 +127,45 @@ fun SearchAppBar(
                 Text(
                     text = stringResource(R.string.search_phones_hint),
                     textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clearAndSetSemantics {},
                 )
             },
             leadingIcon = {
-                when {
-                    searchExpanded -> IconButton(onClick = collapseSearch) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.search_back),
-                        )
-                    }
-                    // Same slot as the search icon, so the pill keeps its width and its center.
-                    showBackButton -> IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back),
-                        )
-                    }
-                    else -> Box(
+                val leading = when {
+                    searchExpanded -> LeadingSlot.Collapse
+                    showBackButton -> LeadingSlot.Back
+                    else -> LeadingSlot.Search
+                }
+                // The search icon and the back button swap in place with a springy scale
+                AnimatedContent(
+                    targetState = leading,
+                    transitionSpec = {
+                        (scaleIn(Motion.fastSpatialSpring(), initialScale = 0.6f) + fadeIn()) togetherWith
+                                (scaleOut(targetScale = 0.6f) + fadeOut())
+                    },
+                    contentAlignment = Alignment.Center,
+                    label = "leadingSlot",
+                ) { slot ->
+                    Box(
                         modifier = Modifier.size(SearchBarIconSlot),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                        )
+                        when (slot) {
+                            LeadingSlot.Collapse -> IconButton(onClick = collapseSearch) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.search_back),
+                                )
+                            }
+                            LeadingSlot.Back -> BackButton(onClick = onBackClick)
+                            LeadingSlot.Search -> Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                            )
+                        }
                     }
                 }
             },
@@ -148,11 +184,16 @@ fun SearchAppBar(
                             )
                         }
                     }
-                    AccountMenuButton(
-                        accountInitial = accountInitial,
-                        onAccountClick = onAccountClick,
-                        onSettingsClick = onSettingsClick,
-                    )
+                    if (!searchExpanded) {
+                        AccountMenuButton(
+                            accountInitial = accountInitial,
+                            onAccountClick = onAccountClick,
+                            onSettingsClick = onSettingsClick,
+                        )
+                    } else if (!hasQuery) {
+                        // Balances the collapse arrow, so the hint stays centered
+                        Spacer(Modifier.size(SearchBarIconSlot))
+                    }
                 }
             },
         )
@@ -169,26 +210,19 @@ fun SearchAppBar(
     }
 
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-        Box(
-            modifier = Modifier
-                .statusBarsPadding()
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            SearchBar(
-                state = searchBarState,
-                inputField = inputField,
-                modifier = Modifier
-                    .padding(horizontal = SearchBarSideMargin)
-                    .widthIn(max = SearchBarMaxWidth)
-                    .fillMaxWidth(),
-            )
-        }
+        AppBarWithSearch(
+            state = searchBarState,
+            inputField = inputField,
+            colors = SearchBarDefaults.appBarWithSearchColors(
+                searchBarColors = SearchBarDefaults.containedColors(state = searchBarState),
+            ),
+            contentPadding = AppBarPadding,
+            scrollBehavior = scrollBehavior,
+        )
 
         if (searchExpanded) {
             if (maxWidth < DockedSearchBreakpoint) {
-                ExpandedFullScreenSearchBar(
+                ExpandedFullScreenContainedSearchBar(
                     state = searchBarState,
                     inputField = inputField,
                     modifier = Modifier.testTag("expanded_search_full_screen"),
@@ -206,6 +240,42 @@ fun SearchAppBar(
     }
 }
 
+private enum class LeadingSlot { Collapse, Back, Search }
+
+/** A tonal back button whose round shape squares off while pressed. Mirrors the avatar. */
+@Composable
+private fun BackButton(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    FilledTonalIconButton(
+        onClick = onClick,
+        shape = pressMorphShape(interactionSource),
+        // Same colours as the avatar at the other end
+        colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        interactionSource = interactionSource,
+        modifier = Modifier.size(PillButtonSize),
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = stringResource(R.string.common_back),
+        )
+    }
+}
+
+/** A fully rounded shape whose corners spring tighter while [interactionSource] is pressed. */
+@Composable
+private fun pressMorphShape(interactionSource: MutableInteractionSource): Shape {
+    val pressed by interactionSource.collectIsPressedAsState()
+    val corner by animateDpAsState(
+        targetValue = if (pressed) PillButtonPressedCorner else PillButtonSize / 2,
+        animationSpec = Motion.fastSpatialSpring(),
+        label = "pressCorner",
+    )
+    return RoundedCornerShape(corner)
+}
+
 /** The user's avatar, opening a menu that leads to their account or to the app's settings. */
 @Composable
 private fun AccountMenuButton(
@@ -214,20 +284,44 @@ private fun AccountMenuButton(
     onSettingsClick: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    // Shrinks a touch under the finger and springs back, and stays raised while its menu is open
+    val scale by animateFloatAsState(
+        targetValue = when {
+            pressed -> 0.88f
+            expanded -> 1.06f
+            else -> 1f
+        },
+        animationSpec = Motion.fastSpatialSpring(),
+        label = "avatarScale",
+    )
 
     // The menu drops down from the avatar
     Box {
         val menuDescription = stringResource(R.string.account_menu)
         IconButton(
             onClick = { expanded = true },
-            modifier = Modifier.semantics { contentDescription = menuDescription }
+            interactionSource = interactionSource,
+            modifier = Modifier
+                .size(SearchBarIconSlot)
+                .semantics { contentDescription = menuDescription }
         ) {
-            UserAvatar(initial = accountInitial)
+            UserAvatar(
+                initial = accountInitial,
+                size = PillButtonSize,
+                textStyle = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                },
+            )
         }
 
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
+            shape = MaterialTheme.shapes.large,
         ) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.account)) },
