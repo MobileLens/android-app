@@ -114,7 +114,6 @@
     <string name="gallery_title">Galeria</string>
     <string name="gallery_open">Otwórz galerię</string>
     <!-- %1$s: phone model, e.g. "Galeria: Pixel 8 Pro" -->
-    <string name="gallery_screen_title">Galeria: %1$s</string>
     <plurals name="gallery_photo_count">
         <item quantity="one">%1$d zdjęcie</item>
         <item quantity="few">%1$d zdjęcia</item>
