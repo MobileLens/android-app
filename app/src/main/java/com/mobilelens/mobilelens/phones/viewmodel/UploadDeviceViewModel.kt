@@ -13,9 +13,12 @@ import com.mobilelens.mobilelens.core.data.BuildInfoRepository
 import com.mobilelens.mobilelens.core.data.remote.apiErrorCode
 import com.mobilelens.mobilelens.phones.data.CameraSubmitRepository
 import com.mobilelens.mobilelens.phones.data.DeviceMatchStore
+import com.mobilelens.mobilelens.phones.data.JPEG_MIME_TYPE
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogueRepository
 import com.mobilelens.mobilelens.phones.data.PhotoExif
 import com.mobilelens.mobilelens.phones.data.PhotoExifReader
+import com.mobilelens.mobilelens.phones.data.PhotoLensMatch
+import com.mobilelens.mobilelens.phones.data.checkPhotoLens
 import com.mobilelens.mobilelens.phones.data.exifMatchesDevice
 import com.mobilelens.mobilelens.phones.data.lensFromPhotoExif
 import com.mobilelens.mobilelens.phones.data.sharesOpticsWith
@@ -271,20 +274,23 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    /** Adds photos taken with the camera [cameraId]; ones not taken on this phone are left out. */
+    /**
+     * Adds photos taken on this phone with the camera [cameraId], as their EXIF tells. The others
+     * are left out, and the reason the first of them was is shown.
+     */
     fun addGalleryPhotos(cameraId: String, uris: List<Uri>, contentResolver: ContentResolver) {
+        val camera = (_gallery.value as? UploadGalleryUiState.Ready)?.cameras
+            ?.firstOrNull { it.id == cameraId }
+            ?: return
         if (uris.isEmpty()) return
         viewModelScope.launch {
-            val fromThisPhone = uris.filter { uri ->
-                readExif(uri, contentResolver)?.let(::matchesThisDevice) == true
-            }
-            if (fromThisPhone.size < uris.size) {
-                _message.value = R.string.upload_error_photos_skipped
-            }
-            if (fromThisPhone.isEmpty()) return@launch
+            val problems = uris.associateWith { galleryPhotoProblem(it, camera, contentResolver) }
+            problems.values.firstOrNull { it != null }?.let { _message.value = it }
+            val accepted = problems.filterValues { it == null }.keys
+            if (accepted.isEmpty()) return@launch
             _gallery.update { state ->
                 if (state !is UploadGalleryUiState.Ready) return@update state
-                val picked = (state.photos[cameraId].orEmpty() + fromThisPhone).distinct()
+                val picked = (state.photos[cameraId].orEmpty() + accepted).distinct()
                 state.copy(photos = state.photos + (cameraId to picked))
             }
         }
@@ -304,8 +310,9 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
             _isSubmitting.value = true
             try {
                 gallery.photos.forEach { (cameraId, uris) ->
+                    val camera = gallery.cameras.firstOrNull { it.id == cameraId } ?: return@forEach
                     uris.forEach { uri ->
-                        uploadPhoto(cameraId, uri, contentResolver)
+                        uploadPhoto(camera, uri, contentResolver)
                         // Off the list once sent, so sending again after a failure only sends the rest
                         dropGalleryPhoto(cameraId, uri)
                     }
@@ -344,14 +351,35 @@ class UploadDeviceViewModel(application: Application) : AndroidViewModel(applica
         model = buildInfoRepository.getModel(),
     )
 
-    private suspend fun uploadPhoto(cameraId: String, uri: Uri, contentResolver: ContentResolver) {
+    // Why a photo can't go up for [camera], as the string resource of the message saying it was
+    // left out; null when it can
+    private suspend fun galleryPhotoProblem(
+        uri: Uri,
+        camera: GalleryCamera,
+        contentResolver: ContentResolver,
+    ): Int? {
+        // Only a JPEG's metadata can be removed without re-encoding the photo
+        if (contentResolver.getType(uri) != JPEG_MIME_TYPE) return R.string.upload_error_photos_not_jpeg
+        val exif = readExif(uri, contentResolver)
+        if (exif == null || !matchesThisDevice(exif)) return R.string.upload_error_photos_other_phone
+        return when (checkPhotoLens(exif, camera)) {
+            PhotoLensMatch.MATCHES -> null
+            PhotoLensMatch.NO_LENS_DATA -> R.string.upload_error_photos_no_lens_data
+            PhotoLensMatch.OTHER_LENS -> R.string.upload_error_photos_other_lens
+        }
+    }
+
+    private suspend fun uploadPhoto(camera: GalleryCamera, uri: Uri, contentResolver: ContentResolver) {
         withContext(Dispatchers.IO) {
-            val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
-            val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            val jpeg = contentResolver.openInputStream(uri)?.use { it.readBytes() }
                 ?: throw FileNotFoundException("Couldn't open $uri")
+            // Checked when the photo was picked too, but the file may have changed since
             val exif = photoExifReader.read(contentResolver, uri)
             check(matchesThisDevice(exif)) { "EXIF no longer matches this device" }
-            submitRepository.uploadLensPhoto(cameraId, bytes, mimeType, exif)
+            check(checkPhotoLens(exif, camera) == PhotoLensMatch.MATCHES) {
+                "EXIF no longer matches camera ${camera.id}"
+            }
+            submitRepository.uploadLensPhoto(camera.id, jpeg, exif)
         }
     }
 

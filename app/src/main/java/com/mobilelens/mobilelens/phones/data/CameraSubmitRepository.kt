@@ -34,13 +34,19 @@ class CameraSubmitRepository(
         galleryCamerasFrom(phoneId, listed = listed.await(), mine = mine.await())
     }
 
+    /**
+     * Uploads a JPEG taken with the camera [cameraId]. The file goes without its metadata (see
+     * [stripJpegMetadata]); of its [exif] only the size and exposure the backend asks for are sent,
+     * as fields of their own. Fails when the metadata can't be removed.
+     */
     suspend fun uploadLensPhoto(
         cameraId: String,
-        bytes: ByteArray,
-        mimeType: String,
+        jpeg: ByteArray,
         exif: PhotoExif,
     ): MediaUploadResponse {
-        val body = bytes.toRequestBody(mimeType.toMediaType())
+        val stripped = stripJpegMetadata(jpeg, exif.orientation)
+            ?: throw IllegalArgumentException("Not a complete JPEG, so its metadata can't be removed")
+        val body = stripped.toRequestBody(JPEG_MIME_TYPE.toMediaType())
         val filePart = MultipartBody.Part.createFormData("file", "photo.jpg", body)
         return uploadApi.uploadPhoto(
             file = filePart,
@@ -77,7 +83,11 @@ internal fun galleryCamerasFrom(
                 type = lensTypeFromApi(dto.type),
                 facing = facingFromApi(dto.facing),
                 focalLengthMm = dto.focalLengthMm,
+                focalLengthMaxMm = dto.focalLengthMaxMm,
                 aperture = dto.aperture,
+                apertureNarrow = dto.apertureNarrow,
+                cropFactor = dto.cropFactor,
+                resolutionMp = dto.resolutionMp,
                 status = dto.status,
             )
         }

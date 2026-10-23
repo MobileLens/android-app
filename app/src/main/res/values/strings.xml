@@ -81,7 +81,7 @@
     <string name="upload_photo_camera_stabilization">Stabilization</string>
     <string name="upload_photo_camera_confirm">Add</string>
     <string name="upload_specs_sent">Specs sent for review.</string>
-    <string name="upload_photos_intro">Add photos taken on this phone. They appear in its gallery once reviewed.</string>
+    <string name="upload_photos_intro">Add JPEGs taken with each lens on this phone. Location and other details are removed before sending.</string>
     <string name="upload_photos_add">Add photos</string>
     <string name="upload_photos_remove">Remove photo</string>
     <string name="upload_camera_in_review">In review</string>
@@ -90,7 +90,10 @@
     <string name="upload_photos_sent">Photos sent for review.</string>
     <string name="upload_error_load_cameras">Couldn\'t load this phone\'s lenses.</string>
     <string name="upload_error_photo_not_from_device">That photo wasn\'t taken on this phone.</string>
-    <string name="upload_error_photos_skipped">Skipped photos not taken on this phone.</string>
+    <string name="upload_error_photos_other_phone">Skipped photos not taken on this phone.</string>
+    <string name="upload_error_photos_other_lens">Skipped photos not taken with this lens.</string>
+    <string name="upload_error_photos_no_lens_data">Skipped photos without lens data.</string>
+    <string name="upload_error_photos_not_jpeg">Skipped photos that aren\'t JPEGs.</string>
     <string name="upload_error_photo_no_optics">That photo is missing its lens data.</string>
     <string name="upload_error_camera_already_listed">That lens is already listed. If you used another one, retake the photo in good light.</string>
     <string name="upload_error_submit">Couldn\'t send. Try again; nothing is sent twice.</string>

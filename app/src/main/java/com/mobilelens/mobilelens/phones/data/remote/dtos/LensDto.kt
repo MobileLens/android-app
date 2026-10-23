@@ -17,6 +17,10 @@ data class LensDto(
     val activeResolutionMp: Double,
     val afZones: Int = 0,
     val ois: String = "none",
+    // A variable aperture's narrowest stop; [aperture] is then its widest
+    val apertureNarrow: Double? = null,
+    // An optical zoom's longest focal length; [focalLengthMm] is then its shortest
+    val focalLengthMaxMm: Double? = null,
     val submitterId: String? = null,
     val reviewedBy: String? = null,
     val submittedAt: String? = null,

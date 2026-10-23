@@ -31,6 +31,7 @@ import com.mobilelens.mobilelens.core.navigation.Screen
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
 import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
+import com.mobilelens.mobilelens.phones.data.JPEG_MIME_TYPE
 import com.mobilelens.mobilelens.phones.model.CatalogueSort
 import com.mobilelens.mobilelens.phones.model.Phone
 import com.mobilelens.mobilelens.phones.ui.components.CatalogueFilterChips
@@ -345,8 +346,9 @@ fun NavGraphBuilder.phonesRoutes(
             onRemovePhotoCamera = uploadViewModel::removePhotoCamera,
             onAddGalleryPhotos = { cameraId ->
                 pickingForCamera = cameraId
+                // Only JPEGs can be sent, since only their metadata can be removed without re-encoding
                 pickGalleryPhotos.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.SingleMimeType(JPEG_MIME_TYPE))
                 )
             },
             onRemoveGalleryPhoto = uploadViewModel::removeGalleryPhoto,

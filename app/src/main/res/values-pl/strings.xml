@@ -78,7 +78,7 @@
     <string name="upload_photo_camera_stabilization">Stabilizacja</string>
     <string name="upload_photo_camera_confirm">Dodaj</string>
     <string name="upload_specs_sent">Parametry wysłane do weryfikacji.</string>
-    <string name="upload_photos_intro">Dodaj zdjęcia zrobione tym telefonem. Po weryfikacji pojawią się w jego galerii.</string>
+    <string name="upload_photos_intro">Dodaj zdjęcia JPEG zrobione każdym obiektywem tego telefonu. Lokalizacja i inne dane są usuwane przed wysłaniem.</string>
     <string name="upload_photos_add">Dodaj zdjęcia</string>
     <string name="upload_photos_remove">Usuń zdjęcie</string>
     <string name="upload_camera_in_review">W weryfikacji</string>
@@ -87,7 +87,10 @@
     <string name="upload_photos_sent">Zdjęcia wysłane do weryfikacji.</string>
     <string name="upload_error_load_cameras">Nie udało się wczytać obiektywów telefonu.</string>
     <string name="upload_error_photo_not_from_device">To zdjęcie nie zostało zrobione tym telefonem.</string>
-    <string name="upload_error_photos_skipped">Pominięto zdjęcia zrobione innym telefonem.</string>
+    <string name="upload_error_photos_other_phone">Pominięto zdjęcia zrobione innym telefonem.</string>
+    <string name="upload_error_photos_other_lens">Pominięto zdjęcia zrobione innym obiektywem.</string>
+    <string name="upload_error_photos_no_lens_data">Pominięto zdjęcia bez danych obiektywu.</string>
+    <string name="upload_error_photos_not_jpeg">Pominięto zdjęcia, które nie są w formacie JPEG.</string>
     <string name="upload_error_photo_no_optics">W tym zdjęciu brakuje danych obiektywu.</string>
     <string name="upload_error_camera_already_listed">Ten obiektyw jest już na liście. Jeśli użyto innego, zrób zdjęcie ponownie przy dobrym świetle.</string>
     <string name="upload_error_submit">Nie udało się wysłać. Spróbuj ponownie – nic nie zostanie wysłane dwa razy.</string>

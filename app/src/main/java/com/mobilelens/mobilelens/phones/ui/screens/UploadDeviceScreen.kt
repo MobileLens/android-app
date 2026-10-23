@@ -594,9 +594,27 @@ private fun NoGalleryCameras(onGoToSpecs: () -> Unit) {
 }
 
 private val previewGalleryCameras = listOf(
-    GalleryCamera("cam_1", LensType.WIDE, Facing.BACK, 6.9, 1.68, status = "approved"),
-    GalleryCamera("cam_2", LensType.TELEPHOTO, Facing.BACK, 18.0, 2.8, status = "pending"),
-    GalleryCamera("cam_3", LensType.WIDE, Facing.FRONT, 2.7, 2.2, status = "approved"),
+    previewGalleryCamera("cam_1", LensType.WIDE, Facing.BACK, focalLengthMm = 6.9, aperture = 1.68),
+    previewGalleryCamera("cam_2", LensType.TELEPHOTO, Facing.BACK, focalLengthMm = 18.0, aperture = 2.8, status = "pending"),
+    previewGalleryCamera("cam_3", LensType.WIDE, Facing.FRONT, focalLengthMm = 2.7, aperture = 2.2),
+)
+
+private fun previewGalleryCamera(
+    id: String,
+    type: LensType,
+    facing: Facing,
+    focalLengthMm: Double,
+    aperture: Double,
+    status: String = "approved",
+) = GalleryCamera(
+    id = id,
+    type = type,
+    facing = facing,
+    focalLengthMm = focalLengthMm,
+    aperture = aperture,
+    cropFactor = 4.0,
+    resolutionMp = 50.0,
+    status = status,
 )
 
 @Preview(showBackground = true)

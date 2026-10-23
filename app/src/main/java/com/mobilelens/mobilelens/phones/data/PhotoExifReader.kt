@@ -26,6 +26,8 @@ class PhotoExifReader {
             iso = exif.getAttributeInt(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY, -1)
                 .takeIf { it > 0 },
             shutterSpeed = exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME),
+            orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
+                .takeIf { it in 1..8 },
         )
     }
 
