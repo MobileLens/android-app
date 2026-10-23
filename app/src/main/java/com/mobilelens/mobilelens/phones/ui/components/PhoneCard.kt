@@ -30,11 +30,18 @@ val PhoneCardListArrangement = Arrangement.spacedBy(8.dp)
 private val CardPadding = 12.dp
 
 /**
+ * The shadow of a resting [ElevatedCard] (Material's level 1). Spec cards draw it themselves so
+ * they sit at the same height as [PhoneCard]s.
+ */
+internal val CardShadowElevation = 1.dp
+
+/**
  * A phone in the catalogue or favorites list, as a Material 3 elevated card: a tonal surface with
  * large corners that sits slightly above the screen, holding the photo and the name.
  *
- * The corners are nested: the card's corner (`extraLarge`, 28dp) is the photo's (`large`, 16dp)
- * plus [CardPadding], so the gap around the photo stays even all the way round.
+ * The corners are nested: the card's corner (`large`, 16dp, the same as the spec cards) is the
+ * photo's (`extraSmall`, 4dp) plus [CardPadding], so the gap around the photo stays even all the
+ * way round.
  */
 @Composable
 fun PhoneCard(
@@ -54,7 +61,7 @@ fun PhoneCard(
     ElevatedCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
     ) {
         Row(
@@ -64,7 +71,7 @@ fun PhoneCard(
         ) {
             DeviceImageOrPlaceholder(
                 deviceInfo = phone.deviceInfo,
-                shape = MaterialTheme.shapes.large,
+                shape = MaterialTheme.shapes.extraSmall,
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
