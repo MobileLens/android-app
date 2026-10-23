@@ -15,7 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,10 +60,23 @@ fun PhoneGalleryScreen(
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
     ) {
-        LargeTopAppBar(
+        LargeFlexibleTopAppBar(
             title = {
                 Text(
-                    text = stringResource(R.string.gallery_screen_title, phoneModel),
+                    text = stringResource(R.string.gallery_title),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            subtitle = {
+                val subtitle = if (uiState is PhoneGalleryUiState.Success) {
+                    val count = uiState.photos.size
+                    "$phoneModel · ${pluralStringResource(R.plurals.gallery_photo_count, count, count)}"
+                } else {
+                    phoneModel
+                }
+                Text(
+                    text = subtitle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,7 +48,7 @@ fun LoadingButtonContent(
 @Composable
 private fun LoadingButtonContentPreview() {
     MaterialTheme {
-        Button(onClick = {}) {
+        Button(onClick = {}, shapes = ButtonDefaults.shapes()) {
             LoadingButtonContent(text = stringResource(R.string.review_editor_publish), loading = true)
         }
     }

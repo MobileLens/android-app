@@ -1,6 +1,5 @@
 package com.mobilelens.mobilelens.auth.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,10 +21,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -43,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mobilelens.mobilelens.R
@@ -63,7 +62,9 @@ import com.mobilelens.mobilelens.phones.model.SubmittedCamera
 import com.mobilelens.mobilelens.phones.viewmodel.MyCamerasUiState
 import com.mobilelens.mobilelens.reviews.model.Review
 import com.mobilelens.mobilelens.reviews.viewmodel.MyReviewsUiState
+import com.mobilelens.mobilelens.settings.ui.components.SettingsGroup
 import com.mobilelens.mobilelens.settings.ui.components.SettingsSectionHeader
+import com.mobilelens.mobilelens.settings.ui.components.settingsItemColors
 
 /** The account screen's dialogs that save something; only one is open at a time. */
 private enum class AccountDialog { Username, Email, Password, DeleteAccount }
@@ -98,8 +99,6 @@ fun UserSettingsScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var openDialog by rememberSaveable { mutableStateOf<AccountDialog?>(null) }
     var reviewToDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
-    // The screen's background shows through, as on the other screens
-    val itemColors = ListItemDefaults.colors(containerColor = Color.Transparent)
 
     // A dialog closes once its change is saved, and the route confirms it in the snackbar
     LaunchedEffect(editState) {
@@ -118,7 +117,7 @@ fun UserSettingsScreen(
                 .fillMaxSize()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
         ) {
-            LargeTopAppBar(
+            LargeFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.account)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -143,38 +142,42 @@ fun UserSettingsScreen(
 
                 item(key = "profile") {
                     SettingsSectionHeader(text = stringResource(R.string.settings_section_profile))
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.auth_username)) },
-                        supportingContent = { Text(user.username) },
-                        leadingContent = { Icon(Icons.Outlined.Person, contentDescription = null) },
-                        modifier = Modifier.clickable(role = Role.Button) { showDialog(AccountDialog.Username) },
-                        colors = itemColors,
-                    )
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.auth_email)) },
-                        supportingContent = { Text(user.email) },
-                        leadingContent = { Icon(Icons.Outlined.Email, contentDescription = null) },
-                        modifier = Modifier.clickable(role = Role.Button) { showDialog(AccountDialog.Email) },
-                        colors = itemColors,
-                    )
+                    SettingsGroup {
+                        SegmentedListItem(
+                            onClick = { showDialog(AccountDialog.Username) },
+                            shapes = ListItemDefaults.segmentedShapes(index = 0, count = 2),
+                            colors = settingsItemColors(),
+                            supportingContent = { Text(user.username) },
+                            leadingContent = { Icon(Icons.Outlined.Person, contentDescription = null) },
+                        ) { Text(stringResource(R.string.auth_username)) }
+                        SegmentedListItem(
+                            onClick = { showDialog(AccountDialog.Email) },
+                            shapes = ListItemDefaults.segmentedShapes(index = 1, count = 2),
+                            colors = settingsItemColors(),
+                            supportingContent = { Text(user.email) },
+                            leadingContent = { Icon(Icons.Outlined.Email, contentDescription = null) },
+                        ) { Text(stringResource(R.string.auth_email)) }
+                    }
                 }
 
                 item(key = "security") {
                     SettingsSectionHeader(text = stringResource(R.string.settings_section_security))
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.auth_password)) },
-                        supportingContent = { Text(stringResource(R.string.settings_password_supporting)) },
-                        leadingContent = { Icon(Icons.Outlined.Lock, contentDescription = null) },
-                        modifier = Modifier.clickable(role = Role.Button) { showDialog(AccountDialog.Password) },
-                        colors = itemColors,
-                    )
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.settings_log_out)) },
-                        supportingContent = { Text(stringResource(R.string.settings_log_out_supporting)) },
-                        leadingContent = { Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null) },
-                        modifier = Modifier.clickable(role = Role.Button, onClick = onLogout),
-                        colors = itemColors,
-                    )
+                    SettingsGroup {
+                        SegmentedListItem(
+                            onClick = { showDialog(AccountDialog.Password) },
+                            shapes = ListItemDefaults.segmentedShapes(index = 0, count = 2),
+                            colors = settingsItemColors(),
+                            supportingContent = { Text(stringResource(R.string.settings_password_supporting)) },
+                            leadingContent = { Icon(Icons.Outlined.Lock, contentDescription = null) },
+                        ) { Text(stringResource(R.string.auth_password)) }
+                        SegmentedListItem(
+                            onClick = onLogout,
+                            shapes = ListItemDefaults.segmentedShapes(index = 1, count = 2),
+                            colors = settingsItemColors(),
+                            supportingContent = { Text(stringResource(R.string.settings_log_out_supporting)) },
+                            leadingContent = { Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null) },
+                        ) { Text(stringResource(R.string.settings_log_out)) }
+                    }
                 }
 
                 item(key = "reviews_header") {
@@ -198,17 +201,18 @@ fun UserSettingsScreen(
 
                 item(key = "danger_zone") {
                     SettingsSectionHeader(text = stringResource(R.string.settings_danger_zone))
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.settings_delete_account)) },
-                        supportingContent = { Text(stringResource(R.string.settings_delete_account_supporting)) },
-                        leadingContent = { Icon(Icons.Outlined.DeleteForever, contentDescription = null) },
-                        modifier = Modifier.clickable(role = Role.Button) { showDialog(AccountDialog.DeleteAccount) },
-                        colors = ListItemDefaults.colors(
-                            containerColor = Color.Transparent,
-                            headlineColor = MaterialTheme.colorScheme.error,
-                            leadingIconColor = MaterialTheme.colorScheme.error,
-                        ),
-                    )
+                    SettingsGroup {
+                        SegmentedListItem(
+                            onClick = { showDialog(AccountDialog.DeleteAccount) },
+                            shapes = ListItemDefaults.segmentedShapes(index = 0, count = 1),
+                            supportingContent = { Text(stringResource(R.string.settings_delete_account_supporting)) },
+                            leadingContent = { Icon(Icons.Outlined.DeleteForever, contentDescription = null) },
+                            colors = settingsItemColors(
+                                contentColor = MaterialTheme.colorScheme.error,
+                                leadingContentColor = MaterialTheme.colorScheme.error,
+                            ),
+                        ) { Text(stringResource(R.string.settings_delete_account)) }
+                    }
                 }
             }
         }

@@ -277,6 +277,12 @@ fun NavGraphBuilder.phonesRoutes(
             // Ignores repeated taps, which would otherwise pop past the previous screen
             onBackClick = dropUnlessResumed { navController.popBackStack() },
             onRetry = compareViewModel::retry,
+            // The picker takes the comparison's place, so choosing a phone there replaces this screen
+            onChangePhone = dropUnlessResumed {
+                navController.navigate(Screen.ComparePicker(route.firstPhoneId)) {
+                    popUpTo<Screen.ComparePhones> { inclusive = true }
+                }
+            },
         )
     }
     composable<Screen.UploadDeviceCameras> {

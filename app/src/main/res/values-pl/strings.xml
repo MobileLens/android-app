@@ -103,6 +103,12 @@
     <string name="gallery_open">Otwórz galerię</string>
     <!-- %1$s: phone model, e.g. "Galeria: Pixel 8 Pro" -->
     <string name="gallery_screen_title">Galeria: %1$s</string>
+    <plurals name="gallery_photo_count">
+        <item quantity="one">%1$d zdjęcie</item>
+        <item quantity="few">%1$d zdjęcia</item>
+        <item quantity="many">%1$d zdjęć</item>
+        <item quantity="other">%1$d zdjęcia</item>
+    </plurals>
     <!-- %1$d: position of the photo, %2$d: number of photos -->
     <string name="gallery_photo">Zdjęcie %1$d z %2$d</string>
     <string name="gallery_empty">Brak zdjęć</string>
@@ -116,6 +122,7 @@
     <string name="compare_picker_close">Zamknij</string>
     <string name="compare_picker_hint">Szukaj telefonów</string>
     <string name="compare_swap">Zamień strony</string>
+    <string name="compare_change_phone">Zmień telefon</string>
     <string name="compare_this_device">To urządzenie</string>
     <string name="compare_no_cameras">Brak danych o aparatach</string>
     <!-- Read out for a "—" standing in for a lens the phone doesn't have -->

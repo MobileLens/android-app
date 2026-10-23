@@ -35,7 +35,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
@@ -117,6 +118,7 @@ fun UploadDeviceScreen(
                     val canSubmit = uiState is UploadDeviceUiState.Ready && !isSubmitting
                     Button(
                         onClick = onSubmit,
+                        shapes = ButtonDefaults.shapes(),
                         enabled = canSubmit,
                         modifier = Modifier.padding(end = 8.dp),
                     ) {
@@ -131,7 +133,7 @@ fun UploadDeviceScreen(
 
             AnimatedVisibility(visible = isSubmitting) {
                 val uploadingDescription = stringResource(R.string.upload_submitting)
-                LinearProgressIndicator(
+                LinearWavyProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
                         .semantics { contentDescription = uploadingDescription },
@@ -273,6 +275,7 @@ private fun UploadReadyContent(
         item {
             OutlinedButton(
                 onClick = onAddPhotoCamera,
+                shapes = ButtonDefaults.shapes(),
                 enabled = enabled,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
@@ -354,12 +357,13 @@ private fun UploadLensRow(
                 }
             }
             if (onRemove != null) {
-                TextButton(onClick = onRemove, enabled = enabled) {
+                TextButton(onClick = onRemove, shapes = ButtonDefaults.shapes(), enabled = enabled) {
                     Text(stringResource(R.string.upload_remove_photo_camera))
                 }
             }
             IconButton(
                 onClick = onToggle,
+                shapes = IconButtonDefaults.shapes(),
                 modifier = Modifier.semantics { contentDescription = toggleDescription },
             ) {
                 Icon(
@@ -406,11 +410,11 @@ private fun LensPhotoRow(
             }
         }
         AnimatedVisibility(visible = hasPhoto) {
-            TextButton(onClick = onRemovePhoto, enabled = enabled) {
+            TextButton(onClick = onRemovePhoto, shapes = ButtonDefaults.shapes(), enabled = enabled) {
                 Text(stringResource(R.string.upload_remove_photo))
             }
         }
-        OutlinedButton(onClick = onAddPhoto, enabled = enabled) {
+        OutlinedButton(onClick = onAddPhoto, shapes = ButtonDefaults.shapes(), enabled = enabled) {
             AnimatedContent(
                 targetState = hasPhoto,
                 transitionSpec = { fadeThroughIn() togetherWith fadeThroughOut() },

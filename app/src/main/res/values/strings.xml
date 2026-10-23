@@ -106,6 +106,10 @@
     <string name="gallery_open">Open gallery</string>
     <!-- %1$s: phone model, e.g. "Pixel 8 Pro gallery" -->
     <string name="gallery_screen_title">%1$s gallery</string>
+    <plurals name="gallery_photo_count">
+        <item quantity="one">%1$d photo</item>
+        <item quantity="other">%1$d photos</item>
+    </plurals>
     <!-- %1$d: position of the photo, %2$d: number of photos -->
     <string name="gallery_photo">Photo %1$d of %2$d</string>
     <string name="gallery_empty">No photos yet</string>
@@ -119,6 +123,7 @@
     <string name="compare_picker_close">Close</string>
     <string name="compare_picker_hint">Search phones</string>
     <string name="compare_swap">Swap sides</string>
+    <string name="compare_change_phone">Change phone</string>
     <string name="compare_this_device">This device</string>
     <string name="compare_no_cameras">No camera data yet</string>
     <!-- Read out for a "—" standing in for a lens the phone doesn't have -->

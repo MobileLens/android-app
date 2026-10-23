@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +43,7 @@ fun ErrorContent(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = stringResource(messageRes), modifier = Modifier.padding(16.dp))
             if (onRetry != null) {
-                TextButton(onClick = onRetry) {
+                TextButton(onClick = onRetry, shapes = ButtonDefaults.shapes()) {
                     Text(text = stringResource(R.string.action_retry))
                 }
             }

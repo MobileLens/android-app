@@ -1,7 +1,6 @@
 package com.mobilelens.mobilelens.core.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
@@ -52,7 +50,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -80,7 +77,6 @@ private val SearchBarIconSlot = 48.dp
 
 // The back button and the avatar mirror each other at the two ends of the pill
 private val PillButtonSize = 40.dp
-private val PillButtonPressedCorner = 12.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -242,19 +238,17 @@ fun SearchAppBar(
 
 private enum class LeadingSlot { Collapse, Back, Search }
 
-/** A tonal back button whose round shape squares off while pressed. Mirrors the avatar. */
+/** A tonal back button that morphs its shape while pressed. Mirrors the avatar. */
 @Composable
 private fun BackButton(onClick: () -> Unit) {
-    val interactionSource = remember { MutableInteractionSource() }
     FilledTonalIconButton(
         onClick = onClick,
-        shape = pressMorphShape(interactionSource),
+        shapes = IconButtonDefaults.shapes(),
         // Same colours as the avatar at the other end
         colors = IconButtonDefaults.filledTonalIconButtonColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
-        interactionSource = interactionSource,
         modifier = Modifier.size(PillButtonSize),
     ) {
         Icon(
@@ -262,18 +256,6 @@ private fun BackButton(onClick: () -> Unit) {
             contentDescription = stringResource(R.string.common_back),
         )
     }
-}
-
-/** A fully rounded shape whose corners spring tighter while [interactionSource] is pressed. */
-@Composable
-private fun pressMorphShape(interactionSource: MutableInteractionSource): Shape {
-    val pressed by interactionSource.collectIsPressedAsState()
-    val corner by animateDpAsState(
-        targetValue = if (pressed) PillButtonPressedCorner else PillButtonSize / 2,
-        animationSpec = Motion.fastSpatialSpring(),
-        label = "pressCorner",
-    )
-    return RoundedCornerShape(corner)
 }
 
 /** The user's avatar, opening a menu that leads to their account or to the app's settings. */

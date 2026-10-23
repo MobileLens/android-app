@@ -12,9 +12,11 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -42,7 +44,12 @@ fun ReviewLikeButton(
     modifier: Modifier = Modifier,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
-        IconToggleButton(checked = liked, onCheckedChange = { onToggle() }) {
+        IconToggleButton(
+            checked = liked,
+            onCheckedChange = { onToggle() },
+            shapes = IconButtonDefaults.toggleableShapes(),
+            colors = IconButtonDefaults.iconToggleButtonColors(),
+        ) {
             Icon(
                 imageVector = if (liked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 contentDescription = stringResource(
@@ -109,7 +116,7 @@ fun ReviewCommentsSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = onLoginClick) {
+                TextButton(onClick = onLoginClick, shapes = ButtonDefaults.shapes()) {
                     Text(stringResource(R.string.review_comment_login_action))
                 }
             }
@@ -133,7 +140,7 @@ fun ReviewCommentsSection(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = onRetry) {
+                TextButton(onClick = onRetry, shapes = ButtonDefaults.shapes()) {
                     Text(stringResource(R.string.action_retry))
                 }
             }
@@ -186,7 +193,11 @@ private fun CommentComposer(
             if (isPosting) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
             } else {
-                IconButton(onClick = onPost, enabled = enabled && draft.isNotBlank()) {
+                IconButton(
+                    onClick = onPost,
+                    shapes = IconButtonDefaults.shapes(),
+                    enabled = enabled && draft.isNotBlank(),
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = stringResource(R.string.review_comment_send),
@@ -232,7 +243,7 @@ private fun CommentItem(
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
             }
         } else if (canDelete) {
-            IconButton(onClick = onDelete) {
+            IconButton(onClick = onDelete, shapes = IconButtonDefaults.shapes()) {
                 Icon(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = stringResource(R.string.common_delete),

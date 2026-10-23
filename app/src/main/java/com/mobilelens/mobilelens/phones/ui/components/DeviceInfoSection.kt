@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -93,7 +94,7 @@ fun DeviceInfoSection(
             }
 
             if (onFavoriteClick != null) {
-                IconButton(onClick = onFavoriteClick) {
+                IconButton(onClick = onFavoriteClick, shapes = IconButtonDefaults.shapes()) {
                     AnimatedContent(
                         targetState = isFavorite,
                         transitionSpec = {
