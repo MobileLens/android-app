@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -93,6 +94,8 @@ fun SearchAppBar(
     onSettingsClick: () -> Unit = {},
     // Initial of the logged-in user; a generic person icon is shown when null
     accountInitial: String? = null,
+    // Switches the account menu item between the account page and logging in
+    isLoggedIn: Boolean = false,
     // Hides the bar as the content scrolls up and brings it back on the way down
     scrollBehavior: SearchBarScrollBehavior? = null,
 ) {
@@ -183,6 +186,7 @@ fun SearchAppBar(
                     if (!searchExpanded) {
                         AccountMenuButton(
                             accountInitial = accountInitial,
+                            isLoggedIn = isLoggedIn,
                             onAccountClick = onAccountClick,
                             onSettingsClick = onSettingsClick,
                         )
@@ -258,10 +262,11 @@ private fun BackButton(onClick: () -> Unit) {
     }
 }
 
-/** The user's avatar, opening a menu that leads to their account or to the app's settings. */
+/** The user's avatar, opening a menu that leads to their account (or to logging in) or to the app's settings. */
 @Composable
 private fun AccountMenuButton(
     accountInitial: String?,
+    isLoggedIn: Boolean,
     onAccountClick: () -> Unit,
     onSettingsClick: () -> Unit,
 ) {
@@ -306,12 +311,17 @@ private fun AccountMenuButton(
             shape = MaterialTheme.shapes.large,
         ) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.account)) },
+                text = { Text(stringResource(if (isLoggedIn) R.string.account else R.string.auth_log_in)) },
                 onClick = {
                     expanded = false
                     onAccountClick()
                 },
-                leadingIcon = { Icon(Icons.Outlined.AccountCircle, contentDescription = null) },
+                leadingIcon = {
+                    Icon(
+                        if (isLoggedIn) Icons.Outlined.AccountCircle else Icons.AutoMirrored.Outlined.Login,
+                        contentDescription = null,
+                    )
+                },
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.app_settings_title)) },
@@ -336,6 +346,7 @@ private fun SearchAppBarPreview() {
             onResultSelected = {},
             onClear = {},
             accountInitial = "M",
+            isLoggedIn = true,
         )
     }
 }
@@ -352,6 +363,7 @@ private fun SearchAppBarWithBackPreview() {
             onClear = {},
             showBackButton = true,
             accountInitial = "M",
+            isLoggedIn = true,
         )
     }
 }

@@ -186,6 +186,7 @@ fun MainApp(
                         onAccountClick = { handleAccountClick() },
                         onSettingsClick = { handleSettingsClick() },
                         accountInitial = currentUser?.username?.take(1)?.uppercase(),
+                        isLoggedIn = currentUser != null,
                         scrollBehavior = searchBarScrollBehavior,
                     )
                 }
