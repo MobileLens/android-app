@@ -5,9 +5,16 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavBackStackEntry
 import com.mobilelens.mobilelens.core.ui.theme.fadeThroughIn
 import com.mobilelens.mobilelens.core.ui.theme.fadeThroughOut
+import com.mobilelens.mobilelens.core.ui.theme.predictiveBackIn
+import com.mobilelens.mobilelens.core.ui.theme.predictiveBackOut
+import com.mobilelens.mobilelens.core.ui.theme.predictiveBackScrim
+import com.mobilelens.mobilelens.core.ui.theme.predictiveBackSheetOut
+import com.mobilelens.mobilelens.core.ui.theme.predictiveBackUnveil
+import com.mobilelens.mobilelens.core.ui.theme.rememberPredictiveBackMargin
 import com.mobilelens.mobilelens.core.ui.theme.rememberSlideDistance
 import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXIn
 import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXOut
@@ -30,9 +37,17 @@ private typealias PredictiveExitSpec = AnimatedContentTransitionScope<NavBackSta
  * - sheets ([isSheet]) rise from the bottom over the screen that opened them and sink back down.
  *
  * Screens have no background of their own, so the slides cross-fade rather than overlap; sheets
- * draw their own. The predictive back gesture scrubs through the same pop transitions.
+ * draw their own.
+ *
+ * The predictive back gesture follows Material's predictive back instead: the screen shrinks into a
+ * card with rounded corners ([PredictiveBackCard]) that moves with the finger, over the screen it
+ * uncovers, and fades away once the gesture is let go. A sheet sinks away instead of fading.
  */
-class NavTransitions(private val slideDistance: Int) {
+class NavTransitions(
+    private val slideDistance: Int,
+    private val predictiveBackMargin: Int,
+    private val scrim: Color,
+) {
     val enter: EnterSpec = {
         when {
             targetState.destination.isSheet() -> sheetIn()
@@ -67,10 +82,20 @@ class NavTransitions(private val slideDistance: Int) {
         }
     }
 
-    // Navigation's own predictive back shrinks the old screen without fading it, which would leave
-    // it drawn over the screen it uncovers
-    val predictivePopEnter: PredictiveEnterSpec = { popEnter(this) }
-    val predictivePopExit: PredictiveExitSpec = { popExit(this) }
+    val predictivePopEnter: PredictiveEnterSpec = {
+        when {
+            // Was under the sheet the whole time, so it stays put
+            initialState.destination.isSheet() -> predictiveBackUnveil(scrim)
+            else -> predictiveBackIn(slideDistance, scrim)
+        }
+    }
+
+    val predictivePopExit: PredictiveExitSpec = { swipeEdge ->
+        when {
+            initialState.destination.isSheet() -> predictiveBackSheetOut()
+            else -> predictiveBackOut(swipeEdge, predictiveBackMargin)
+        }
+    }
 
     // Pressing back on a tab, or the Home tab, pops to Home
     private fun AnimatedContentTransitionScope<NavBackStackEntry>.isBetweenTabs(): Boolean =
@@ -80,5 +105,9 @@ class NavTransitions(private val slideDistance: Int) {
 @Composable
 fun rememberNavTransitions(): NavTransitions {
     val slideDistance = rememberSlideDistance()
-    return remember(slideDistance) { NavTransitions(slideDistance) }
+    val predictiveBackMargin = rememberPredictiveBackMargin()
+    val scrim = predictiveBackScrim()
+    return remember(slideDistance, predictiveBackMargin, scrim) {
+        NavTransitions(slideDistance, predictiveBackMargin, scrim)
+    }
 }

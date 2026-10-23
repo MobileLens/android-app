@@ -19,11 +19,11 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.auth.viewmodel.AuthViewModel
 import com.mobilelens.mobilelens.core.navigation.Screen
+import com.mobilelens.mobilelens.core.navigation.screen
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
 import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
@@ -47,7 +47,7 @@ fun NavGraphBuilder.reviewsRoutes(
     navController: NavController,
     authViewModel: AuthViewModel,
 ) {
-    composable<Screen.ReviewThread> { backStackEntry ->
+    screen<Screen.ReviewThread>(navController) { backStackEntry ->
         val route = backStackEntry.toRoute<Screen.ReviewThread>()
         val reviewViewModel: ReviewViewModel = viewModel()
         val threadState by reviewViewModel.thread.collectAsState()
@@ -111,7 +111,7 @@ fun NavGraphBuilder.reviewsRoutes(
             }
         }
     }
-    composable<Screen.ReviewDetails> { backStackEntry ->
+    screen<Screen.ReviewDetails>(navController) { backStackEntry ->
         val route = backStackEntry.toRoute<Screen.ReviewDetails>()
         val reviewViewModel: ReviewViewModel = viewModel()
         val commentsViewModel: CommentsViewModel = viewModel()
@@ -181,7 +181,7 @@ fun NavGraphBuilder.reviewsRoutes(
             }
         }
     }
-    composable<Screen.WriteReview> { backStackEntry ->
+    screen<Screen.WriteReview>(navController) { backStackEntry ->
         val route = backStackEntry.toRoute<Screen.WriteReview>()
         val writeReviewViewModel: WriteReviewViewModel = viewModel()
         val target by writeReviewViewModel.target.collectAsState()
@@ -259,7 +259,7 @@ fun NavGraphBuilder.reviewsRoutes(
             },
         )
     }
-    composable<Screen.ReviewPhonePicker> { backStackEntry ->
+    screen<Screen.ReviewPhonePicker>(navController) { backStackEntry ->
         val pickerViewModel: ComparePickerViewModel = viewModel()
         val uiState by pickerViewModel.uiState.collectAsState()
         val searchState = rememberTextFieldState()

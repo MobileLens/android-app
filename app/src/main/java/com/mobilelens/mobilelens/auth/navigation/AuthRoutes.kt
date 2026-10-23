@@ -13,7 +13,6 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.mobilelens.mobilelens.auth.ui.screens.LoginScreen
 import com.mobilelens.mobilelens.auth.ui.screens.RegisterScreen
@@ -22,6 +21,7 @@ import com.mobilelens.mobilelens.auth.viewmodel.AccountEditState
 import com.mobilelens.mobilelens.auth.viewmodel.AuthViewModel
 import com.mobilelens.mobilelens.auth.viewmodel.PasswordResetState
 import com.mobilelens.mobilelens.core.navigation.Screen
+import com.mobilelens.mobilelens.core.navigation.screen
 import com.mobilelens.mobilelens.phones.viewmodel.MyCamerasViewModel
 import com.mobilelens.mobilelens.reviews.viewmodel.MyReviewsViewModel
 
@@ -34,7 +34,7 @@ fun NavGraphBuilder.authRoutes(
     navController: NavController,
     authViewModel: AuthViewModel,
 ) {
-    composable<Screen.Login> { backStackEntry ->
+    screen<Screen.Login>(navController) { backStackEntry ->
         val route = backStackEntry.toRoute<Screen.Login>()
         val currentUser by authViewModel.currentUser.collectAsState()
         val loginError by authViewModel.loginError.collectAsState()
@@ -66,7 +66,7 @@ fun NavGraphBuilder.authRoutes(
             onClearPasswordReset = { authViewModel.clearPasswordReset() },
         )
     }
-    composable<Screen.Register> { backStackEntry ->
+    screen<Screen.Register>(navController) { backStackEntry ->
         val route = backStackEntry.toRoute<Screen.Register>()
         val currentUser by authViewModel.currentUser.collectAsState()
         val registerError by authViewModel.registerError.collectAsState()
@@ -89,7 +89,7 @@ fun NavGraphBuilder.authRoutes(
             onClearError = { authViewModel.clearRegisterError() }
         )
     }
-    composable<Screen.UserSettings> {
+    screen<Screen.UserSettings>(navController) {
         val currentUser by authViewModel.currentUser.collectAsState()
         val accountEdit by authViewModel.accountEdit.collectAsState()
         val user = currentUser

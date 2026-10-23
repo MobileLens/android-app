@@ -8,17 +8,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import com.mobilelens.mobilelens.BuildConfig
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.navigation.Screen
+import com.mobilelens.mobilelens.core.navigation.screen
 import com.mobilelens.mobilelens.settings.data.AppLanguages
 import com.mobilelens.mobilelens.settings.ui.screens.AppSettingsScreen
 import com.mobilelens.mobilelens.settings.viewmodel.AppSettingsViewModel
 
 /** The app's Settings screen, opened from the account menu. */
 fun NavGraphBuilder.settingsRoutes(navController: NavController) {
-    composable<Screen.AppSettings> {
+    screen<Screen.AppSettings>(navController) {
         val viewModel: AppSettingsViewModel = viewModel()
         val settings by viewModel.settings.collectAsState()
         val language by viewModel.language.collectAsState()

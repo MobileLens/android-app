@@ -24,10 +24,10 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.navigation.Screen
+import com.mobilelens.mobilelens.core.navigation.screen
 import com.mobilelens.mobilelens.core.ui.ErrorContent
 import com.mobilelens.mobilelens.core.ui.LoadingContent
 import com.mobilelens.mobilelens.core.ui.UiStateCrossfade
@@ -72,7 +72,7 @@ fun NavGraphBuilder.phonesRoutes(
     favoritePhones: () -> List<Phone>,
     onToggleFavorite: (Phone) -> Unit,
 ) {
-    composable<Screen.Home> {
+    screen<Screen.Home>(navController) {
         val context = LocalContext.current
         val camerasUnavailable = stringResource(R.string.upload_cameras_unavailable)
         HomeScreen(
@@ -98,7 +98,7 @@ fun NavGraphBuilder.phonesRoutes(
             },
         )
     }
-    composable<Screen.Favorites> {
+    screen<Screen.Favorites>(navController) {
         FavoritesScreen(
             favoritePhones = favoritePhones(),
             onPhoneClick = { phone ->
@@ -106,7 +106,7 @@ fun NavGraphBuilder.phonesRoutes(
             }
         )
     }
-    composable<Screen.Catalogue> {
+    screen<Screen.Catalogue>(navController) {
         val context = LocalContext.current
         val catalogueState by catalogueViewModel.catalogueState.collectAsState()
         val sort by catalogueViewModel.sort.collectAsState()
@@ -158,7 +158,7 @@ fun NavGraphBuilder.phonesRoutes(
             }
         }
     }
-    composable<Screen.PhoneDetails> { backStackEntry ->
+    screen<Screen.PhoneDetails>(navController) { backStackEntry ->
         val route = backStackEntry.toRoute<Screen.PhoneDetails>()
         val phoneDetailsViewModel: PhoneDetailsViewModel = viewModel()
         val phoneState by phoneDetailsViewModel.uiState.collectAsState()
@@ -203,7 +203,7 @@ fun NavGraphBuilder.phonesRoutes(
             }
         }
     }
-    composable<Screen.PhoneGallery> { backStackEntry ->
+    screen<Screen.PhoneGallery>(navController) { backStackEntry ->
         val route = backStackEntry.toRoute<Screen.PhoneGallery>()
         // The phone screen already loaded this gallery. Reuse its ViewModel so this screen
         // opens on those photos instead of the loading quilt and a second fetch.
@@ -228,7 +228,7 @@ fun NavGraphBuilder.phonesRoutes(
             onBackClick = dropUnlessResumed { navController.popBackStack() },
         )
     }
-    composable<Screen.ComparePicker> { backStackEntry ->
+    screen<Screen.ComparePicker>(navController) { backStackEntry ->
         val route = backStackEntry.toRoute<Screen.ComparePicker>()
         val pickerViewModel: ComparePickerViewModel = viewModel()
         val uiState by pickerViewModel.uiState.collectAsState()
@@ -256,7 +256,7 @@ fun NavGraphBuilder.phonesRoutes(
             onRetry = pickerViewModel::retry,
         )
     }
-    composable<Screen.ComparePhones> { backStackEntry ->
+    screen<Screen.ComparePhones>(navController) { backStackEntry ->
         val route = backStackEntry.toRoute<Screen.ComparePhones>()
         val compareViewModel: CompareViewModel = viewModel()
         val uiState by compareViewModel.uiState.collectAsState()
@@ -285,7 +285,7 @@ fun NavGraphBuilder.phonesRoutes(
             },
         )
     }
-    composable<Screen.UploadDeviceCameras> {
+    screen<Screen.UploadDeviceCameras>(navController) {
         val context = LocalContext.current
         val uploadViewModel: UploadDeviceViewModel = viewModel()
         val uiState by uploadViewModel.uiState.collectAsState()

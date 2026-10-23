@@ -2,22 +2,33 @@ package com.mobilelens.mobilelens.core.ui.theme
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.unveilIn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEvent
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 /**
  * Timing shared by the app's animations, from Material 3's motion tokens
@@ -30,6 +41,9 @@ object Motion {
     val EmphasizedDecelerate: Easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f)
     // For things leaving the screen: slow at first, then gone
     val EmphasizedAccelerate: Easing = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
+    // For following the back gesture, as Material's components do: things respond as soon as the
+    // gesture starts, then less and less the further it goes
+    val PredictiveBack: Easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
 
     const val DURATION_SHORT = 150
     const val DURATION_MEDIUM = 300
@@ -37,6 +51,12 @@ object Motion {
 
     /** How far content travels when it slides between screens or tabs. */
     val SlideDistance = 30.dp
+
+    /** How close a screen the back gesture drags away gets to the edge it's heading for. */
+    val PredictiveBackMargin = 8.dp
+
+    /** The corners of a screen the back gesture drags away: Material's extra-large shape. */
+    val PredictiveBackCornerRadius = 28.dp
 
     // Material 3 Expressive spatial springs: a slight overshoot for things that move or change shape
     fun <T> fastSpatialSpring(): FiniteAnimationSpec<T> = spring(dampingRatio = 0.6f, stiffness = 800f)
@@ -50,12 +70,33 @@ private const val FADE_IN_MILLIS = Motion.DURATION_MEDIUM - FADE_OUT_MILLIS
 
 private const val SHEET_EXIT_MILLIS = 250
 
+// The back gesture scrubs through the predictive back transitions, and once it's let go they play
+// the rest of the way at normal speed. So how far the gesture has gone is a point on this timeline.
+private const val PREDICTIVE_BACK_MILLIS = Motion.DURATION_LONG
+// A screen being dragged away only starts fading after this, so a short swipe can peek behind it
+private const val PREDICTIVE_BACK_FADE_DELAY_MILLIS = 100
+// As small as Material's predictive back makes a full-screen surface
+private const val PREDICTIVE_BACK_SCALE = 0.9f
+// Material's scrim opacity
+private const val SCRIM_ALPHA = 0.32f
+
 /** [Motion.SlideDistance] in pixels, for slide transitions that take an offset. */
 @Composable
 fun rememberSlideDistance(): Int {
     val density = LocalDensity.current
     return remember(density) { with(density) { Motion.SlideDistance.roundToPx() } }
 }
+
+/** [Motion.PredictiveBackMargin] in pixels. */
+@Composable
+fun rememberPredictiveBackMargin(): Int {
+    val density = LocalDensity.current
+    return remember(density) { with(density) { Motion.PredictiveBackMargin.roundToPx() } }
+}
+
+/** The scrim over a screen the back gesture uncovers. */
+@Composable
+fun predictiveBackScrim(): Color = MaterialTheme.colorScheme.scrim.copy(alpha = SCRIM_ALPHA)
 
 /**
  * Fade through, for content that replaces unrelated content: fades (and optionally scales) in once
@@ -89,3 +130,53 @@ fun sheetIn(): EnterTransition =
 
 fun sheetOut(): ExitTransition =
     slideOutVertically(tween(SHEET_EXIT_MILLIS, easing = Motion.EmphasizedAccelerate)) { it }
+
+/** For anything that follows the back gesture as closely as the screen it drags away. */
+fun <T> predictiveBackSpec(): FiniteAnimationSpec<T> =
+    tween(PREDICTIVE_BACK_MILLIS, easing = Motion.PredictiveBack)
+
+/**
+ * A screen the back gesture drags away, after Material's predictive back for full-screen surfaces:
+ * it shrinks into a card that heads for the side the finger moves toward, stopping [edgeMargin]
+ * short of the edge, and fades out once the gesture is let go. [swipeEdge] is the
+ * [NavigationEvent] edge the gesture started from.
+ */
+fun predictiveBackOut(swipeEdge: Int, edgeMargin: Int): ExitTransition =
+    scaleOut(predictiveBackSpec(), PREDICTIVE_BACK_SCALE) +
+            slideOut(predictiveBackSpec()) { size ->
+                // Into the room the shrinking leaves on that side, all but the margin
+                val shift = max(0, (size.width * (1 - PREDICTIVE_BACK_SCALE) / 2).roundToInt() - edgeMargin)
+                when (swipeEdge) {
+                    NavigationEvent.EDGE_LEFT -> IntOffset(shift, 0)
+                    NavigationEvent.EDGE_RIGHT -> IntOffset(-shift, 0)
+                    else -> IntOffset.Zero
+                }
+            } +
+            fadeOut(
+                tween(
+                    PREDICTIVE_BACK_MILLIS - PREDICTIVE_BACK_FADE_DELAY_MILLIS,
+                    delayMillis = PREDICTIVE_BACK_FADE_DELAY_MILLIS,
+                    easing = Motion.EmphasizedAccelerate,
+                )
+            )
+
+/**
+ * A sheet ([sheetIn]) the back gesture drags away: it shrinks into a card like [predictiveBackOut]
+ * and starts to sink, then drops out of sight once the gesture is let go.
+ */
+fun predictiveBackSheetOut(): ExitTransition =
+    scaleOut(predictiveBackSpec(), PREDICTIVE_BACK_SCALE) +
+            slideOutVertically(tween(PREDICTIVE_BACK_MILLIS, easing = Motion.EmphasizedAccelerate)) { it }
+
+/**
+ * The screen the back gesture uncovers, under a [scrim] that clears as the gesture goes on. It
+ * slides in from the start side by [slideDistance], as [sharedAxisXIn] does going back.
+ */
+fun predictiveBackIn(slideDistance: Int, scrim: Color): EnterTransition =
+    slideInHorizontally(predictiveBackSpec()) { -slideDistance } + predictiveBackUnveil(scrim)
+
+/** A screen the back gesture uncovers in place, as the sheet over it is dragged away. */
+@OptIn(ExperimentalAnimationApi::class)
+fun predictiveBackUnveil(scrim: Color): EnterTransition =
+    // Over the whole parent, as the screen under it has no background of its own
+    unveilIn(tween(PREDICTIVE_BACK_MILLIS, easing = LinearEasing), scrim, matchParentSize = true)
