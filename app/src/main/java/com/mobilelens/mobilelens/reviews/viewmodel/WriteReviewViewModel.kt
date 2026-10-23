@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
 import java.io.FileNotFoundException
 
 private const val TAG = "WriteReviewViewModel"
@@ -87,7 +86,7 @@ class WriteReviewViewModel(application: Application) : AndroidViewModel(applicat
             if (phoneId != null) {
                 phoneRepository.getPhoneById(phoneId)
             } else {
-                findPhoneForDevice()
+                phoneRepository.findPhoneForDevice(buildInfoRepository.getModel(), deviceMatchStore)
             }
         }
     }
@@ -122,20 +121,6 @@ class WriteReviewViewModel(application: Application) : AndroidViewModel(applicat
                 ReviewTargetUiState.Error(R.string.error_load_phone)
             }
         }
-    }
-
-    private suspend fun findPhoneForDevice(): Phone? {
-        val model = buildInfoRepository.getModel()
-        deviceMatchStore.getPhoneId(model)?.let { pickedId ->
-            try {
-                return phoneRepository.getPhoneById(pickedId)
-            } catch (e: HttpException) {
-                if (e.code() != 404) throw e
-                // The picked phone was removed from the catalogue; match by model again
-                deviceMatchStore.clear()
-            }
-        }
-        return phoneRepository.findPhoneByModel(model)
     }
 
     /** Uploads the picked image and inserts it into the content at the cursor. */

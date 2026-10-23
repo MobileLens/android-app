@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.mobilelens.mobilelens.auth.ui.screens.LoginScreen
 import com.mobilelens.mobilelens.auth.ui.screens.RegisterScreen
 import com.mobilelens.mobilelens.auth.ui.screens.UserSettingsScreen
@@ -26,19 +27,21 @@ import com.mobilelens.mobilelens.reviews.viewmodel.MyReviewsViewModel
 
 /**
  * Login, Register and UserSettings. Navigation between them follows `currentUser`: Login/Register
- * move on once a user is set, and UserSettings falls back to Login once it's cleared.
+ * move on once a user is set (see [leaveAuthScreens]), and UserSettings falls back to Login once
+ * it's cleared.
  */
 fun NavGraphBuilder.authRoutes(
     navController: NavController,
     authViewModel: AuthViewModel,
 ) {
-    composable<Screen.Login> {
+    composable<Screen.Login> { backStackEntry ->
+        val route = backStackEntry.toRoute<Screen.Login>()
         val currentUser by authViewModel.currentUser.collectAsState()
         val loginError by authViewModel.loginError.collectAsState()
         val passwordReset by authViewModel.passwordReset.collectAsState()
 
         LaunchedEffect(currentUser) {
-            if (currentUser != null) navController.navigateToUserSettings()
+            if (currentUser != null) navController.leaveAuthScreens(route.returnToPrevious)
         }
         // AuthViewModel outlives this screen, so drop the error rather than show it on the next visit
         DisposableEffect(Unit) {
@@ -52,7 +55,7 @@ fun NavGraphBuilder.authRoutes(
                 authViewModel.login(email, password)
             },
             onNavigateToRegister = {
-                navController.navigate(Screen.Register)
+                navController.navigate(Screen.Register(route.returnToPrevious)) { launchSingleTop = true }
             },
             errorMessage = loginError?.let { stringResource(it) },
             onClearError = { authViewModel.clearLoginError() },
@@ -63,12 +66,13 @@ fun NavGraphBuilder.authRoutes(
             onClearPasswordReset = { authViewModel.clearPasswordReset() },
         )
     }
-    composable<Screen.Register> {
+    composable<Screen.Register> { backStackEntry ->
+        val route = backStackEntry.toRoute<Screen.Register>()
         val currentUser by authViewModel.currentUser.collectAsState()
         val registerError by authViewModel.registerError.collectAsState()
 
         LaunchedEffect(currentUser) {
-            if (currentUser != null) navController.navigateToUserSettings()
+            if (currentUser != null) navController.leaveAuthScreens(route.returnToPrevious)
         }
         DisposableEffect(Unit) {
             onDispose { authViewModel.clearRegisterError() }
@@ -77,8 +81,9 @@ fun NavGraphBuilder.authRoutes(
             onRegister = { username, email, password ->
                 authViewModel.register(username, email, password)
             },
+            // Back to the Login under this screen, rather than stacking another one on top
             onNavigateToLogin = {
-                navController.navigate(Screen.Login)
+                navController.popBackStack<Screen.Login>(inclusive = false)
             },
             errorMessage = registerError?.let { stringResource(it) },
             onClearError = { authViewModel.clearRegisterError() }
@@ -154,7 +159,7 @@ fun NavGraphBuilder.authRoutes(
             )
         } else {
             LaunchedEffect(Unit) {
-                navController.navigate(Screen.Login) {
+                navController.navigate(Screen.Login()) {
                     popUpTo(Screen.Home)
                 }
             }
@@ -162,8 +167,17 @@ fun NavGraphBuilder.authRoutes(
     }
 }
 
-private fun NavController.navigateToUserSettings() {
-    navigate(Screen.UserSettings) {
-        popUpTo(Screen.Home) { saveState = false }
+/**
+ * Closes Login, and Register above it, once the user is signed in. With [returnToPrevious] the
+ * user is back on the screen that asked them to log in; otherwise their account screen takes the
+ * auth screens' place. Either way the screens they came from stay on the back stack.
+ */
+private fun NavController.leaveAuthScreens(returnToPrevious: Boolean) {
+    if (returnToPrevious) {
+        popBackStack<Screen.Login>(inclusive = true)
+    } else {
+        navigate(Screen.UserSettings) {
+            popUpTo<Screen.Login> { inclusive = true }
+        }
     }
 }

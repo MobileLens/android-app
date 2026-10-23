@@ -37,8 +37,13 @@ sealed interface Screen {
     @Serializable data class ComparePicker(val firstPhoneId: String? = null) : Screen
     /** Two phones side by side; a null [firstPhoneId] is this device's own cameras. */
     @Serializable data class ComparePhones(val firstPhoneId: String?, val secondPhoneId: String) : Screen
-    @Serializable object Login : Screen
-    @Serializable object Register : Screen
+    /**
+     * [returnToPrevious]: opened by an action that needs an account (e.g. liking a review), so
+     * logging in goes back to that screen instead of on to the account screen.
+     */
+    @Serializable data class Login(val returnToPrevious: Boolean = false) : Screen
+    /** Opened from [Login], whose [Login.returnToPrevious] it carries on. */
+    @Serializable data class Register(val returnToPrevious: Boolean = false) : Screen
     @Serializable object UserSettings : Screen
     /** The app's own preferences (theme, language), opened from the account menu. */
     @Serializable object AppSettings : Screen

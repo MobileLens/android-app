@@ -1,16 +1,18 @@
 package com.mobilelens.mobilelens.phones.viewmodel
 
+import android.app.Application
 import android.content.ContentResolver
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.StringRes
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.core.data.BuildInfoRepository
 import com.mobilelens.mobilelens.core.data.remote.apiErrorCode
 import com.mobilelens.mobilelens.phones.data.CameraSubmitRepository
+import com.mobilelens.mobilelens.phones.data.DeviceMatchStore
 import com.mobilelens.mobilelens.phones.data.PhoneCatalogueRepository
 import com.mobilelens.mobilelens.phones.data.PhotoExif
 import com.mobilelens.mobilelens.phones.data.PhotoExifReader
@@ -87,12 +89,14 @@ private fun submitErrorFor(e: Exception, stage: SubmitStage): Int {
     }
 }
 
-class UploadDeviceViewModel(
-    private val phoneRepository: PhoneCatalogueRepository = PhoneCatalogueRepository(),
-    private val submitRepository: CameraSubmitRepository = CameraSubmitRepository(),
-    private val buildInfoRepository: BuildInfoRepository = BuildInfoRepository(),
-    private val photoExifReader: PhotoExifReader = PhotoExifReader(),
-) : ViewModel() {
+class UploadDeviceViewModel(application: Application) : AndroidViewModel(application) {
+    private val phoneRepository = PhoneCatalogueRepository()
+    private val submitRepository = CameraSubmitRepository()
+    private val buildInfoRepository = BuildInfoRepository()
+    private val photoExifReader = PhotoExifReader()
+    // The catalogue phone the user picked for this device when writing a review
+    private val deviceMatchStore = DeviceMatchStore.getInstance(application)
+
     private val _uiState = MutableStateFlow<UploadDeviceUiState>(UploadDeviceUiState.Loading)
     val uiState: StateFlow<UploadDeviceUiState> = _uiState.asStateFlow()
 
@@ -205,6 +209,7 @@ class UploadDeviceViewModel(
                     phoneRepository.findOrCreatePhoneForDevice(
                         model = buildInfoRepository.getModel(),
                         brandName = buildInfoRepository.getBrand(),
+                        matchStore = deviceMatchStore,
                     ).id
                 }.also { submittedPhoneId = it }
 

@@ -6,6 +6,7 @@ import com.mobilelens.mobilelens.phones.data.remote.BrandApi
 import com.mobilelens.mobilelens.phones.data.remote.PhoneApi
 import com.mobilelens.mobilelens.phones.data.remote.dtos.CreatePhoneRequest
 import com.mobilelens.mobilelens.phones.data.remote.dtos.PhoneDto
+import com.mobilelens.mobilelens.phones.data.remote.dtos.PhoneListDto
 import com.mobilelens.mobilelens.phones.model.Brand
 import com.mobilelens.mobilelens.phones.model.CatalogueFilters
 import com.mobilelens.mobilelens.phones.model.CatalogueSort
@@ -20,6 +21,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import retrofit2.HttpException
 import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "PhoneCatalogueRepository"
@@ -51,11 +53,9 @@ class PhoneCatalogueRepository {
             verified = filters.verifiedOnly.takeIf { it },
             opticalZoom = filters.opticalZoom.takeIf { it },
         )
-        val phoneList = response.data.map { listDto ->
-            val fullPhoneDto = phoneApi.getPhone(listDto.id)
-            mapToPhone(fullPhoneDto)
-        }
-        _phones.value = phoneList
+        // The list only shows each phone's name and photo, so their cameras aren't fetched;
+        // the phone's own screen loads them
+        _phones.value = response.data.map { mapToListedPhone(it) }
     }
 
     suspend fun getBrands(): List<Brand> =
@@ -67,22 +67,11 @@ class PhoneCatalogueRepository {
     }
 
     /**
-     * Phones matching [query] (all of them when null), for picking one from a list. Unlike
+     * Phones matching [query] (all of them when null), for picking one from a list. Like
      * [loadPhones] they come without cameras, so the search takes a single request.
      */
     suspend fun searchPhones(query: String?): List<Phone> =
-        phoneApi.getPhones(query = query, limit = SEARCH_LIMIT).data.map { dto ->
-            Phone(
-                id = dto.id,
-                deviceInfo = DeviceInfo(
-                    brand = dto.brandName ?: getBrandName(dto.brandId),
-                    model = dto.modelName,
-                    releaseDate = dto.releaseDate,
-                    imageURL = dto.imageUrl,
-                ),
-                lenses = emptyList(),
-            )
-        }
+        phoneApi.getPhones(query = query, limit = SEARCH_LIMIT).data.map { mapToListedPhone(it) }
 
     /** The phones with [ids] (2 to 4), with their cameras, in the same order. Fails if one is missing. */
     suspend fun comparePhones(ids: List<String>): List<Phone> {
@@ -115,13 +104,35 @@ class PhoneCatalogueRepository {
     }
 
     /**
-     * Catalogue entry for this device: reuse an exact model match, otherwise add the phone so
-     * Camera2 lenses can be submitted for a device that isn't listed yet. Any signed-in user may
-     * add one; the backend finds or creates the brand, answers with the existing phone instead of
-     * a duplicate, and keeps a regular user's new phone unverified until a moderator confirms it.
+     * The catalogue phone this device ([model], from Build.MODEL) is: the one the user picked for it
+     * in [matchStore], otherwise the one whose model name is exactly [model]. A picked phone that
+     * has since been removed from the catalogue is forgotten.
      */
-    suspend fun findOrCreatePhoneForDevice(model: String, brandName: String): Phone {
-        findPhoneByModel(model)?.let { return it }
+    suspend fun findPhoneForDevice(model: String, matchStore: DeviceMatchStore): Phone? {
+        matchStore.getPhoneId(model)?.let { pickedId ->
+            try {
+                return getPhoneById(pickedId)
+            } catch (e: HttpException) {
+                if (e.code() != 404) throw e
+                matchStore.clear()
+            }
+        }
+        return findPhoneByModel(model)
+    }
+
+    /**
+     * Catalogue entry for this device: the phone [findPhoneForDevice] finds, otherwise a new one
+     * added so Camera2 lenses can be submitted for a device that isn't listed yet. Any signed-in
+     * user may add one; the backend finds or creates the brand, answers with the existing phone
+     * instead of a duplicate, and keeps a regular user's new phone unverified until a moderator
+     * confirms it.
+     */
+    suspend fun findOrCreatePhoneForDevice(
+        model: String,
+        brandName: String,
+        matchStore: DeviceMatchStore,
+    ): Phone {
+        findPhoneForDevice(model, matchStore)?.let { return it }
 
         val created = phoneApi.createPhone(
             CreatePhoneRequest(brandName = brandName, modelName = model)
@@ -130,15 +141,29 @@ class PhoneCatalogueRepository {
     }
 
     private suspend fun getBrandName(brandId: String): String {
-        return brandCache.getOrPut(brandId) {
-            try {
-                brandApi.getBrand(brandId).name
-            } catch (_: Exception) {
-                // fallback to ID if brand fetch fails
-                brandId
-            }
+        brandCache[brandId]?.let { return it }
+        return try {
+            brandApi.getBrand(brandId).name.also { brandCache[brandId] = it }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Shows the ID this time, but isn't cached, so the next load asks again
+            Log.w(TAG, "Failed to load brand $brandId", e)
+            brandId
         }
     }
+
+    // A phone as the list endpoints return it, without its cameras
+    private suspend fun mapToListedPhone(dto: PhoneListDto): Phone = Phone(
+        id = dto.id,
+        deviceInfo = DeviceInfo(
+            brand = dto.brandName ?: getBrandName(dto.brandId),
+            model = dto.modelName,
+            releaseDate = dto.releaseDate,
+            imageURL = dto.imageUrl,
+        ),
+        lenses = emptyList(),
+    )
 
     private suspend fun mapToPhone(dto: PhoneDto): Phone {
         val lenses = dto.cameras.map { lensDto ->

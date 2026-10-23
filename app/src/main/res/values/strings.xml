@@ -47,11 +47,13 @@
     <string name="action_reviews">Reviews</string>
     <string name="action_upload">Upload</string>
     <string name="action_compare">Compare</string>
+    <!-- Shown when a signed-out user picks an action that needs an account -->
+    <string name="login_required_title">Sign in required</string>
+    <string name="login_required_ok">OK</string>
+    <string name="review_login_required_message">You need to be logged in to write a review.</string>
 
     <!-- Device camera upload (Home) -->
-    <string name="upload_login_required_title">Sign in required</string>
     <string name="upload_login_required_message">You need to be logged in to upload camera data from this phone.</string>
-    <string name="upload_login_required_ok">OK</string>
     <string name="upload_screen_title">Upload cameras</string>
     <string name="upload_screen_close">Close upload</string>
     <string name="upload_submit">Upload</string>

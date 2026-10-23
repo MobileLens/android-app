@@ -70,7 +70,8 @@ fun HomeScreenContent(
     onUpload: () -> Unit = {},
     onCompare: () -> Unit = {},
 ) {
-    var showLoginRequired by rememberSaveable { mutableStateOf(false) }
+    // While set, a dialog tells a signed-out user why the action they chose needs an account
+    var loginRequiredMessage by rememberSaveable { mutableStateOf<Int?>(null) }
 
     Box(modifier = modifier.fillMaxSize()) {
         UiStateCrossfade(state = uiState) { state ->
@@ -88,9 +89,11 @@ fun HomeScreenContent(
 
         FabMenu(
             items = listOf(
-                FabMenuItem(Icons.Filled.RateReview, R.string.action_write_review, onWriteReview),
+                FabMenuItem(Icons.Filled.RateReview, R.string.action_write_review) {
+                    if (isLoggedIn) onWriteReview() else loginRequiredMessage = R.string.review_login_required_message
+                },
                 FabMenuItem(Icons.Filled.Upload, R.string.action_upload) {
-                    if (isLoggedIn) onUpload() else showLoginRequired = true
+                    if (isLoggedIn) onUpload() else loginRequiredMessage = R.string.upload_login_required_message
                 },
                 FabMenuItem(Icons.AutoMirrored.Filled.CompareArrows, R.string.action_compare, onCompare),
             ),
@@ -100,14 +103,14 @@ fun HomeScreenContent(
         )
     }
 
-    if (showLoginRequired) {
+    loginRequiredMessage?.let { messageRes ->
         AlertDialog(
-            onDismissRequest = { showLoginRequired = false },
-            title = { Text(stringResource(R.string.upload_login_required_title)) },
-            text = { Text(stringResource(R.string.upload_login_required_message)) },
+            onDismissRequest = { loginRequiredMessage = null },
+            title = { Text(stringResource(R.string.login_required_title)) },
+            text = { Text(stringResource(messageRes)) },
             confirmButton = {
-                TextButton(onClick = { showLoginRequired = false }) {
-                    Text(stringResource(R.string.upload_login_required_ok))
+                TextButton(onClick = { loginRequiredMessage = null }) {
+                    Text(stringResource(R.string.login_required_ok))
                 }
             },
         )

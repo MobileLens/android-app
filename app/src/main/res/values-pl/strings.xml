@@ -45,11 +45,13 @@
     <string name="action_reviews">Recenzje</string>
     <string name="action_upload">Prześlij</string>
     <string name="action_compare">Porównaj</string>
+    <!-- Shown when a signed-out user picks an action that needs an account -->
+    <string name="login_required_title">Wymagane logowanie</string>
+    <string name="login_required_ok">OK</string>
+    <string name="review_login_required_message">Aby napisać recenzję, musisz się zalogować.</string>
 
     <!-- Device camera upload (Home) -->
-    <string name="upload_login_required_title">Wymagane logowanie</string>
     <string name="upload_login_required_message">Aby przesłać dane aparatów z tego telefonu, musisz się zalogować.</string>
-    <string name="upload_login_required_ok">OK</string>
     <string name="upload_screen_title">Prześlij aparaty</string>
     <string name="upload_screen_close">Zamknij przesyłanie</string>
     <string name="upload_submit">Prześlij</string>

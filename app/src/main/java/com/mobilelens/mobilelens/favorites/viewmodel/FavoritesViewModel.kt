@@ -8,6 +8,8 @@ import com.mobilelens.mobilelens.R
 import com.mobilelens.mobilelens.favorites.data.FavoriteRepository
 import com.mobilelens.mobilelens.favorites.data.LocalFavoritesStore
 import com.mobilelens.mobilelens.phones.model.Phone
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,11 +28,15 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
     val favoritePhones: StateFlow<List<Phone>> = _favoritePhones.asStateFlow()
 
     private val _uiError = MutableStateFlow<Int?>(null)
-    // String resource of the last load/toggle failure
+    // String resource of the last load/toggle failure, shown once by MainApp; cleared with clearError()
     val uiError: StateFlow<Int?> = _uiError.asStateFlow()
 
     @Volatile
     private var signedIn: Boolean = false
+
+    // Merges and loads the signed-in user's favorites. Cancelled on sign-out, so a load still in
+    // flight can't put that account's list back afterwards.
+    private var signedInJob: Job? = null
 
     init {
         applyLocal()
@@ -39,7 +45,8 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
     /** Call when auth session appears: merge guest favorites to the account, then load from API. */
     fun onSignedIn() {
         signedIn = true
-        viewModelScope.launch {
+        signedInJob?.cancel()
+        signedInJob = viewModelScope.launch {
             mergeLocalIntoAccount()
             refreshFromServer()
         }
@@ -48,6 +55,7 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
     /** Call when signed out: show locally stored favorites (not the previous account's list). */
     fun onSignedOut() {
         signedIn = false
+        signedInJob?.cancel()
         applyLocal()
         _uiError.value = null
     }
@@ -106,6 +114,8 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
             _favoritePhones.value = phones
             _favoriteIds.value = phones.map { it.id }.toSet()
             _uiError.value = null
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load favorites", e)
             _uiError.value = R.string.error_load_favorites
@@ -119,6 +129,8 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
         for (phone in local) {
             try {
                 repository.addFavorite(phone.id)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to merge favorite ${phone.id}", e)
                 failed = true

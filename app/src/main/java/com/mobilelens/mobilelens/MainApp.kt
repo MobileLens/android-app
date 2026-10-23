@@ -1,5 +1,6 @@
 package com.mobilelens.mobilelens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -28,6 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -83,6 +86,17 @@ fun MainApp(
         }
     }
 
+    // Favorites are toggled and loaded from several screens, so a failure gets a toast
+    val context = LocalContext.current
+    val favoritesErrorRes by favoritesViewModel.uiError.collectAsState()
+    val favoritesError = favoritesErrorRes?.let { stringResource(it) }
+    LaunchedEffect(favoritesError) {
+        if (favoritesError != null) {
+            Toast.makeText(context, favoritesError, Toast.LENGTH_SHORT).show()
+            favoritesViewModel.clearError()
+        }
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val isTopLevelRoute = TOP_LEVEL_ROUTES.any { topLevelRoute ->
@@ -118,7 +132,7 @@ fun MainApp(
         if (currentUser != null) {
             navController.navigate(Screen.UserSettings)
         } else {
-            navController.navigate(Screen.Login)
+            navController.navigate(Screen.Login())
         }
     }
 

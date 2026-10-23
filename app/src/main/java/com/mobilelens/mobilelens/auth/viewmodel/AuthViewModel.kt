@@ -11,6 +11,9 @@ import com.mobilelens.mobilelens.auth.data.isStrongPassword
 import com.mobilelens.mobilelens.auth.model.User
 import com.mobilelens.mobilelens.core.data.remote.ApiClient
 import com.mobilelens.mobilelens.core.data.remote.apiErrorCode
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +22,10 @@ import retrofit2.HttpException
 import java.io.IOException
 
 private const val TAG = "AuthViewModel"
+
+// Wait between attempts to restore the session, doubling after each failure up to the maximum
+private const val RESTORE_RETRY_INITIAL_MS = 2_000L
+private const val RESTORE_RETRY_MAX_MS = 60_000L
 
 /** Progress of a change to the account that one of the account screen's dialogs is saving. */
 sealed interface AccountEditState {
@@ -61,22 +68,37 @@ class AuthViewModel(
     val isLoggedIn: Boolean
         get() = _currentUser.value != null
 
+    // Cancelled when the user logs in meanwhile, so a session restored late can't replace the new one
+    private var restoreJob: Job? = null
+
     init {
         restoreSession()
     }
 
-    /** Reloads the user from a persisted bearer token, or clears it when the session is dead. */
+    /**
+     * Reloads the user from a persisted bearer token, or clears it when the session is dead.
+     * Offline the token may still be good, so it keeps trying until the backend answers.
+     */
     private fun restoreSession() {
         if (ApiClient.authToken == null) return
-        viewModelScope.launch {
-            try {
-                _currentUser.value = authRepository.getSession()
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to restore session", e)
-                if (e is HttpException && e.code() == 401) {
-                    ApiClient.authToken = null
-                    _currentUser.value = null
+        restoreJob = viewModelScope.launch {
+            var retryDelayMs = RESTORE_RETRY_INITIAL_MS
+            while (true) {
+                try {
+                    _currentUser.value = authRepository.getSession()
+                    return@launch
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to restore session", e)
+                    if (e is HttpException && e.code() == 401) {
+                        ApiClient.authToken = null
+                        _currentUser.value = null
+                    }
+                    if (!isTransientSessionError(e)) return@launch
                 }
+                delay(retryDelayMs)
+                retryDelayMs = (retryDelayMs * 2).coerceAtMost(RESTORE_RETRY_MAX_MS)
             }
         }
     }
@@ -85,7 +107,9 @@ class AuthViewModel(
         viewModelScope.launch {
             _loginError.value = null
             try {
-                _currentUser.value = authRepository.login(email, password)
+                val user = authRepository.login(email, password)
+                restoreJob?.cancel()
+                _currentUser.value = user
             } catch (e: Exception) {
                 Log.w(TAG, "Login failed", e)
                 _loginError.value = loginErrorFor(e)
@@ -109,7 +133,9 @@ class AuthViewModel(
         viewModelScope.launch {
             _registerError.value = null
             try {
-                _currentUser.value = authRepository.register(username, email, password)
+                val user = authRepository.register(username, email, password)
+                restoreJob?.cancel()
+                _currentUser.value = user
             } catch (e: Exception) {
                 Log.w(TAG, "Registration failed", e)
                 _registerError.value = registerErrorFor(e)
@@ -208,6 +234,16 @@ class AuthViewModel(
             } catch (_: Exception) {}
         }
     }
+}
+
+/**
+ * Whether restoring the session failed for a reason that may pass (no connection, a timeout, the
+ * server failing), so the stored token may still be good and the attempt is worth repeating.
+ */
+internal fun isTransientSessionError(e: Exception): Boolean = when (e) {
+    is IOException -> true
+    is HttpException -> e.code() >= 500 || e.code() == 408 || e.code() == 429
+    else -> false
 }
 
 // The backend answers 401 for a wrong e-mail or password, 400 for a malformed e-mail and 403 for a

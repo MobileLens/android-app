@@ -57,6 +57,7 @@ fun NavGraphBuilder.reviewsRoutes(
         val resources = LocalResources.current
         val shareChooserTitle = stringResource(R.string.review_share)
 
+        // Also runs on the way back from a review, refreshing the list in place
         LaunchedEffect(route.phoneId) {
             reviewViewModel.loadReviewsForPhone(route.phoneId)
         }
@@ -91,7 +92,7 @@ fun NavGraphBuilder.reviewsRoutes(
                             if (currentUser != null) {
                                 reviewViewModel.toggleThreadLike(review.id)
                             } else {
-                                navController.navigate(Screen.Login)
+                                navController.navigateToLoginAndBack()
                             }
                         },
                         onShareClick = { review ->
@@ -164,7 +165,7 @@ fun NavGraphBuilder.reviewsRoutes(
                             if (user != null) {
                                 reviewViewModel.toggleLike()
                             } else {
-                                navController.navigate(Screen.Login)
+                                navController.navigateToLoginAndBack()
                             }
                         },
                         onDraftChange = commentsViewModel::updateDraft,
@@ -173,7 +174,7 @@ fun NavGraphBuilder.reviewsRoutes(
                             commentsViewModel.deleteComment(route.reviewId, commentId)
                         },
                         onRetryComments = { commentsViewModel.loadComments(route.reviewId) },
-                        onLoginClick = { navController.navigate(Screen.Login) },
+                        onLoginClick = { navController.navigateToLoginAndBack() },
                         snackbarHostState = snackbarHostState,
                     )
                 }
@@ -284,4 +285,10 @@ fun NavGraphBuilder.reviewsRoutes(
             onRetry = pickerViewModel::retry,
         )
     }
+}
+
+// A signed-out viewer liking or commenting logs in, then lands back on the review.
+// Single-top, so a second tap on the way out doesn't open another login screen.
+private fun NavController.navigateToLoginAndBack() {
+    navigate(Screen.Login(returnToPrevious = true)) { launchSingleTop = true }
 }

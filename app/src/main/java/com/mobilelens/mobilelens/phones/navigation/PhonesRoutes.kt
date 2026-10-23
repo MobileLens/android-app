@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -291,7 +292,8 @@ fun NavGraphBuilder.phonesRoutes(
         val uiState by uploadViewModel.uiState.collectAsState()
         val submitState by uploadViewModel.submitState.collectAsState()
         val snackbarHostState = remember { SnackbarHostState() }
-        var pickingForLens by remember { mutableIntStateOf(-1) }
+        // Saved, since the activity can be recreated while the photo picker is open (e.g. a rotation)
+        var pickingForLens by rememberSaveable { mutableIntStateOf(-1) }
 
         val cameraState by cameraViewModel.uiState.collectAsState()
         LaunchedEffect(cameraState) {

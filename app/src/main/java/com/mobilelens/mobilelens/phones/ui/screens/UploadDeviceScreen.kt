@@ -1,6 +1,7 @@
 package com.mobilelens.mobilelens.phones.ui.screens
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -96,6 +97,10 @@ fun UploadDeviceScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val isSubmitting = submitState == UploadSubmitState.Submitting
+
+    // Like the close button, back does nothing while submitting: leaving would stop the upload
+    // partway, and sending it again from a new screen would submit the same cameras twice
+    BackHandler(enabled = isSubmitting) {}
 
     // Opaque, since it rises over the screen that opened it
     Box(

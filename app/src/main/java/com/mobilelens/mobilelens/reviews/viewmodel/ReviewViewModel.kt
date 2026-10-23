@@ -43,18 +43,30 @@ class ReviewViewModel(
     private var likeInFlight = false
     private val threadLikesInFlight = mutableSetOf<String>()
 
+    /**
+     * Loads the phone's reviews, or refreshes them in place when they're already showing, so the
+     * list keeps its scroll position and picks up likes and comments made on a review's own screen.
+     */
     fun loadReviewsForPhone(phoneId: String) {
         viewModelScope.launch {
-            _thread.value = ReviewThreadUiState.Loading
+            if (!isShowingThread(phoneId)) {
+                _thread.value = ReviewThreadUiState.Loading
+            }
             try {
                 val reviews = reviewRepository.getReviewsForPhone(phoneId)
                 _thread.value = ReviewThreadUiState.Success(ReviewThread(id = phoneId, reviews = reviews))
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to load reviews for phone $phoneId", e)
-                _thread.value = ReviewThreadUiState.Error(R.string.error_load_reviews)
+                // A refresh that fails keeps the reviews already showing
+                if (!isShowingThread(phoneId)) {
+                    _thread.value = ReviewThreadUiState.Error(R.string.error_load_reviews)
+                }
             }
         }
     }
+
+    private fun isShowingThread(phoneId: String): Boolean =
+        (_thread.value as? ReviewThreadUiState.Success)?.thread?.id == phoneId
 
     /**
      * Shows the review as last loaded at once, if it was, and refreshes it: its likes and
