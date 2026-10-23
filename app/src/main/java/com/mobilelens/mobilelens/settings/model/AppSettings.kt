@@ -8,6 +8,8 @@ data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     // Material You: colors taken from the wallpaper instead of the app's own
     val dynamicColor: Boolean = true,
+    // Vibration feedback on taps, toggles and outcomes
+    val hapticsEnabled: Boolean = true,
 )
 
 /** Whether the app should be dark, given whether the system is. */

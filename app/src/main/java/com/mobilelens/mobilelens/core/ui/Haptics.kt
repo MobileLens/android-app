@@ -8,6 +8,19 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 // They go through the view, which drops them when touch feedback is off in the system settings
 // and falls back to the closest older effect where a newer one isn't available.
 
+/**
+ * Wraps [delegate] so every call site respects the Settings switch without checking it itself.
+ * [enabled] is read on each call, so a change applies to the very next effect.
+ */
+class SwitchableHapticFeedback(
+    private val delegate: HapticFeedback,
+    private val enabled: () -> Boolean,
+) : HapticFeedback {
+    override fun performHapticFeedback(hapticFeedbackType: HapticFeedbackType) {
+        if (enabled()) delegate.performHapticFeedback(hapticFeedbackType)
+    }
+}
+
 /** A two-state control flipped: a favorite, a like, a switch, a toggle chip, the FAB menu. */
 fun HapticFeedback.performToggle(on: Boolean) {
     performHapticFeedback(if (on) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)

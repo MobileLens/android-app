@@ -5,15 +5,12 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavBackStackEntry
 import com.mobilelens.mobilelens.core.ui.theme.fadeThroughIn
 import com.mobilelens.mobilelens.core.ui.theme.fadeThroughOut
 import com.mobilelens.mobilelens.core.ui.theme.predictiveBackIn
 import com.mobilelens.mobilelens.core.ui.theme.predictiveBackOut
-import com.mobilelens.mobilelens.core.ui.theme.predictiveBackScrim
 import com.mobilelens.mobilelens.core.ui.theme.predictiveBackSheetOut
-import com.mobilelens.mobilelens.core.ui.theme.predictiveBackUnveil
 import com.mobilelens.mobilelens.core.ui.theme.rememberPredictiveBackMargin
 import com.mobilelens.mobilelens.core.ui.theme.rememberSlideDistance
 import com.mobilelens.mobilelens.core.ui.theme.sharedAxisXIn
@@ -40,13 +37,13 @@ private typealias PredictiveExitSpec = AnimatedContentTransitionScope<NavBackSta
  * draw their own.
  *
  * The predictive back gesture follows Material's predictive back instead: the screen shrinks into a
- * card with rounded corners ([PredictiveBackCard]) that moves with the finger, over the screen it
- * uncovers, and fades away once the gesture is let go. A sheet sinks away instead of fading.
+ * card with rounded corners and a shadow ([PredictiveBackCard]) that moves with the finger, over
+ * the screen it uncovers, and shrinks on and fades away once the gesture is let go. A sheet sinks
+ * away instead.
  */
 class NavTransitions(
     private val slideDistance: Int,
     private val predictiveBackMargin: Int,
-    private val scrim: Color,
 ) {
     val enter: EnterSpec = {
         when {
@@ -85,8 +82,8 @@ class NavTransitions(
     val predictivePopEnter: PredictiveEnterSpec = {
         when {
             // Was under the sheet the whole time, so it stays put
-            initialState.destination.isSheet() -> predictiveBackUnveil(scrim)
-            else -> predictiveBackIn(slideDistance, scrim)
+            initialState.destination.isSheet() -> EnterTransition.None
+            else -> predictiveBackIn(slideDistance)
         }
     }
 
@@ -106,8 +103,7 @@ class NavTransitions(
 fun rememberNavTransitions(): NavTransitions {
     val slideDistance = rememberSlideDistance()
     val predictiveBackMargin = rememberPredictiveBackMargin()
-    val scrim = predictiveBackScrim()
-    return remember(slideDistance, predictiveBackMargin, scrim) {
-        NavTransitions(slideDistance, predictiveBackMargin, scrim)
+    return remember(slideDistance, predictiveBackMargin) {
+        NavTransitions(slideDistance, predictiveBackMargin)
     }
 }

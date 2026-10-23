@@ -23,6 +23,8 @@ class AppSettingsViewModel(application: Application) : AndroidViewModel(applicat
 
     fun setDynamicColor(enabled: Boolean) = store.setDynamicColor(enabled)
 
+    fun setHapticsEnabled(enabled: Boolean) = store.setHapticsEnabled(enabled)
+
     fun setLanguage(tag: String?) {
         AppLanguages.set(getApplication(), tag)
         _language.value = tag

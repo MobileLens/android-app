@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -56,7 +57,7 @@ import com.mobilelens.mobilelens.settings.ui.components.languageName
 import com.mobilelens.mobilelens.settings.ui.components.settingsItemColors
 
 /**
- * App preferences: theme, Material You colors and language. Has its own top bar, so MainApp hides
+ * App preferences: theme, Material You colors, language and haptics. Has its own top bar, so MainApp hides
  * the search bar here.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,6 +71,7 @@ fun AppSettingsScreen(
     onBackClick: () -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
+    onHapticsChange: (Boolean) -> Unit,
     onLanguageChange: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -145,7 +147,22 @@ fun AppSettingsScreen(
                         Text(language?.let(::languageName) ?: stringResource(R.string.app_settings_language_system))
                     },
                     leadingContent = { Icon(Icons.Outlined.Language, contentDescription = null) },
-                    shapes = ListItemDefaults.segmentedShapes(index = 0, count = 1),
+                    shapes = ListItemDefaults.segmentedShapes(index = 0, count = 2),
+                    colors = settingsItemColors(),
+                )
+
+                SegmentedListItem(
+                    checked = settings.hapticsEnabled,
+                    onCheckedChange = { enabled ->
+                        // After the change, so turning haptics on confirms itself and turning them off is silent
+                        onHapticsChange(enabled)
+                        haptic.performToggle(enabled)
+                    },
+                    content = { Text(stringResource(R.string.app_settings_haptics)) },
+                    supportingContent = { Text(stringResource(R.string.app_settings_haptics_supporting)) },
+                    leadingContent = { Icon(Icons.Outlined.Vibration, contentDescription = null) },
+                    trailingContent = { Switch(checked = settings.hapticsEnabled, onCheckedChange = null) },
+                    shapes = ListItemDefaults.segmentedShapes(index = 1, count = 2),
                     colors = settingsItemColors(),
                 )
             }
@@ -242,6 +259,7 @@ private fun AppSettingsScreenPreview() {
             onBackClick = {},
             onThemeModeChange = {},
             onDynamicColorChange = {},
+            onHapticsChange = {},
             onLanguageChange = {},
         )
     }

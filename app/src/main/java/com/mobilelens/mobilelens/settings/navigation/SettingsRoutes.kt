@@ -39,6 +39,7 @@ fun NavGraphBuilder.settingsRoutes(navController: NavController) {
             onBackClick = { navController.popBackStack() },
             onThemeModeChange = { mode -> viewModel.setThemeMode(mode) },
             onDynamicColorChange = { enabled -> viewModel.setDynamicColor(enabled) },
+            onHapticsChange = { enabled -> viewModel.setHapticsEnabled(enabled) },
             onLanguageChange = { tag ->
                 viewModel.setLanguage(tag)
                 // MainActivity puts itself in the stored language when it's created

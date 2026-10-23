@@ -305,6 +305,8 @@
     <string name="app_settings_general">Ogólne</string>
     <string name="app_settings_language">Język</string>
     <string name="app_settings_language_system">Język systemu</string>
+    <string name="app_settings_haptics">Wibracje</string>
+    <string name="app_settings_haptics_supporting">Wibruj przy dotknięciach, przełącznikach i wynikach</string>
     <string name="app_settings_about">O aplikacji</string>
     <string name="app_settings_version">Wersja</string>
     <!-- %1$s: version name, %2$d: version code, e.g. "1.0 (1)" -->

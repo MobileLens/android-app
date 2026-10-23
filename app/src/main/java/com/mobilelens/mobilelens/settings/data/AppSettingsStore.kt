@@ -13,6 +13,7 @@ private const val PREFS_NAME = "app_settings"
 private const val KEY_THEME_MODE = "theme_mode"
 private const val KEY_DYNAMIC_COLOR = "dynamic_color"
 private const val KEY_LANGUAGE = "language"
+private const val KEY_HAPTICS = "haptics"
 
 /**
  * App preferences in SharedPreferences. [settings] is shared by every reader, so MainActivity's
@@ -41,6 +42,11 @@ class AppSettingsStore private constructor(context: Context) {
         _settings.update { it.copy(dynamicColor = enabled) }
     }
 
+    fun setHapticsEnabled(enabled: Boolean) {
+        prefs.edit { putBoolean(KEY_HAPTICS, enabled) }
+        _settings.update { it.copy(hapticsEnabled = enabled) }
+    }
+
     private fun read(): AppSettings {
         val defaults = AppSettings()
         return AppSettings(
@@ -48,6 +54,7 @@ class AppSettingsStore private constructor(context: Context) {
                 ?.let { name -> ThemeMode.entries.firstOrNull { it.name == name } }
                 ?: defaults.themeMode,
             dynamicColor = prefs.getBoolean(KEY_DYNAMIC_COLOR, defaults.dynamicColor),
+            hapticsEnabled = prefs.getBoolean(KEY_HAPTICS, defaults.hapticsEnabled),
         )
     }
 

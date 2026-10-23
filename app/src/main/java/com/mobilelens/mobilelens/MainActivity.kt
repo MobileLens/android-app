@@ -10,13 +10,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.mobilelens.mobilelens.core.data.BuildInfoRepository
 import com.mobilelens.mobilelens.phones.data.CameraHardwareRepository
+import com.mobilelens.mobilelens.core.ui.SwitchableHapticFeedback
 import com.mobilelens.mobilelens.core.ui.theme.MobileLensTheme
 import com.mobilelens.mobilelens.phones.viewmodel.CameraViewModel
 import com.mobilelens.mobilelens.settings.data.AppLanguages
@@ -58,8 +62,16 @@ class MainActivity : ComponentActivity() {
                 onDispose {}
             }
 
-            MobileLensTheme(darkTheme = darkTheme, dynamicColor = settings.dynamicColor) {
-                MainApp(cameraViewModel = cameraViewModel)
+            // Every screen reads LocalHapticFeedback, so gating it here covers them all
+            val systemHaptic = LocalHapticFeedback.current
+            val haptic = remember(systemHaptic) {
+                SwitchableHapticFeedback(systemHaptic) { settingsStore.settings.value.hapticsEnabled }
+            }
+
+            CompositionLocalProvider(LocalHapticFeedback provides haptic) {
+                MobileLensTheme(darkTheme = darkTheme, dynamicColor = settings.dynamicColor) {
+                    MainApp(cameraViewModel = cameraViewModel)
+                }
             }
         }
     }
